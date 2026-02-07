@@ -447,13 +447,6 @@ function initAmbassadorsAnimation() {
     }
 }
 
-
-function initAmbassadorsAnimationV2() {
-    // Placeholder if needed, or mapped to initAmbassadorsAnimation
-    // Using the logic from previous steps
-    initAmbassadorsAnimation();
-}
-
 function initStageSecondAnimation() {
     // Select by the specific class requested
     const heading = document.querySelector('.stage-pre-heading');
@@ -525,22 +518,6 @@ function initStagesAnimation() {
     const progressBar = document.querySelector('[data-anim-stage-progress="progress-stages"]');
     const mainCard = document.querySelector('[data-anim-stage="main-card"]');
     const secondCard = document.querySelector('[data-anim-stage="second-wrapper"]');
-
-    console.group("STAGES SECTION CHECKS");
-    verifyElement("Progress Bar", progressBar);
-    verifyElement("Main Card", mainCard);
-    verifyElement("Second Wrapper", secondCard);
-
-    // Check Source Cards
-    const sourceCard2 = document.querySelector('[data-anim-card="2"]') || document.querySelector('[data-stage-source="number-2"]')?.closest('.stage-card-wrapper');
-    const sourceCard3 = document.querySelector('[data-anim-card="3"]') || document.querySelector('[data-stage-source="number-3"]')?.closest('.stage-card-wrapper');
-    verifyElement("Source Card 2 (Hidden)", sourceCard2);
-    verifyElement("Source Card 3 (Hidden)", sourceCard3);
-
-    // Check Targets
-    const targetNumber = mainCard ? mainCard.querySelector('[data-stage-target="number"]') : null;
-    verifyElement("Target Number (in Main Card)", targetNumber);
-    console.groupEnd();
 
     if (!progressBar || !mainCard || !secondCard) return;
 
@@ -902,21 +879,36 @@ function initProcessAnimation() {
     }
 
     // --- Red Map Initial State ---
-    const redMaskPath = document.getElementById('mask-path');
-    const redFillLayer = document.getElementById('fill-layer');
+    // Use scoped selector for robustness
+    const redMaskPath = section.querySelector('#mask-path') || document.getElementById('mask-path');
+    const redFillLayer = section.querySelector('#fill-layer') || document.getElementById('fill-layer');
 
     // Create a paused timeline for the Red Map
     let tlMap = gsap.timeline({ paused: true });
 
-    if (redMaskPath && redFillLayer) {
-        // Init: Line hidden (dashoffset), Fill hidden
-        const len = redMaskPath.getTotalLength();
+    if (redMaskPath) {
+        // Force display block to ensure measurement works? 
+        // GSAP usually handles this, but let's be safe if it was hidden via display:none
+        // However, we used autoAlpha:0 which is opacity:0 + visibility:hidden, which still allows measurement usually.
+
+        let len = redMaskPath.getTotalLength();
+        console.log("Red Map Path Length:", len);
+
+        // Fallback if length is 0 (browser quirk or hidden)
+        if (len === 0) {
+            console.warn("Red Map Path Length is 0. Using fallback 2000.");
+            len = 2000;
+        }
+
         gsap.set(redMaskPath, {
             strokeDasharray: len,
             strokeDashoffset: len,
             autoAlpha: 1 // Make sure path is visible so we see the draw
         });
-        gsap.set(redFillLayer, { autoAlpha: 0 });
+
+        if (redFillLayer) {
+            gsap.set(redFillLayer, { autoAlpha: 0 });
+        }
 
         // Animation: Draw Line (0.8s)
         tlMap.to(redMaskPath, {
@@ -927,11 +919,15 @@ function initProcessAnimation() {
         });
 
         // Animation: Fade in Fill (Instant/Fast)
-        tlMap.to(redFillLayer, {
-            autoAlpha: 1,
-            duration: 0.05, // Almost instant snap
-            ease: "power2.out"
-        });
+        if (redFillLayer) {
+            tlMap.to(redFillLayer, {
+                autoAlpha: 1,
+                duration: 0.05, // Almost instant snap
+                ease: "power2.out"
+            });
+        }
+    } else {
+        console.error("❌ Red Map Elements (#mask-path or #fill-layer) NOT FOUND in DOM");
     }
 
     const playRedMap = () => {
@@ -955,48 +951,57 @@ function initProcessAnimation() {
         }
     });
 
-    // Configuration for each step
+    // Configuration for each step - SUPPORT BOTH "1-1" AND "1" NAMING CONVENTIONS
+    // NOTE: Removed "2", "3", "4" from dotIds because "2" matches the Blue Wrapper in Webflow, which we DON'T want to show in Phase 1.
+    // "1" is kept because it's the Red Wrapper.
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotId: "1-1" }, // 90% visible
-        { id: 2, barX: "-20%", dotId: "1-2" }, // 80% visible
-        { id: 3, barX: "-60%", dotId: "1-3" }, // 40% visible
-        { id: 4, barX: "-80%", dotId: "1-4" }  // 20% visible
+        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] }, // 90% visible (Red Wrapper + Dot 1)
+        { id: 2, barX: "-20%", dotIds: ["1-2"] },      // 80% visible
+        { id: 3, barX: "-60%", dotIds: ["1-3"] },      // 40% visible
+        { id: 4, barX: "-80%", dotIds: ["1-4"] }       // 20% visible
     ];
 
     stepsConfig.forEach((step) => {
         const desc = section.querySelector(`[data-anim-process-desc="${step.id}"]`);
         const barLine = section.querySelector(`[data-anim-process-bar-line="${step.id}"]`);
-        const dot = section.querySelector(`[data-anim-process-dot="${step.dotId}"]`);
 
-        if (desc) {
-            // 1. Description: Fade/Move In
-            tlProcess.to(desc, {
-                y: "0rem",
-                autoAlpha: 1,
+        // Select all dots for this step (checking both ID formats)
+        const dots = [];
+        step.dotIds.forEach(did => {
+            const d = section.querySelector(`[data-anim-process-dot="${did}"]`);
+            if (d) dots.push(d);
+        });
+
+        // 1. Description: Fade/Move In
+        // Define label time explicitly
+        const label = `step${step.id}-details`;
+        tlProcess.add(label, "+=0.2"); // Add label with stagger
+
+        tlProcess.to(desc, {
+            y: "0rem",
+            autoAlpha: 1,
+            duration: 1,
+            ease: "none",
+            onStart: () => console.log(`Step ${step.id} Desc Start`)
+        }, label);
+
+        // 2. Bar Line: Grow
+        if (barLine) {
+            tlProcess.to(barLine, {
+                x: step.barX,
                 duration: 1,
                 ease: "none"
-            }, "+=0.2"); // Small stagger
+            }, label);
+        }
 
-            // 2. Bar Line: Grow
-            const label = `step${step.id}-details`;
-            if (barLine) {
-                // Ensure correct selector (bar line vs container)
-                // Assuming data-anim-process-bar-line is on the inner moving div
-                tlProcess.to(barLine, {
-                    x: step.barX,
-                    duration: 1,
-                    ease: "none"
-                }, label);
-            }
-
-            // 3. Dot: Appear
-            if (dot) {
-                tlProcess.to(dot, {
-                    autoAlpha: 1,
-                    duration: 1,
-                    ease: "none"
-                }, label);
-            }
+        // 3. Dots: Appear
+        if (dots.length) {
+            tlProcess.to(dots, {
+                autoAlpha: 1,
+                duration: 1,
+                ease: "none",
+                onStart: () => console.log(`Step ${step.id} Dots Reveal Start (IDs: ${step.dotIds})`)
+            }, label);
         }
     });
 
@@ -1092,15 +1097,19 @@ function initProcessAnimation() {
             }
 
             // 1. Description: Fade/Move In
+            // We want the description to start, and we'll mark this time as the "step start"
+            const label = `step${step.id}-details`;
+            tlProcess.add(label, position);
+
             tlProcess.to(desc, {
                 y: "0rem",
                 autoAlpha: 1,
                 duration: 1,
-                ease: "none"
-            }, position);
+                ease: "none",
+                onStart: () => console.log(`Step ${step.id} Desc Start`)
+            }, label);
 
             // 2. Bar Line
-            const label = `step${step.id}-details`;
             if (barLine) {
                 tlProcess.to(barLine, {
                     x: step.barX,
@@ -1111,10 +1120,12 @@ function initProcessAnimation() {
 
             // 3. Dots (one or multiple)
             if (dots.length) {
+                console.log(`Adding tween for Step ${step.id} dots:`, dots);
                 tlProcess.to(dots, {
                     autoAlpha: 1,
                     duration: 1,
-                    ease: "none"
+                    ease: "none",
+                    onStart: () => console.log(`Step ${step.id} Dots Reveal Start (Dot IDs: ${step.dotIds})`)
                 }, label);
             }
         }
@@ -1275,6 +1286,82 @@ function initTeamAnimation() {
     });
 }
 
+function initAmbassadorsAnimationV2() {
+    const section = document.querySelector('.our-ambassadors');
+    // Select elements by data attributes as requested
+    const wrapper = document.querySelector('[data-anim-ambassador-wrapper="true"]');
+    const card1 = document.querySelector('[data-anim-ambassador="card-1"]');
+    const card2 = document.querySelector('[data-anim-ambassador="card-2"]');
+    const card3 = document.querySelector('[data-anim-ambassador="card-3"]');
+
+    if (!section || !wrapper || !card1 || !card2 || !card3) return;
+
+    console.log("Initializing Ambassadors Card Animation V2");
+
+    // SETUP:
+    const cardHeight = card1.offsetHeight || 516;
+    gsap.set(wrapper, { height: cardHeight });
+
+    gsap.set([card1, card2, card3], {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%"
+    });
+
+    gsap.set([card2, card3], { y: "100%", opacity: 0 });
+
+    if (section.querySelector('.progress-bar-white-line')) {
+        gsap.fromTo(section.querySelector('.progress-bar-white-line'),
+            { x: "-100%" },
+            {
+                x: "0%",
+                ease: "none",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top bottom",
+                    end: "top top",
+                    scrub: true,
+                    markers: false
+                }
+            }
+        );
+    }
+
+    const mm = ScrollTrigger.matchMedia();
+
+    mm.add("(min-width: 992px)", () => {
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: section,
+                start: "top top",
+                end: "bottom bottom",
+                // pin: true, // REMOVED: Using CSS sticky instead
+                scrub: true,
+                markers: false
+            }
+        });
+
+        // Loop sequence
+
+        // Card 1 Exit
+        tl.to(card1, { y: "-100%", opacity: 0, duration: 1 });
+
+        // Card 2 Enter (starts before Card 1 finishes)
+        tl.to(card2, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
+        // Pause
+        tl.to({}, { duration: 0.5 });
+        // Card 2 Exit
+        tl.to(card2, { y: "-100%", opacity: 0, duration: 1 });
+
+        // Card 3 Enter (starts before Card 2 finishes)
+        tl.to(card3, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
+
+        // Card 3 stays (No exit, no hold)
+        // tl.to({}, { duration: 0.5 }); // REMOVED to avoid empty space at end
+    });
+}
+
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", initAnimations);
 
@@ -1366,4 +1453,3 @@ function initInputPlaceholders() {
         });
     });
 }
-
