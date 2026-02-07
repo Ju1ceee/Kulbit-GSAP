@@ -952,11 +952,13 @@ function initProcessAnimation() {
     });
 
     // Configuration for each step - SUPPORT BOTH "1-1" AND "1" NAMING CONVENTIONS
+    // NOTE: Removed "2", "3", "4" from dotIds because "2" matches the Blue Wrapper in Webflow, which we DON'T want to show in Phase 1.
+    // "1" is kept because it's the Red Wrapper.
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] }, // 90% visible
-        { id: 2, barX: "-20%", dotIds: ["1-2", "2"] }, // 80% visible
-        { id: 3, barX: "-60%", dotIds: ["1-3", "3"] }, // 40% visible
-        { id: 4, barX: "-80%", dotIds: ["1-4", "4"] }  // 20% visible
+        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] }, // 90% visible (Red Wrapper + Dot 1)
+        { id: 2, barX: "-20%", dotIds: ["1-2"] },      // 80% visible
+        { id: 3, barX: "-60%", dotIds: ["1-3"] },      // 40% visible
+        { id: 4, barX: "-80%", dotIds: ["1-4"] }       // 20% visible
     ];
 
     stepsConfig.forEach((step) => {
