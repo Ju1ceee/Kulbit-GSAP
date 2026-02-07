@@ -963,7 +963,7 @@ function initProcessAnimation() {
         scrollTrigger: {
             trigger: section,
             start: "top top",     // Start at top of section
-            end: "+=300%",        // Extend scroll distance
+            end: "+=600%",        // Significantly extended scroll distance
             scrub: 1,             // Smooth scrubbing
             trackMarkers: false,  // Debug
             // Pin the container specifically, or fallback to section (true)
