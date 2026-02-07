@@ -1049,7 +1049,7 @@ function initProcessAnimation() {
     }
 
     const stepsConfigPhase2 = [
-        { id: 5, barX: "-70%", dotIds: ["2-1"] },
+        { id: 5, barX: "-70%", dotIds: ["2-1", "2"] }, // Added "2" (Blue Wrapper)
         { id: 6, barX: "-60%", dotIds: ["2-2"] },
         { id: 7, barX: "-10%", dotIds: ["2-3", "2-4"] }, // Two dots for step 7
         { id: 8, barX: "-20%", dotIds: ["2-5"] }
