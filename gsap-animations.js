@@ -900,16 +900,22 @@ function initProcessAnimation() {
 
     // Configuration for each step
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotId: "1-1" }, // 90% visible
-        { id: 2, barX: "-20%", dotId: "1-5" }, // 80% visible
-        { id: 3, barX: "-60%", dotId: "1-2, 1-3" }, // 40% visible
-        { id: 4, barX: "-80%", dotId: "1-4" }  // 20% visible
+        { id: 1, barX: "-10%", dotIds: ["1-1"] }, // 90% visible
+        { id: 2, barX: "-20%", dotIds: ["1-5"] }, // 80% visible
+        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] }, // 40% visible (Two dots)
+        { id: 4, barX: "-80%", dotIds: ["1-4"] }  // 20% visible
     ];
 
     stepsConfig.forEach((step) => {
         const desc = section.querySelector(`[data-anim-process-desc="${step.id}"]`);
         const barLine = section.querySelector(`[data-anim-process-bar-line="${step.id}"]`);
-        const dot = section.querySelector(`[data-anim-process-dot="${step.dotId}"]`);
+
+        // Select all dots for this step
+        const dots = [];
+        step.dotIds.forEach(did => {
+            const d = section.querySelector(`[data-anim-process-dot="${did}"]`);
+            if (d) dots.push(d);
+        });
 
         if (desc) {
             // 1. Description: Fade/Move In
@@ -920,7 +926,7 @@ function initProcessAnimation() {
                 ease: "none"
             });
 
-            // 2. Bar Line & Dot
+            // 2. Bar Line
             const label = `step${step.id}-details`;
 
             if (barLine) {
@@ -931,8 +937,9 @@ function initProcessAnimation() {
                 }, label);
             }
 
-            if (dot) {
-                tlProcess.to(dot, {
+            // 3. Dots (one or multiple)
+            if (dots.length) {
+                tlProcess.to(dots, {
                     autoAlpha: 1,
                     duration: 1, // Sync with bar
                     ease: "none"
