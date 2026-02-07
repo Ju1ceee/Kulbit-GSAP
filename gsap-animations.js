@@ -1,4 +1,4 @@
-// Register GSAP Plugins 111
+// Register GSAP Plugins1
 gsap.registerPlugin(ScrollTrigger);
 
 // Check if ScrambleTextPlugin is available before trying to use it
@@ -1175,6 +1175,23 @@ function initProcessAnimation() {
     let tlBlueMap = gsap.timeline({ paused: true });
 
     if (blueMaskPath && blueFillLayer) {
+        // Initial setup for Blue Map
+        let lenBlue = blueMaskPath.getTotalLength();
+        console.log("Blue Map Path Length:", lenBlue);
+
+        if (lenBlue === 0) {
+            console.warn("Blue Map Path Length is 0. Using fallback 2000.");
+            lenBlue = 2000;
+        }
+
+        gsap.set(blueMaskPath, {
+            strokeDasharray: lenBlue,
+            strokeDashoffset: lenBlue,
+            autoAlpha: 1
+        });
+
+        gsap.set(blueFillLayer, { autoAlpha: 0 });
+
         // Draw Line (0.8s)
         tlBlueMap.to(blueMaskPath, {
             strokeDashoffset: 0,
