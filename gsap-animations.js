@@ -902,7 +902,7 @@ function initProcessAnimation() {
     const stepsConfig = [
         { id: 1, barX: "-10%", dotId: "1-1" }, // 90% visible
         { id: 2, barX: "-20%", dotId: "1-5" }, // 80% visible
-        { id: 3, barX: "-60%", dotId: "1-2" }, // 40% visible
+        { id: 3, barX: "-60%", dotId: "1-2, 1-3" }, // 40% visible
         { id: 4, barX: "-80%", dotId: "1-4" }  // 20% visible
     ];
 
