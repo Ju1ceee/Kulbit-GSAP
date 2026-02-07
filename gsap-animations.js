@@ -366,51 +366,36 @@ function initHeroAnimation() {
                 }
             });
 
-            // 1. Hero Content & Left Gradient move down out of screen
-            // Using 150% to ensure it's fully off-screen if it's large
-            tl.to(contentWrapper, { y: "150vh", ease: "none" }, 0);
-            tl.to(leftGradient, { y: "150vh", ease: "none" }, 0);
+            // 1. Hero Content & Left Gradient
+            if (contentWrapper) tl.to(contentWrapper, { y: "150vh", ease: "none" }, 0);
+            if (leftGradient) tl.to(leftGradient, { y: "150vh", ease: "none" }, 0);
 
-            // 2. Video Wrapper resizes to Full Viewport
-            // Safari Fixes: 
-            // 1. Centering: Use left: 50% + x: -50% to ensure it grows from center (prevents side gaps/black bars).
-            // 2. Jitter: force3D, willChange.
+            // 2. Video Wrapper
+            if (videoWrapper) {
+                gsap.set(videoWrapper, {
+                    willChange: "width, height, transform",
+                    force3D: true,
+                    backfaceVisibility: "hidden"
+                });
 
-            // Ensure initial centering state if not already set by CSS, generally safe to set properties to prepare for animation
-            // Note: We use 'fromTo' or strictly 'to' if we trust the start state. 
-            // To be safe against layout flow, we ensure it's positioned absolutely relative to the section/body context if possible, 
-            // but here we just enforce centering properties during the tween.
+                tl.to(videoWrapper, {
+                    height: "100vh",
+                    width: "100vw",
+                    minWidth: "100vw",
+                    position: "absolute",
+                    left: "50%",
+                    x: "-50%",
+                    top: "0rem",
+                    ease: "none",
+                    force3D: true
+                }, 0);
+            }
 
-            gsap.set(videoWrapper, {
-                willChange: "width, height, transform",
-                force3D: true,
-                backfaceVisibility: "hidden"
-            });
+            // 3. Hero BG Video
+            if (bgVideo) tl.to(bgVideo, { y: "-12rem", ease: "none" }, 0);
 
-            tl.to(videoWrapper, {
-                height: "100vh",
-                width: "100vw",     // Full viewport width
-                minWidth: "100vw",
-
-                // Centering Logic to prevent side bars:
-                position: "absolute", // decoupled from flow to avoid pushing content? Or just relative? 
-                // User reported 'trembling', absolute is smoother.
-                // Start 'auto' might satisfy flow, but 'absolute' at end is needed? 
-                // Safest is to rely on transform centering if parent is full width.
-                left: "50%",
-                x: "-50%",
-
-                top: "0rem", // Ensure it hits the top
-
-                ease: "none",
-                force3D: true
-            }, 0);
-
-            // 3. Hero BG Video moves from 0rem (default) to -12rem
-            tl.to(bgVideo, { y: "-12rem", ease: "none" }, 0);
-
-            // 4. Video Mask fades out
-            tl.to(videoMask, { opacity: 0, ease: "none" }, 0);
+            // 4. Video Mask
+            if (videoMask) tl.to(videoMask, { opacity: 0, ease: "none" }, 0);
         },
 
         // Tablet & Mobile
@@ -947,7 +932,12 @@ function initProcessAnimation() {
             scrub: 1,             // Smooth scrubbing
             trackMarkers: false,  // Debug
             // Pin the container specifically, or fallback to section (true)
-            pin: section.querySelector('[data-proces-anim-container="true"]') || true
+            pin: section.querySelector('[data-proces-anim-container="true"]') || true,
+            onUpdate: (self) => console.log("Process Scroll Progress:", self.progress.toFixed(3)),
+            onEnter: () => console.log("Process Scroll: Enter"),
+            onLeave: () => console.log("Process Scroll: Leave"),
+            onEnterBack: () => console.log("Process Scroll: Enter Back"),
+            onLeaveBack: () => console.log("Process Scroll: Leave Back")
         }
     });
 
