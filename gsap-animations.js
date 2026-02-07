@@ -879,21 +879,36 @@ function initProcessAnimation() {
     }
 
     // --- Red Map Initial State ---
-    const redMaskPath = document.getElementById('mask-path');
-    const redFillLayer = document.getElementById('fill-layer');
+    // Use scoped selector for robustness
+    const redMaskPath = section.querySelector('#mask-path') || document.getElementById('mask-path');
+    const redFillLayer = section.querySelector('#fill-layer') || document.getElementById('fill-layer');
 
     // Create a paused timeline for the Red Map
     let tlMap = gsap.timeline({ paused: true });
 
-    if (redMaskPath && redFillLayer) {
-        // Init: Line hidden (dashoffset), Fill hidden
-        const len = redMaskPath.getTotalLength();
+    if (redMaskPath) {
+        // Force display block to ensure measurement works? 
+        // GSAP usually handles this, but let's be safe if it was hidden via display:none
+        // However, we used autoAlpha:0 which is opacity:0 + visibility:hidden, which still allows measurement usually.
+
+        let len = redMaskPath.getTotalLength();
+        console.log("Red Map Path Length:", len);
+
+        // Fallback if length is 0 (browser quirk or hidden)
+        if (len === 0) {
+            console.warn("Red Map Path Length is 0. Using fallback 2000.");
+            len = 2000;
+        }
+
         gsap.set(redMaskPath, {
             strokeDasharray: len,
             strokeDashoffset: len,
             autoAlpha: 1 // Make sure path is visible so we see the draw
         });
-        gsap.set(redFillLayer, { autoAlpha: 0 });
+
+        if (redFillLayer) {
+            gsap.set(redFillLayer, { autoAlpha: 0 });
+        }
 
         // Animation: Draw Line (0.8s)
         tlMap.to(redMaskPath, {
@@ -904,11 +919,15 @@ function initProcessAnimation() {
         });
 
         // Animation: Fade in Fill (Instant/Fast)
-        tlMap.to(redFillLayer, {
-            autoAlpha: 1,
-            duration: 0.05, // Almost instant snap
-            ease: "power2.out"
-        });
+        if (redFillLayer) {
+            tlMap.to(redFillLayer, {
+                autoAlpha: 1,
+                duration: 0.05, // Almost instant snap
+                ease: "power2.out"
+            });
+        }
+    } else {
+        console.error("❌ Red Map Elements (#mask-path or #fill-layer) NOT FOUND in DOM");
     }
 
     const playRedMap = () => {
@@ -932,18 +951,24 @@ function initProcessAnimation() {
         }
     });
 
-    // Configuration for each step
+    // Configuration for each step - SUPPORT BOTH "1-1" AND "1" NAMING CONVENTIONS
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotId: "1-1" }, // 90% visible
-        { id: 2, barX: "-20%", dotId: "1-2" }, // 80% visible
-        { id: 3, barX: "-60%", dotId: "1-3" }, // 40% visible
-        { id: 4, barX: "-80%", dotId: "1-4" }  // 20% visible
+        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] }, // 90% visible
+        { id: 2, barX: "-20%", dotIds: ["1-2", "2"] }, // 80% visible
+        { id: 3, barX: "-60%", dotIds: ["1-3", "3"] }, // 40% visible
+        { id: 4, barX: "-80%", dotIds: ["1-4", "4"] }  // 20% visible
     ];
 
     stepsConfig.forEach((step) => {
         const desc = section.querySelector(`[data-anim-process-desc="${step.id}"]`);
         const barLine = section.querySelector(`[data-anim-process-bar-line="${step.id}"]`);
-        const dot = section.querySelector(`[data-anim-process-dot="${step.dotId}"]`);
+
+        // Select all dots for this step (checking both ID formats)
+        const dots = [];
+        step.dotIds.forEach(did => {
+            const d = section.querySelector(`[data-anim-process-dot="${did}"]`);
+            if (d) dots.push(d);
+        });
 
         if (desc) {
             // 1. Description: Fade/Move In
@@ -966,9 +991,9 @@ function initProcessAnimation() {
                 }, label);
             }
 
-            // 3. Dot: Appear
-            if (dot) {
-                tlProcess.to(dot, {
+            // 3. Dots: Appear
+            if (dots.length) {
+                tlProcess.to(dots, {
                     autoAlpha: 1,
                     duration: 1,
                     ease: "none"
