@@ -7,11 +7,24 @@ if (typeof ScrambleTextPlugin !== "undefined") {
 }
 
 /**
+ * Helper to log success/error for elements
+ */
+function verifyElement(name, element) {
+    if (element) {
+        console.log(`✅ FOUND: ${name}`);
+        return true;
+    } else {
+        console.error(`❌ MISSING: ${name}`);
+        return false;
+    }
+}
+
+/**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    console.log("Initializing GSAP Animations...");
+    console.log("Initializing GSAP Animations... (DEBUG MODE)");
 
     // Initialize specific section animations
     initPreloader(); // Run Preloader first
@@ -499,7 +512,7 @@ function initStageSecondAnimation() {
 
 function initStagesAnimation() {
     const section = document.querySelector('.stages');
-    if (!section) return;
+    if (!verifyElement("Stages Section (.stages)", section)) return;
 
     // Select elements via Attributes
     const progressBar = document.querySelector('[data-anim-stage-progress="progress-stages"]');
@@ -795,14 +808,40 @@ function initStagesAnimation() {
 
 function initProcessAnimation() {
     const section = document.querySelector('.proces');
-    if (!section) return;
+    if (!verifyElement("Process Section (.proces)", section)) return;
 
     // Select Elements via Attributes
     const descriptions = section.querySelectorAll('[data-anim-process-desc]');
     const dots = section.querySelectorAll('[data-anim-process-dot]');
     const processBarLines = section.querySelectorAll('[data-anim-process-bar-line]');
+    const container = section.querySelector('[data-proces-anim-container="true"]');
 
-    console.log("Initializing Process Animation", { descriptions, dots, processBarLines });
+    console.group("PROCESS SECTION CHECKS");
+    verifyElement("Container [data-proces-anim-container]", container);
+    if (descriptions.length < 8) console.warn("❌ MISSING: Some Process Descriptions (Found " + descriptions.length + "/12)");
+    else console.log("✅ FOUND: Process Descriptions");
+    if (dots.length < 5) console.warn("❌ MISSING: Some Process Dots (Found " + dots.length + ")");
+    else console.log("✅ FOUND: Process Dots");
+
+    // Check Map SVGs and Paths
+    const redMap = section.querySelector('.map-svg');
+    const blueMap = section.querySelector('.map-svg-blue');
+    verifyElement("Red Map SVG (.map-svg)", redMap);
+    if (redMap) {
+        verifyElement("Red Map Path (#mask-path)", redMap.querySelector('#mask-path'));
+        verifyElement("Red Map Fill (#fill-layer)", redMap.querySelector('#fill-layer'));
+    }
+    verifyElement("Blue Map SVG (.map-svg-blue)", blueMap);
+    if (blueMap) {
+        verifyElement("Blue Map Path (#blue-mask-path)", blueMap.querySelector('#blue-mask-path'));
+        verifyElement("Blue Map Fill (#blue-fill-layer)", blueMap.querySelector('#blue-fill-layer'));
+    }
+    console.groupEnd();
+
+    // Fallback if elements are missing
+    if (!descriptions.length && !dots.length) return;
+
+    console.log("Initializing Process Animation");
 
     // Initial States
     // 1. Descriptions: Hidden, shifted down 3.5rem
@@ -839,61 +878,46 @@ function initProcessAnimation() {
         gsap.set(phase3Descs, { y: "3.5rem", autoAlpha: 0 });
     }
 
-    // 3. SVG Map Animations
-    const animateMap = (trigger, maskPathId, fillLayerId) => {
-        const maskPath = document.getElementById(maskPathId);
-        const fillLayer = document.getElementById(fillLayerId);
+    // --- Red Map Initial State ---
+    const redMaskPath = document.getElementById('mask-path');
+    const redFillLayer = document.getElementById('fill-layer');
 
-        if (!maskPath || !fillLayer) return;
+    // Create a paused timeline for the Red Map
+    let tlMap = gsap.timeline({ paused: true });
 
-        const length = maskPath.getTotalLength();
-
-        // Initial State via GSAP (0% state)
-        gsap.set(maskPath, {
-            strokeDasharray: length,
-            strokeDashoffset: length,
-            autoAlpha: 0 // Hide completely to prevent artifacting
+    if (redMaskPath && redFillLayer) {
+        // Init: Line hidden (dashoffset), Fill hidden
+        const len = redMaskPath.getTotalLength();
+        gsap.set(redMaskPath, {
+            strokeDasharray: len,
+            strokeDashoffset: len,
+            autoAlpha: 1 // Make sure path is visible so we see the draw
         });
-        gsap.set(fillLayer, { opacity: 0 });
+        gsap.set(redFillLayer, { autoAlpha: 0 });
 
-        // Temporarily disabled: awaiting specific trigger
-        return;
-
-        /*
-        // Animation Timeline
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: trigger,
-                start: "top 70%", // Start when top of SVG is at 70% viewport
-                toggleActions: "play none none none", // Play once
-                markers: false
-            }
-        });
-
-        // 1. Draw Line (2s linear)
-        tl.to(maskPath, {
+        // Animation: Draw Line (0.8s)
+        tlMap.to(redMaskPath, {
             strokeDashoffset: 0,
-            duration: 2,
+            autoAlpha: 1, // Keep visible
+            duration: 0.8,
             ease: "none"
         });
 
-        // 2. Fade in Fill (0.4s ease-out)
-        tl.to(fillLayer, {
-            opacity: 1,
-            duration: 0.4,
+        // Animation: Fade in Fill (Instant/Fast)
+        tlMap.to(redFillLayer, {
+            autoAlpha: 1,
+            duration: 0.05, // Almost instant snap
             ease: "power2.out"
         });
-        */
+    }
+
+    const playRedMap = () => {
+        tlMap.play();
     };
 
-    // Red Map
-    const redMap = section.querySelector('.map-svg');
-    if (redMap) animateMap(redMap, 'mask-path', 'fill-layer');
-
-    // Blue Map
-    const blueMap = section.querySelector('.map-svg-blue');
-    if (blueMap) animateMap(blueMap, 'blue-mask-path', 'blue-fill-layer');
-
+    const reverseRedMap = () => {
+        tlMap.reverse();
+    };
 
     // --- Main Sequential Timeline (Scrubbed) ---
     const tlProcess = gsap.timeline({
@@ -911,8 +935,8 @@ function initProcessAnimation() {
     // Configuration for each step
     const stepsConfig = [
         { id: 1, barX: "-10%", dotId: "1-1" }, // 90% visible
-        { id: 2, barX: "-20%", dotId: "1-5" }, // 80% visible
-        { id: 3, barX: "-60%", dotId: "1-2" }, // 40% visible
+        { id: 2, barX: "-20%", dotId: "1-2" }, // 80% visible
+        { id: 3, barX: "-60%", dotId: "1-3" }, // 40% visible
         { id: 4, barX: "-80%", dotId: "1-4" }  // 20% visible
     ];
 
@@ -928,12 +952,13 @@ function initProcessAnimation() {
                 autoAlpha: 1,
                 duration: 1,
                 ease: "none"
-            });
+            }, "+=0.2"); // Small stagger
 
-            // 2. Bar Line & Dot
+            // 2. Bar Line: Grow
             const label = `step${step.id}-details`;
-
             if (barLine) {
+                // Ensure correct selector (bar line vs container)
+                // Assuming data-anim-process-bar-line is on the inner moving div
                 tlProcess.to(barLine, {
                     x: step.barX,
                     duration: 1,
@@ -941,60 +966,22 @@ function initProcessAnimation() {
                 }, label);
             }
 
+            // 3. Dot: Appear
             if (dot) {
                 tlProcess.to(dot, {
                     autoAlpha: 1,
-                    duration: 1, // Sync with bar
+                    duration: 1,
                     ease: "none"
                 }, label);
             }
-
-            // Add a small spacer/pause after each step for separation during scrub
-            tlProcess.to({}, { duration: 0.5 });
         }
     });
 
-    // --- Red Map Animation (First Map) ---
-    // Triggered automatically after Step 4. Reverses on scroll back.
-    const redMaskPath = document.getElementById('mask-path');
-    const redFillLayer = document.getElementById('fill-layer');
-
-    // Create a standalone timeline for the map so we can play/reverse it
-    let tlMap = gsap.timeline({ paused: true });
-
-    if (redMaskPath && redFillLayer) {
-        // Draw Line (Faster: 0.8s)
-        tlMap.to(redMaskPath, {
-            strokeDashoffset: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            ease: "none"
-        });
-
-        // Fade in Fill (Instantly after line)
-        tlMap.to(redFillLayer, {
-            autoAlpha: 1,
-            duration: 0.2, // Almost instant snap
-            ease: "power2.out"
-        }); // No overlap, strict sequence
-    }
-
-    const playRedMap = () => {
-        tlMap.play();
-    };
-
-    const reverseRedMap = () => {
-        tlMap.reverse();
-    };
-
-    // Trigger logic:
-    // onStart (forward): Plays map
-    // onReverseComplete (backward): Reverses map (when dot drops from 100% -> 99%)
-    // Trigger logic:
-    // onStart (forward): Plays map
-    // onReverseComplete (backward): Reverses map (when dot drops from 100% -> 99%)
+    // --- Red Map Trigger at End of Phase 1 ---
+    // We add a dummy tween that triggers the external map timeline
+    // This allows the map to play at its own speed (0.8s) even if user stops scrolling
     tlProcess.to({}, {
-        duration: 0.1, // Small duration to establish a timeline presence
+        duration: 0.1, // Short duration trigger
         onStart: playRedMap,
         onReverseComplete: reverseRedMap
     });
@@ -1005,51 +992,43 @@ function initProcessAnimation() {
 
     // --- Phase 1 Exit Animation (Transition to Phase 2) ---
     // Occurs as we continue scrolling DOWN after the map has triggered
-
-    // Select Elements for Phase 1 Exit
-    const phase1Descs = section.querySelectorAll('[data-anim-process-desc="1"], [data-anim-process-desc="2"], [data-anim-process-desc="3"], [data-anim-process-desc="4"]');
-    const dotsWrapper1 = section.querySelector('[data-anim-process-dots="1"]');
+    const descriptionsPhase1 = [];
+    [1, 2, 3, 4].forEach(id => {
+        const d = section.querySelector(`[data-anim-process-desc="${id}"]`);
+        if (d) descriptionsPhase1.push(d);
+    });
     const redMapSvg = section.querySelector('.map-svg');
 
-    // 1. Descriptions 1-4: Move Up + Fade Out
-    if (phase1Descs.length) {
-        tlProcess.to(phase1Descs, {
-            y: "-5rem",
+    // Hide Descriptions 1-4
+    if (descriptionsPhase1.length) {
+        tlProcess.to(descriptionsPhase1, {
             autoAlpha: 0,
-            duration: 1, // Normalized scrub duration
+            y: "-5rem",
+            duration: 1,
             ease: "none"
-        }, "+=0.2"); // Start shortly after map triggers
+        });
     }
 
-    // 2. Dots & Map: Fade to 20%
-    if (dotsWrapper1) {
-        // Target all dots inside wrapper 1
-        const childDots = dotsWrapper1.querySelectorAll('[data-anim-process-dot]');
-        if (childDots.length) {
-            tlProcess.to(childDots, {
-                autoAlpha: 0.2,
+    // Fade Out Red Map (Opacity 0.2) & Hide Fill
+    if (redMapSvg) {
+        // Select internal elements/use ID if globally unique or scoped query
+        // Assuming we just fade the whole svg wrapper or specific parts
+        // User asked to fade map to 0.2
+        tlProcess.to(redMapSvg, {
+            autoAlpha: 0.2,
+            duration: 1,
+            ease: "none"
+        }, "<");
+
+        if (redFillLayer) {
+            tlProcess.to(redFillLayer, {
+                autoAlpha: 0,
                 duration: 1,
                 ease: "none"
-            }, "<"); // Sync with descriptions
+            }, "<");
         }
     }
 
-    // 3. Map SVG to 20%, Fill to 0%
-    if (redMapSvg) {
-        tlProcess.to(redMapSvg, {
-            autoAlpha: 0.2, // Entire SVG (including lines) to 20%
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    if (redFillLayer) {
-        tlProcess.to(redFillLayer, {
-            autoAlpha: 0, // Fill goes completely transparent
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
 
     // --- Phase 2: Blue Section (Steps 5-8) ---
     // Start fading them in sequentially
@@ -1119,9 +1098,7 @@ function initProcessAnimation() {
     });
 
     // --- Branding Transition (Title & Square) ---
-    // Triggered after Step 8 is fully visible
-    // --- Branding Transition (Title & Square) ---
-    // Triggered after Step 8 is fully visible
+    // Triggered at 'phase2Start' (when Step 5 starts)
     const infoSquare = section.querySelector('.process-info-square');
     const infoTitleWrapper = section.querySelector('.width-180-a-a');
     const infoTitle = section.querySelector('.process-info-title');
@@ -1142,12 +1119,11 @@ function initProcessAnimation() {
         duration: 0.5,
         ease: "none",
         onStart: () => {
-            if (infoTitle) {
+            if (infoTitle && typeof ScrambleTextPlugin !== "undefined") {
                 // Prepare structure for split color/text
                 infoTitle.innerHTML = '<span id="brand-s1" style="color:#62B0FF"></span><br><span id="brand-s2" style="color:#ffffff"></span>';
 
-                // Play Scramble Effect (Non-scrubbed/Forward only for effect)
-                // We use global gsap.to to animate the newly created elements
+                // Play Scramble Effect
                 gsap.to("#brand-s1", {
                     duration: 1,
                     scrambleText: { text: "KULBIT", chars: "upperCase", speed: 0.3, revealDelay: 0 }
@@ -1157,6 +1133,9 @@ function initProcessAnimation() {
                     delay: 0.2,
                     scrambleText: { text: "AI-Elevated Production", chars: "upperCase", speed: 0.3, revealDelay: 0 }
                 });
+            } else if (infoTitle) {
+                // Fallback if no ScrambleText
+                infoTitle.innerHTML = '<span style="color:#62B0FF">KULBIT</span><br><span style="color:#ffffff">AI-Elevated Production</span>';
             }
         },
         onReverseComplete: () => {
