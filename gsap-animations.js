@@ -350,7 +350,7 @@ function initHeroAnimation() {
     const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
     const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
-    console.log("Initializing Hero Animation", { contentWrapper, videoWrapper, bgVideo, leftGradient, videoMask });
+    // console.log("Initializing Hero Animation");
 
     // Use matchMedia to create responsive animations
     ScrollTrigger.matchMedia({
@@ -412,7 +412,7 @@ function initAmbassadorsAnimation() {
 
     const progressBarLine = section.querySelector('.progress-bar-white-line');
 
-    console.log("Initializing Ambassadors Animation", { progressBarLine });
+    // console.log("Initializing Ambassadors Animation");
 
     if (progressBarLine) {
         gsap.fromTo(progressBarLine,
@@ -468,7 +468,7 @@ function initStageSecondAnimation() {
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 992px)", () => {
-        console.log("Initializing Stage Second Animation (Typewriter) [Desktop]");
+        // console.log("Initializing Stage Second Animation (Typewriter) [Desktop]");
 
         // 1. Prepare text (split into spans) - Only do this on desktop match to avoid hiding text on mobile
         // Note: This logic runs once when matching. Reverting completely on resize requires manual cleanup, 
@@ -506,7 +506,7 @@ function initStagesAnimation() {
 
     if (!progressBar || !mainCard || !secondCard) return;
 
-    console.log("Initializing Stages Animation");
+    // console.log("Initializing Stages Animation");
 
     const mm = ScrollTrigger.matchMedia();
 
@@ -801,26 +801,14 @@ function initProcessAnimation() {
     const processBarLines = section.querySelectorAll('[data-anim-process-bar-line]');
     const container = section.querySelector('[data-proces-anim-container="true"]');
 
-    console.group("PROCESS SECTION CHECKS");
+    console.group("PROCESS SECTION DEBUG");
     verifyElement("Container [data-proces-anim-container]", container);
-    if (descriptions.length < 8) console.warn("❌ MISSING: Some Process Descriptions (Found " + descriptions.length + "/12)");
-    else console.log("✅ FOUND: Process Descriptions");
-    if (dots.length < 5) console.warn("❌ MISSING: Some Process Dots (Found " + dots.length + ")");
-    else console.log("✅ FOUND: Process Dots");
+    if (descriptions.length < 8) console.warn("❌ MISSING: Process Descriptions (Found " + descriptions.length + "/12)");
+    if (dots.length < 5) console.warn("❌ MISSING: Process Dots (Found " + dots.length + ")");
 
-    // Check Map SVGs and Paths
-    const redMap = section.querySelector('.map-svg');
-    const blueMap = section.querySelector('.map-svg-blue');
-    verifyElement("Red Map SVG (.map-svg)", redMap);
-    if (redMap) {
-        verifyElement("Red Map Path (#mask-path)", redMap.querySelector('#mask-path'));
-        verifyElement("Red Map Fill (#fill-layer)", redMap.querySelector('#fill-layer'));
-    }
-    verifyElement("Blue Map SVG (.map-svg-blue)", blueMap);
-    if (blueMap) {
-        verifyElement("Blue Map Path (#blue-mask-path)", blueMap.querySelector('#blue-mask-path'));
-        verifyElement("Blue Map Fill (#blue-fill-layer)", blueMap.querySelector('#blue-fill-layer'));
-    }
+    // Check Map SVGs
+    if (!section.querySelector('.map-svg')) console.warn("❌ MISSING: Red Map SVG");
+    if (!section.querySelector('.map-svg-blue')) console.warn("❌ MISSING: Blue Map SVG");
     console.groupEnd();
 
     // Fallback if elements are missing
