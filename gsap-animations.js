@@ -1064,12 +1064,12 @@ function initProcessAnimation() {
     }
 
     // Fade Out Red Map (Opacity 0.2) & Hide Fill
+    // Fade Out Red Map & Phase 1 Dots (Dim to Gray)
+    const dotsPhase1 = section.querySelectorAll('[data-anim-process-dot^="1"]');
+
     if (redMapSvg) {
-        // Select internal elements/use ID if globally unique or scoped query
-        // Assuming we just fade the whole svg wrapper or specific parts
-        // User asked to fade map to 0.2
         tlProcess.to(redMapSvg, {
-            autoAlpha: 0.2,
+            autoAlpha: 0.2, // Dim Map
             duration: 1,
             ease: "none"
         }, "<");
@@ -1081,6 +1081,15 @@ function initProcessAnimation() {
                 ease: "none"
             }, "<");
         }
+    }
+
+    // Dim Phase 1 Dots/Wrapper
+    if (dotsPhase1.length) {
+        tlProcess.to(dotsPhase1, {
+            opacity: 0.2, // Dim to "gray"
+            duration: 1,
+            ease: "none"
+        }, "<");
     }
 
 
