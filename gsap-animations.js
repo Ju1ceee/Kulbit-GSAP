@@ -1,6 +1,11 @@
 // Register GSAP Plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// Check if ScrambleTextPlugin is available before trying to use it
+if (typeof ScrambleTextPlugin !== "undefined") {
+    gsap.registerPlugin(ScrambleTextPlugin);
+}
+
 /**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
@@ -11,7 +16,7 @@ function initAnimations() {
     // Initialize specific section animations
     initPreloader(); // Run Preloader first
     initHeroAnimation();
-    initScrambleText(); // Initialize Scramble effects
+    if (typeof ScrambleTextPlugin !== "undefined") initScrambleText(); // Only run if plugin exists
     // initAmbassadorsAnimation();
     initAmbassadorsAnimationV2();
     initStageSecondAnimation();
@@ -20,6 +25,11 @@ function initAnimations() {
     initServicesAnimation();
     initBenefitsAnimation();
     initTeamAnimation();
+
+    // Consolidated Logic (from index.html)
+    initLenis();
+    initVideoPlayer();
+    initInputPlaceholders();
 }
 
 /**
@@ -1341,3 +1351,92 @@ function initAmbassadorsAnimationV2() {
 
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", initAnimations);
+
+
+// --- Consolidated Functions (Migrated from index.html) ---
+
+function initLenis() {
+    // Check if Lenis is available
+    if (typeof Lenis === "undefined") {
+        console.warn("Lenis library not found. Smooth scrolling disabled.");
+        return;
+    }
+
+    const lenis = new Lenis({
+        autoRaf: true,
+    });
+
+    // Scroll Disable Logic (e.g. for Modals/Menus)
+    const scrollDisableElements = document.querySelectorAll('[scroll-disable-element]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                document.body.classList.add('overflow-hidden');
+                lenis.stop();
+            } else {
+                document.body.classList.remove('overflow-hidden');
+                lenis.start();
+            }
+        });
+    });
+
+    scrollDisableElements.forEach(element => {
+        observer.observe(element);
+    });
+}
+
+function initVideoPlayer() {
+    const videoElement = document.getElementById('my-custom-video');
+    const playBtn = document.querySelector('.play-btn');
+
+    if (videoElement && playBtn) {
+        // Force pause at start
+        videoElement.pause();
+        videoElement.currentTime = 0;
+
+        playBtn.addEventListener('click', function () {
+            videoElement.muted = false;
+            videoElement.volume = 1.0;
+            const playPromise = videoElement.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    playBtn.style.transition = 'opacity 500ms ease';
+                    playBtn.style.opacity = '0';
+                    setTimeout(() => {
+                        playBtn.style.display = 'none';
+                    }, 500);
+                })
+                    .catch(error => {
+                        console.error("Video play error:", error);
+                    });
+            }
+        });
+    }
+}
+
+function initInputPlaceholders() {
+    const wrappers = document.querySelectorAll('.input-wrapper');
+    wrappers.forEach(wrapper => {
+        const inputField = wrapper.querySelector('.form-field');
+        const customPlaceholder = wrapper.querySelector('.custom-placeholder');
+        if (!inputField || !customPlaceholder) return;
+
+        const hidePlaceholder = () => {
+            customPlaceholder.style.display = 'none';
+        };
+        const showPlaceholder = () => {
+            if (inputField.value.length === 0) {
+                customPlaceholder.style.display = 'block';
+            }
+        };
+
+        inputField.addEventListener('focus', hidePlaceholder);
+        inputField.addEventListener('blur', showPlaceholder);
+        inputField.addEventListener('input', function () {
+            if (this.value.length > 0) {
+                hidePlaceholder();
+            }
+        });
+    });
+}
