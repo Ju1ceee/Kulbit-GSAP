@@ -976,6 +976,7 @@ function initProcessAnimation() {
         if (dots.length) {
             tlProcess.to(dots, {
                 autoAlpha: 1,
+                visibility: "inherit", // Explicitlyrequested
                 duration: 1,
                 ease: "none",
                 onStart: () => console.log(`Step ${step.id} Dots Reveal Start (IDs: ${step.dotIds})`)
@@ -1073,17 +1074,13 @@ function initProcessAnimation() {
                 tlProcess.add("phase2Start", "+=0.2");
                 position = "phase2Start";
 
-                // REVEAL BLUE WRAPPER HERE
+                // Blue Wrapper (id=2) is now handled by dotIds: ["2-1", "2"] below
+                // So we don't need a manual tween here anymore.
+                /*
                 if (blueWrapper) {
-                    tlProcess.to(blueWrapper, {
-                        autoAlpha: 1,
-                        duration: 0.5,
-                        ease: "none",
-                        onStart: () => console.log("Phase 2: Blue Wrapper Reveal Start")
-                    }, "phase2Start");
-                } else {
-                    console.warn("⚠️ Blue Wrapper not found for Phase 2 reveal");
+                     tlProcess.to(blueWrapper, { autoAlpha: 1, ... }, "phase2Start");
                 }
+                */
             }
 
             // 1. Description: Fade/Move In
@@ -1113,6 +1110,7 @@ function initProcessAnimation() {
                 console.log(`Adding tween for Step ${step.id} dots:`, dots);
                 tlProcess.to(dots, {
                     autoAlpha: 1,
+                    visibility: "inherit", // Explicitly requested
                     duration: 1,
                     ease: "none",
                     onStart: () => console.log(`Step ${step.id} Dots Reveal Start (Dot IDs: ${step.dotIds})`)
