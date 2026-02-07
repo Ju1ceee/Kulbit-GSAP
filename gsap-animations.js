@@ -980,10 +980,10 @@ function initProcessAnimation() {
     // NOTE: Removed "2", "3", "4" from dotIds because "2" matches the Blue Wrapper in Webflow, which we DON'T want to show in Phase 1.
     // "1" is kept because it's the Red Wrapper.
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] }, // 90% visible (Red Wrapper + Dot 1)
-        { id: 2, barX: "-20%", dotIds: ["1-2"] },      // 80% visible
-        { id: 3, barX: "-60%", dotIds: ["1-3"] },      // 40% visible
-        { id: 4, barX: "-80%", dotIds: ["1-4", "1-5"] } // Added 1-5
+        { id: 1, barX: "-10%", dotIds: ["1-1", "1"] },  // Desc 1: Dot 1-1 + Red Wrapper
+        { id: 2, barX: "-20%", dotIds: ["1-5"] },       // Desc 2: Dot 1-5
+        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] },// Desc 3: Dots 1-2 & 1-3
+        { id: 4, barX: "-80%", dotIds: ["1-4"] }        // Desc 4: Dot 1-4
     ];
 
     stepsConfig.forEach((step) => {
@@ -1061,16 +1061,6 @@ function initProcessAnimation() {
             duration: 1,
             ease: "none"
         });
-    }
-
-    // Fade Out Phase 1 Dots (1-1 to 1-5, and 1)
-    const dotsPhase1 = section.querySelectorAll('[data-anim-process-dot^="1"]');
-    if (dotsPhase1.length) {
-        tlProcess.to(dotsPhase1, {
-            autoAlpha: 0.3, // Make them semi-transparent
-            duration: 1,
-            ease: "none"
-        }, "<"); // Sync with descriptions
     }
 
     // Fade Out Red Map (Opacity 0.2) & Hide Fill
