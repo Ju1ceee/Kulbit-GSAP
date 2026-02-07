@@ -1,4 +1,4 @@
-// Register GSAP Plugins1
+// Register GSAP Plugins
 gsap.registerPlugin(ScrollTrigger);
 
 // Check if ScrambleTextPlugin is available before trying to use it
@@ -911,6 +911,53 @@ function initProcessAnimation() {
         tlMap.reverse();
     };
 
+    // --- Blue Map Initial State (Moved to Top) ---
+    const blueMaskPath = section.querySelector('#blue-mask-path') || document.getElementById('blue-mask-path');
+    const blueFillLayer = section.querySelector('#blue-fill-layer') || document.getElementById('blue-fill-layer');
+
+    // Create paused timeline for Blue Map
+    let tlBlueMap = gsap.timeline({ paused: true });
+
+    if (blueMaskPath) {
+        let lenBlue = blueMaskPath.getTotalLength();
+        console.log("Blue Map Path Length (Init):", lenBlue);
+
+        if (lenBlue === 0) {
+            lenBlue = 2000;
+        }
+
+        // Hide Line Initially
+        gsap.set(blueMaskPath, {
+            strokeDasharray: lenBlue,
+            strokeDashoffset: lenBlue,
+            autoAlpha: 1
+        });
+
+        // Hide Fill Initially
+        if (blueFillLayer) {
+            gsap.set(blueFillLayer, { autoAlpha: 0 });
+        }
+
+        // Animation: Draw Line
+        tlBlueMap.to(blueMaskPath, {
+            strokeDashoffset: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "none"
+        });
+
+        // Animation: Fade in Fill
+        if (blueFillLayer) {
+            tlBlueMap.to(blueFillLayer, {
+                autoAlpha: 1,
+                duration: 0.05,
+                ease: "power2.out"
+            });
+        }
+    } else {
+        console.error("❌ Blue Map Elements NOT FOUND at Init");
+    }
+
     // --- Main Sequential Timeline (Scrubbed) ---
     const tlProcess = gsap.timeline({
         scrollTrigger: {
@@ -1166,55 +1213,7 @@ function initProcessAnimation() {
         }
     }, "<"); // Sync with width change
 
-    // --- Blue Map Animation (Second Map) ---
-    // Triggered automatically after Step 8.
-    const blueMaskPath = document.getElementById('blue-mask-path');
-    const blueFillLayer = document.getElementById('blue-fill-layer');
 
-    // Create timeline for Blue Map
-    let tlBlueMap = gsap.timeline({ paused: true });
-
-    if (blueMaskPath && blueFillLayer) {
-        // Initial setup for Blue Map
-        let lenBlue = blueMaskPath.getTotalLength();
-        console.log("Blue Map Path Length:", lenBlue);
-
-        if (lenBlue === 0) {
-            console.warn("Blue Map Path Length is 0. Using fallback 2000.");
-            lenBlue = 2000;
-        }
-
-        gsap.set(blueMaskPath, {
-            strokeDasharray: lenBlue,
-            strokeDashoffset: lenBlue,
-            autoAlpha: 1
-        });
-
-        gsap.set(blueFillLayer, { autoAlpha: 0 });
-
-        // Draw Line (0.8s)
-        tlBlueMap.to(blueMaskPath, {
-            strokeDashoffset: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            ease: "none"
-        });
-
-        // Fade in Fill (Instant)
-        tlBlueMap.to(blueFillLayer, {
-            autoAlpha: 1,
-            duration: 0.05,
-            ease: "power2.out"
-        });
-    }
-
-    const playBlueMap = () => {
-        tlBlueMap.play();
-    };
-
-    const reverseBlueMap = () => {
-        tlBlueMap.reverse();
-    };
 
     // Trigger Blue Map at end of Phase 2
     tlProcess.to({}, {
