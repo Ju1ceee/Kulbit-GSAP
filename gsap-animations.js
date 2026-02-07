@@ -1,4 +1,4 @@
-// Register GSAP Plugins
+// Register GSAP Plugins 111
 gsap.registerPlugin(ScrollTrigger);
 
 // Check if ScrambleTextPlugin is available before trying to use it
