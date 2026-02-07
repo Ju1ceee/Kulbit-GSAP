@@ -1072,6 +1072,18 @@ function initProcessAnimation() {
             if (step.id === 5) {
                 tlProcess.add("phase2Start", "+=0.2");
                 position = "phase2Start";
+
+                // REVEAL BLUE WRAPPER HERE
+                if (blueWrapper) {
+                    tlProcess.to(blueWrapper, {
+                        autoAlpha: 1,
+                        duration: 0.5,
+                        ease: "none",
+                        onStart: () => console.log("Phase 2: Blue Wrapper Reveal Start")
+                    }, "phase2Start");
+                } else {
+                    console.warn("⚠️ Blue Wrapper not found for Phase 2 reveal");
+                }
             }
 
             // 1. Description: Fade/Move In
@@ -1192,7 +1204,10 @@ function initProcessAnimation() {
     // Trigger Blue Map at end of Phase 2
     tlProcess.to({}, {
         duration: 0.1, // Short duration trigger
-        onStart: playBlueMap,
+        onStart: () => {
+            console.log("Phase 2: Blue Map Triggered");
+            playBlueMap();
+        },
         onReverseComplete: reverseBlueMap
     });
 
