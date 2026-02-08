@@ -1262,8 +1262,15 @@ function initServicesAnimation() {
         overflow: "visible"
     });
 
-    // Ensure section fits viewport and clips overflow
-    gsap.set(section, { height: "100vh", overflow: "hidden" });
+    // CSS Sticky Stacking Restore:
+    // We removed 'pin: true' and the height override to let CSS 'position: sticky' handle the overlay effect.
+    // The section will stay sticky, and the next section (Benefits) will slide over it.
+
+    // Ensure accurate sizing
+    ScrollTrigger.refresh();
+
+    // Add z-index for stacking context
+    gsap.set(section, { zIndex: 2 });
 
     const tlServices = gsap.timeline({
         defaults: { ease: "none" }
@@ -1300,19 +1307,11 @@ function initServicesAnimation() {
     tlServices.to({}, { duration: 0.5 });
 
 
-    // Select the container to pin (fix for pin-spacer wrapping issue)
-    const container = section.querySelector('.container');
-
     ScrollTrigger.create({
         trigger: section,
-        start: "top top",
-        // Recalculate end duration based on how much logic adds up?
-        // Actually the timeline duration is arbitrary (1.2 * N), mapped to Scroll distance.
-        // We just need a sufficient scroll distance to feel good.
-        // Previously: track.scrollWidth - window.innerWidth + 500
-        // Let's keep a generous scroll distance.
-        end: () => `+=${track.scrollWidth}`,
-        pin: container || true, // Pin the container, fall back to section
+        start: "top top",     // Start animating when section hits top
+        end: "bottom bottom", // Animate throughout the entire height of the sticky section
+        pin: false,           // DISABLE GSAP PIN (Use CSS Sticky)
         animation: tlServices,
         scrub: 1,
         invalidateOnRefresh: true,
