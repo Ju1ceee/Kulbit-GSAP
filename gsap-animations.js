@@ -1243,79 +1243,66 @@ function initProcessAnimation() {
 }
 
 function initServicesAnimation() {
-    const section = document.querySelector('.our-services');
-    if (!section) return;
+    const section = document.querySelector('[data-anim-services="section"]');
+    const track = document.querySelector('[data-anim-services="track"]');
+    const cards = document.querySelectorAll('[data-anim-services="card"]');
 
-    // Wrapper containing the cards
-    const track = section.querySelector('[data-anim-services="track"]');
-    const cards = section.querySelectorAll('[data-anim-services="card-wrapper"]');
+    if (!section || !track || !cards.length) return;
 
-    if (!track || !cards.length) return;
+    console.log("Initializing Services Animation (Horizontal Scroll)");
 
-    console.log("Initializing Services Animation (Horizontal Scroll with Attributes)");
+    // Horizontal Scroll Trigger
+    // We want to pin the section and move the track left.
+    // Movement distance = (Card Width + Gap) * (Number of Cards - 1)
 
-    // Force horizontal layout & width
-    gsap.set(track, {
-        display: "flex",
-        flexWrap: "nowrap",
-        width: "max-content",
-        overflow: "visible"
-    });
+    // Use matchMedia to ensure it only runs on desktop/landscape if needed, 
+    // or generally, but let's assume global as user didn't specify mobile.
+    // Usually horizontal scroll is desktop-first. Webflow often stacks on mobile.
+    // Let's wrap in matchMedia for safety if typical breaks are used (992px).
 
-    // CSS Sticky Stacking Restore:
-    // We removed 'pin: true' and the height override to let CSS 'position: sticky' handle the overlay effect.
-    // The section will stay sticky, and the next section (Benefits) will slide over it.
+    ScrollTrigger.matchMedia({
+        "(min-width: 992px)": function () {
 
-    // Ensure accurate sizing
-    ScrollTrigger.refresh();
+            // Function to calculate precise movement so exact card alignment happens
+            const getScrollAmount = () => {
+                const cardWidth = cards[0].offsetWidth;
+                const trackStyle = window.getComputedStyle(track);
+                const gap = parseFloat(trackStyle.getPropertyValue("column-gap")) || parseFloat(trackStyle.getPropertyValue("gap")) || 86; // Fallback approx 5.38rem
 
-    // Add z-index for stacking context
-    gsap.set(section, { zIndex: 2 });
+                // Move so the last card reaches the first card's position? 
+                // "next cards stop at the same place where the initial card stands"
+                // This means moving 1 unit shifts card 2 to card 1. 2 units shifts card 3 to card 1.
+                // Total distance = (N-1) units.
+                return (cardWidth + gap) * (cards.length - 1);
+            };
 
-    const tlServices = gsap.timeline({
-        defaults: { ease: "none" }
-    });
+            const scrollAmount = getScrollAmount();
 
-    // Create stepped animation with pauses
-    // FIX: Use exact offset positions instead of dividing total scroll distance variables.
-    // This ensures each card snaps exactly to the starting position of the first card.
-
-    // Check offsets relative to the track
-    // We want to move the track left so that cards[i] takes the place of cards[0].
-    const startX = cards[0].offsetLeft;
-
-    for (let i = 1; i < cards.length; i++) {
-        const targetX = -(cards[i].offsetLeft - startX);
-
-        // Move to next card
-        tlServices.to(track, {
-            x: targetX,
-            duration: 1
-        });
-
-        // Pause
-        tlServices.to({}, { duration: 0.2 });
-    }
-
-    // Optional: If there's extra space after the last card that we want to show,
-    // we might need one final small move or just the end gap.
-    // The user moved "End Gap" to be a pause.
-
-    // Ensure we actually reach the very end if the "snap to last card" doesn't show the full end padding
-    // But aligning the last card to the start is usually the extensive limit or close to it.
-    // Let's add the small end gap buffer.
-    tlServices.to({}, { duration: 0.5 });
-
-
-    ScrollTrigger.create({
-        trigger: section,
-        start: "top top",     // Start animating when section hits top
-        end: "bottom-=10% bottom", // Finish animation slightly before the section ends
-        pin: false,           // DISABLE GSAP PIN (Use CSS Sticky)
-        animation: tlServices,
-        scrub: 1,
-        invalidateOnRefresh: true,
-        markers: false
+            gsap.to(track, {
+                x: () => -getScrollAmount(), // Move left by total distance
+                ease: "none",
+                scrollTrigger: {
+                    trigger: section,
+                    pin: true,
+                    // Use a sticky container inside if preferred, but pin: section works well.
+                    // If visual issues, pin: section.querySelector('.is-stiky')?
+                    // Let's try pinning the section first as it contains the sticky wrapper.
+                    pin: true,
+                    start: "top top",
+                    end: () => "+=" + getScrollAmount(), // Scroll distance matches movement distance? Or scale it?
+                    // User might want it slower. Let's multiply by a factor (e.g. 1.5 or 2) for usability.
+                    // But "stop at same place" relates to positioning, not speed.
+                    // Creating an 'end' value usually defines speed. 
+                    // Let's stick to 1:1 or 1:1.5 mapping. 
+                    // Let's use "+=" + (scrollAmount * 2) to make it slower/smoother?
+                    // User said: "next cards stop at same place". That's positioning.
+                    // Let's start with a reasonable duration.
+                    end: () => "+=" + (getScrollAmount() + window.innerHeight),
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            });
+        }
     });
 }
 
