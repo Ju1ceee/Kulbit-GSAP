@@ -1263,14 +1263,7 @@ function initServicesAnimation() {
     });
 
     // Ensure section fits viewport and clips overflow
-    // FIX: Z-Index handling to ensure next section scrolls OVER this one
-    gsap.set(section, { height: "100vh", overflow: "hidden", zIndex: 1 });
-
-    // Select next section to ensure it covers
-    const nextSection = document.querySelector('.stage-second'); // Or generally section.nextElementSibling
-    if (nextSection) {
-        gsap.set(nextSection, { position: "relative", zIndex: 5, backgroundColor: "#000" }); // Background color needed to cover
-    }
+    gsap.set(section, { height: "100vh", overflow: "hidden" });
 
     const tlServices = gsap.timeline({
         defaults: { ease: "none" }
@@ -1307,6 +1300,9 @@ function initServicesAnimation() {
     tlServices.to({}, { duration: 0.5 });
 
 
+    // Select the container to pin (fix for pin-spacer wrapping issue)
+    const container = section.querySelector('.container');
+
     ScrollTrigger.create({
         trigger: section,
         start: "top top",
@@ -1316,7 +1312,7 @@ function initServicesAnimation() {
         // Previously: track.scrollWidth - window.innerWidth + 500
         // Let's keep a generous scroll distance.
         end: () => `+=${track.scrollWidth}`,
-        pin: true,
+        pin: container || true, // Pin the container, fall back to section
         animation: tlServices,
         scrub: 1,
         invalidateOnRefresh: true,
