@@ -1263,7 +1263,14 @@ function initServicesAnimation() {
     });
 
     // Ensure section fits viewport and clips overflow
-    gsap.set(section, { height: "100vh", overflow: "hidden" });
+    // FIX: Z-Index handling to ensure next section scrolls OVER this one
+    gsap.set(section, { height: "100vh", overflow: "hidden", zIndex: 1 });
+
+    // Select next section to ensure it covers
+    const nextSection = document.querySelector('.stage-second'); // Or generally section.nextElementSibling
+    if (nextSection) {
+        gsap.set(nextSection, { position: "relative", zIndex: 5, backgroundColor: "#000" }); // Background color needed to cover
+    }
 
     const tlServices = gsap.timeline({
         defaults: { ease: "none" }
