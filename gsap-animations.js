@@ -1310,7 +1310,7 @@ function initServicesAnimation() {
     ScrollTrigger.create({
         trigger: section,
         start: "top top",     // Start animating when section hits top
-        end: "bottom bottom", // Animate throughout the entire height of the sticky section
+        end: "bottom-=10% bottom", // Finish animation slightly before the section ends
         pin: false,           // DISABLE GSAP PIN (Use CSS Sticky)
         animation: tlServices,
         scrub: 1,
