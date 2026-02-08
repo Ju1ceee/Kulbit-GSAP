@@ -1263,47 +1263,33 @@ function initServicesAnimation() {
     ScrollTrigger.matchMedia({
         "(min-width: 992px)": function () {
 
-            // Function to calculate precise movement so exact card alignment happens
+            // Function to calculate precise movement
             const getScrollAmount = () => {
-                const cardWidth = cards[0].offsetWidth;
-                const trackStyle = window.getComputedStyle(track);
-                const gap = parseFloat(trackStyle.getPropertyValue("column-gap")) || parseFloat(trackStyle.getPropertyValue("gap")) || 86; // Fallback approx 5.38rem
-
-                // Move so the last card reaches the first card's position? 
-                // "next cards stop at the same place where the initial card stands"
-                // This means moving 1 unit shifts card 2 to card 1. 2 units shifts card 3 to card 1.
-                // Total distance = (N-1) units.
-                return (cardWidth + gap) * (cards.length - 1);
+                // Calculate total width of all cards + gaps
+                // Safest bet for horizontal scroll: Move total width minus container width.
+                const container = section.querySelector('.container');
+                const containerWidth = container ? container.offsetWidth : window.innerWidth;
+                // track.scrollWidth gives total width of content
+                return track.scrollWidth - containerWidth;
             };
 
-            const scrollAmount = getScrollAmount();
-
             gsap.to(track, {
-                x: () => -getScrollAmount(), // Move left by total distance
+                x: () => -getScrollAmount(), // Move left
                 ease: "none",
                 scrollTrigger: {
                     trigger: section,
-                    pin: true,
-                    // Use a sticky container inside if preferred, but pin: section works well.
-                    // If visual issues, pin: section.querySelector('.is-stiky')?
-                    // Let's try pinning the section first as it contains the sticky wrapper.
-                    pin: true,
+                    // Pin the container specifically to match previous sections' logic
+                    pin: section.querySelector('.container') || true,
                     start: "top top",
-                    end: () => "+=" + getScrollAmount(), // Scroll distance matches movement distance? Or scale it?
-                    // User might want it slower. Let's multiply by a factor (e.g. 1.5 or 2) for usability.
-                    // But "stop at same place" relates to positioning, not speed.
-                    // Creating an 'end' value usually defines speed. 
-                    // Let's stick to 1:1 or 1:1.5 mapping. 
-                    // Let's use "+=" + (scrollAmount * 2) to make it slower/smoother?
-                    // User said: "next cards stop at same place". That's positioning.
-                    // Let's start with a reasonable duration.
-                    end: () => "+=" + (getScrollAmount() + window.innerHeight),
+                    // Scroll distance = Movement distance. 
+                    end: () => "+=" + getScrollAmount(),
                     scrub: 1,
                     invalidateOnRefresh: true
                 }
             });
         }
     });
+
 }
 
 function initBenefitsAnimation() {
