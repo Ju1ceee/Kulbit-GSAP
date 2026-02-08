@@ -1277,9 +1277,6 @@ function initServicesAnimation() {
     // We want to move the track left so that cards[i] takes the place of cards[0].
     const startX = cards[0].offsetLeft;
 
-    // Label for first card (start)
-    tlServices.addLabel("card-0");
-
     for (let i = 1; i < cards.length; i++) {
         const targetX = -(cards[i].offsetLeft - startX);
 
@@ -1288,9 +1285,6 @@ function initServicesAnimation() {
             x: targetX,
             duration: 1
         });
-
-        // Label for arrived card (snap point)
-        tlServices.addLabel(`card-${i}`);
 
         // Pause
         tlServices.to({}, { duration: 0.2 });
