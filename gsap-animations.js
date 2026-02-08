@@ -718,17 +718,16 @@ function initStagesAnimation() {
 
 
         // --- Phase 3: Content Swap (Stage 2 -> Stage 3) ---
-        // Trigger: ~2200px down (Delayed start per user request)
-        const tlPhase3 = gsap.timeline({
-            scrollTrigger: {
-                trigger: section,
-                start: "top top-=1800",
-                end: "bottom bottom",
-                toggleActions: "play none none reverse", // Fixed: Don't reverse when leaving bottom
-                scrub: false,
-                markers: false
-            }
-        });
+        // Trigger: Synced with 'phase3' label in tlSticky
+        const tlPhase3 = gsap.timeline({ paused: true });
+
+        // Sync with Main Timeline
+        // We add this trigger to tlSticky to play Phase 3 text effect exactly when the phase starts
+        tlSticky.to({}, {
+            duration: 0.1,
+            onStart: () => tlPhase3.play(),
+            onReverseComplete: () => tlPhase3.reverse()
+        }, "phase3");
 
         const sourceNumber3 = document.querySelector('[data-stage-source="number-3"]');
         const sourceHeading3 = document.querySelector('[data-stage-source="heading-3"]');
