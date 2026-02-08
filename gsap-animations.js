@@ -1246,8 +1246,74 @@ function initServicesAnimation() {
     const section = document.querySelector('.our-services');
     if (!section) return;
 
-    createSectionTrigger(section, () => {
-        console.log("Services Animation Triggered");
+    // Wrapper containing the cards
+    const track = section.querySelector('[data-anim-services="track"]');
+    const cards = section.querySelectorAll('[data-anim-services="card-wrapper"]');
+
+    if (!track || !cards.length) return;
+
+    console.log("Initializing Services Animation (Horizontal Scroll with Attributes)");
+
+    // Force horizontal layout & width
+    gsap.set(track, {
+        display: "flex",
+        flexWrap: "nowrap",
+        width: "max-content",
+        overflow: "visible"
+    });
+
+    // Ensure section fits viewport and clips overflow
+    gsap.set(section, { height: "100vh", overflow: "hidden" });
+
+    const tlServices = gsap.timeline({
+        defaults: { ease: "none" }
+    });
+
+    // Create stepped animation with pauses
+    // FIX: Use exact offset positions instead of dividing total scroll distance variables.
+    // This ensures each card snaps exactly to the starting position of the first card.
+
+    // Check offsets relative to the track
+    // We want to move the track left so that cards[i] takes the place of cards[0].
+    const startX = cards[0].offsetLeft;
+
+    for (let i = 1; i < cards.length; i++) {
+        const targetX = -(cards[i].offsetLeft - startX);
+
+        // Move to next card
+        tlServices.to(track, {
+            x: targetX,
+            duration: 1
+        });
+
+        // Pause
+        tlServices.to({}, { duration: 0.2 });
+    }
+
+    // Optional: If there's extra space after the last card that we want to show,
+    // we might need one final small move or just the end gap.
+    // The user moved "End Gap" to be a pause.
+
+    // Ensure we actually reach the very end if the "snap to last card" doesn't show the full end padding
+    // But aligning the last card to the start is usually the extensive limit or close to it.
+    // Let's add the small end gap buffer.
+    tlServices.to({}, { duration: 0.5 });
+
+
+    ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        // Recalculate end duration based on how much logic adds up?
+        // Actually the timeline duration is arbitrary (1.2 * N), mapped to Scroll distance.
+        // We just need a sufficient scroll distance to feel good.
+        // Previously: track.scrollWidth - window.innerWidth + 500
+        // Let's keep a generous scroll distance.
+        end: () => `+=${track.scrollWidth}`,
+        pin: true,
+        animation: tlServices,
+        scrub: 1,
+        invalidateOnRefresh: true,
+        markers: false
     });
 }
 
