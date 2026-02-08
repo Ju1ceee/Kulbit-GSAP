@@ -722,7 +722,7 @@ function initStagesAnimation() {
         const tlPhase3 = gsap.timeline({
             scrollTrigger: {
                 trigger: section,
-                start: "top top-=2200",
+                start: "top top-=1800",
                 end: "bottom bottom",
                 toggleActions: "play none none reverse", // Fixed: Don't reverse when leaving bottom
                 scrub: false,
