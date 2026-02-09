@@ -6,20 +6,15 @@ gsap.registerPlugin(ScrollTrigger);
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    console.log("Initializing GSAP Animations...");
-
     // Initialize specific section animations
     initPreloader(); // Run Preloader first
     initHeroAnimation();
     initScrambleText(); // Initialize Scramble effects
-    // initAmbassadorsAnimation();
-    initAmbassadorsAnimationV2();
+    initAmbassadorsAnimation();
     initStageSecondAnimation();
     initStagesAnimation();
     initProcessAnimation();
     initServicesAnimation();
-    initBenefitsAnimation();
-    initTeamAnimation();
 }
 
 /**
@@ -27,7 +22,6 @@ function initAnimations() {
  * Selects elements via [data-anim-preloader] attributes
  */
 function initPreloader() {
-    console.log("Initializing Preloader...");
 
     // Helper to select by attribute
     const $ = (v) => document.querySelector(`[data-anim-preloader="${v}"]`);
@@ -192,7 +186,6 @@ function initPreloader() {
  * Targets elements with [data-scramble="true"]
  */
 function initScrambleText() {
-    console.log("Initializing Scramble Text...");
 
     const targets = document.querySelectorAll('[data-scramble="true"]');
     if (!targets.length) return;
@@ -296,21 +289,7 @@ function initScrambleText() {
     });
 }
 
-/**
- * Helper function to create a standardized scroll trigger
- * @param {string|Element} trigger - The element to trigger the animation
- * @param {Function} onEnter - Callback when the section hits the top
- */
-function createSectionTrigger(trigger, onEnter) {
-    ScrollTrigger.create({
-        trigger: trigger,
-        start: "top top", // Starts when the top of the element hits the top of the viewport
-        markers: false, // Debug markers: enable to see start/end points
-        onEnter: onEnter,
-        // Optional: Reset logic if needed when scrolling back
-        // onLeaveBack: () => { ... } 
-    });
-}
+
 
 // --- Section Specific Animations ---
 
@@ -327,7 +306,6 @@ function initHeroAnimation() {
     const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
     const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
-    console.log("Initializing Hero Animation", { contentWrapper, videoWrapper, bgVideo, leftGradient, videoMask });
 
     // Use matchMedia to create responsive animations
     ScrollTrigger.matchMedia({
@@ -398,31 +376,7 @@ function initHeroAnimation() {
 }
 
 
-function initAmbassadorsAnimation() {
-    const section = document.querySelector('.our-ambassadors');
-    if (!section) return;
 
-    const progressBarLine = section.querySelector('.progress-bar-white-line');
-
-    console.log("Initializing Ambassadors Animation", { progressBarLine });
-
-    if (progressBarLine) {
-        gsap.fromTo(progressBarLine,
-            { x: "-100%" },
-            {
-                x: "0%",
-                ease: "none",
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top bottom", // Starts when section enters viewport
-                    end: "top top",      // Ends when section hits top of viewport
-                    scrub: true,
-                    markers: false
-                }
-            }
-        );
-    }
-}
 
 function initStageSecondAnimation() {
     // Select by the specific class requested
@@ -460,7 +414,6 @@ function initStageSecondAnimation() {
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 992px)", () => {
-        console.log("Initializing Stage Second Animation (Typewriter) [Desktop]");
 
         // 1. Prepare text (split into spans) - Only do this on desktop match to avoid hiding text on mobile
         // Note: This logic runs once when matching. Reverting completely on resize requires manual cleanup, 
@@ -498,7 +451,6 @@ function initStagesAnimation() {
 
     if (!progressBar || !mainCard || !secondCard) return;
 
-    console.log("Initializing Stages Animation");
 
     const mm = ScrollTrigger.matchMedia();
 
@@ -590,13 +542,14 @@ function initStagesAnimation() {
         // Pause between phases
         tlSticky.to({}, { duration: 1.5 });
 
-        // Phase 3: Line 100% -> 200%. Text 2 Grey, Text 3 White.
+        // --- Phase 3: Content Swap (Stage 2 -> Stage 3) ---
+        // Line 100% -> 200%. Text 2 Grey, Text 3 White.
         tlSticky.to(progressBar, { x: "200%", duration: 1 }, "phase3");
         tlSticky.to([stage2Num, stage2Title], { color: "#404040", duration: 1 }, "phase3");
         tlSticky.to([stage3Num, stage3Title], { color: "#FDFCFC", duration: 1 }, "phase3");
         if (cardSquare) tlSticky.to(cardSquare, { backgroundColor: "#FDFCFC", duration: 1 }, "phase3");
 
-        // Step 3 Logic:
+        // --- Card Movement Logic (Phase 3) ---
         if (card1 && card2 && card3) {
             // 1. Card 2 Moves UP 3.5rem (further) and Fades Out FAST (0.3s)
             tlSticky.to(card2, { y: "-11rem", opacity: 0, duration: 0.3 }, "phase3");
@@ -791,7 +744,6 @@ function initProcessAnimation() {
     const dots = section.querySelectorAll('[data-anim-process-dot]');
     const processBarLines = section.querySelectorAll('[data-anim-process-bar-line]');
 
-    console.log("Initializing Process Animation", { descriptions, dots, processBarLines });
 
     // Initial States
     // 1. Descriptions: Hidden, shifted down 3.5rem
@@ -845,34 +797,7 @@ function initProcessAnimation() {
         });
         gsap.set(fillLayer, { opacity: 0 });
 
-        // Temporarily disabled: awaiting specific trigger
-        return;
 
-        /*
-        // Animation Timeline
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: trigger,
-                start: "top 70%", // Start when top of SVG is at 70% viewport
-                toggleActions: "play none none none", // Play once
-                markers: false
-            }
-        });
-
-        // 1. Draw Line (2s linear)
-        tl.to(maskPath, {
-            strokeDashoffset: 0,
-            duration: 2,
-            ease: "none"
-        });
-
-        // 2. Fade in Fill (0.4s ease-out)
-        tl.to(fillLayer, {
-            opacity: 1,
-            duration: 0.4,
-            ease: "power2.out"
-        });
-        */
     };
 
     // Red Map
@@ -897,11 +822,11 @@ function initProcessAnimation() {
         }
     });
 
-    // Configuration for each step
+    // --- Phase 1: Red Section (Steps 1-4) ---
     const stepsConfig = [
         { id: 1, barX: "-10%", dotIds: ["1-1"] }, // 90% visible
         { id: 2, barX: "-20%", dotIds: ["1-5"] }, // 80% visible
-        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] }, // 40% visible (Two dots)
+        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] }, // 40% visible
         { id: 4, barX: "-80%", dotIds: ["1-4"] }  // 20% visible
     ];
 
@@ -983,9 +908,6 @@ function initProcessAnimation() {
         tlMap.reverse();
     };
 
-    // Trigger logic:
-    // onStart (forward): Plays map
-    // onReverseComplete (backward): Reverses map (when dot drops from 100% -> 99%)
     // Trigger logic:
     // onStart (forward): Plays map
     // onReverseComplete (backward): Reverses map (when dot drops from 100% -> 99%)
@@ -1116,8 +1038,6 @@ function initProcessAnimation() {
 
     // --- Branding Transition (Title & Square) ---
     // Triggered after Step 8 is fully visible
-    // --- Branding Transition (Title & Square) ---
-    // Triggered after Step 8 is fully visible
     const infoSquare = section.querySelector('.process-info-square');
     const infoTitleWrapper = section.querySelector('.width-180-a-a');
     const infoTitle = section.querySelector('.process-info-title');
@@ -1242,75 +1162,13 @@ function initProcessAnimation() {
 
 }
 
-function initServicesAnimation() {
-    const section = document.querySelector('[data-anim-services="section"]');
-    const track = document.querySelector('[data-anim-services="track"]');
-    const cards = document.querySelectorAll('[data-anim-services="card"]');
 
-    if (!section || !track || !cards.length) return;
 
-    console.log("Initializing Services Animation (Horizontal Scroll)");
-
-    // Horizontal Scroll Trigger
-    // We want to pin the section and move the track left.
-    // Movement distance = (Card Width + Gap) * (Number of Cards - 1)
-
-    // Use matchMedia to ensure it only runs on desktop/landscape if needed, 
-    // or generally, but let's assume global as user didn't specify mobile.
-    // Usually horizontal scroll is desktop-first. Webflow often stacks on mobile.
-    // Let's wrap in matchMedia for safety if typical breaks are used (992px).
-
-    ScrollTrigger.matchMedia({
-        "(min-width: 992px)": function () {
-
-            // Function to calculate precise movement
-            const getScrollAmount = () => {
-                // Calculate total width of all cards + gaps
-                // Safest bet for horizontal scroll: Move total width minus container width.
-                const container = section.querySelector('.container');
-                const containerWidth = container ? container.offsetWidth : window.innerWidth;
-                // track.scrollWidth gives total width of content
-                return track.scrollWidth - containerWidth;
-            };
-
-            gsap.to(track, {
-                x: () => -getScrollAmount(), // Move left
-                ease: "none",
-                scrollTrigger: {
-                    trigger: section,
-                    // Pin the container specifically to match previous sections' logic
-                    pin: section.querySelector('.container') || true,
-                    start: "top top",
-                    // Scroll distance = Movement distance. 
-                    end: () => "+=" + getScrollAmount(),
-                    scrub: 1,
-                    invalidateOnRefresh: true
-                }
-            });
-        }
-    });
-
-}
-
-function initBenefitsAnimation() {
-    const section = document.querySelector('.benefits');
-    if (!section) return;
-
-    createSectionTrigger(section, () => {
-        console.log("Benefits Animation Triggered");
-    });
-}
-
-function initTeamAnimation() {
-    const section = document.querySelector('.team');
-    if (!section) return;
-
-    createSectionTrigger(section, () => {
-        console.log("Team Animation Triggered");
-    });
-}
-
-function initAmbassadorsAnimationV2() {
+/**
+ * Ambassadors Section Animation
+ * Sequential card reveal/exit
+ */
+function initAmbassadorsAnimation() {
     const section = document.querySelector('.our-ambassadors');
     // Select elements by data attributes as requested
     const wrapper = document.querySelector('[data-anim-ambassador-wrapper="true"]');
@@ -1320,7 +1178,6 @@ function initAmbassadorsAnimationV2() {
 
     if (!section || !wrapper || !card1 || !card2 || !card3) return;
 
-    console.log("Initializing Ambassadors Card Animation V2");
 
     // SETUP:
     const cardHeight = card1.offsetHeight || 516;
@@ -1383,6 +1240,65 @@ function initAmbassadorsAnimationV2() {
 
         // Card 3 stays (No exit, no hold)
         // tl.to({}, { duration: 0.5 }); // REMOVED to avoid empty space at end
+    });
+}
+
+
+function initServicesAnimation() {
+    const section = document.querySelector('.our-services');
+    if (!section) return;
+
+    const cardsWrapper = section.querySelector('.our-services-cards-wrapper');
+    const mainWrapper = section.querySelector('.our-services-cards-main-wrapper');
+
+    if (!cardsWrapper || !mainWrapper) return;
+
+    // Use matchMedia to create responsive animations
+    ScrollTrigger.matchMedia({
+        // Desktop Only
+        "(min-width: 992px)": function () {
+
+            // Select ALL card wrappers (siblings)
+            const allCards = section.querySelectorAll('.our-services-cards-wrapper');
+            if (allCards.length < 5) {
+                console.warn("Expected at least 5 service cards, found", allCards.length);
+                return;
+            }
+
+            const card1 = allCards[0];
+            const card5 = allCards[4];
+
+            // Calculate distance to move
+            // We want Card 5 to align with Card 1's initial position
+            const getScrollAmount = () => {
+                // Distance = difference in their current offsets relative to parent
+                const dist = card5.offsetLeft - card1.offsetLeft;
+                return -dist;
+            };
+
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top",
+                    end: "bottom bottom",
+                    pin: false, // Relies on CSS sticky positioning
+                    scrub: 1,
+                    invalidateOnRefresh: true,
+                    markers: false
+                }
+            });
+
+            // Animate ALL cards to the left
+            tl.to(allCards, {
+                x: () => getScrollAmount(),
+                ease: "none",
+                duration: 1 // Normalized duration
+            });
+
+            // Add empty space at the end (20% of total scroll)
+            // This ensures the animation finishes before the unpin (CSS end) happens
+            tl.to({}, { duration: 0.2 });
+        }
     });
 }
 
