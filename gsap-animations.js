@@ -1288,15 +1288,22 @@ function initServicesAnimation() {
                 }
             });
 
-            // Animate ALL cards to the left
+            // 1. Entry Animation: First Card moves up and fades in
+            // Use fromTo to ensure initial state is set immediately upon ScrollTrigger activation
+            tl.fromTo(card1,
+                { y: "10rem", autoAlpha: 0 },
+                { y: "0rem", autoAlpha: 1, duration: 0.3, ease: "power2.out" }
+            );
+
+            // 2. Horizontal Scroll: All cards move left
+            // Starts after the entry animation is complete
             tl.to(allCards, {
                 x: () => getScrollAmount(),
                 ease: "none",
-                duration: 1 // Normalized duration
+                duration: 1 // Normalized duration relative to scroll distance
             });
 
-            // Add empty space at the end (20% of total scroll)
-            // This ensures the animation finishes before the unpin (CSS end) happens
+            // 3. Buffer: Empty space at the end
             tl.to({}, { duration: 0.2 });
         }
     });
