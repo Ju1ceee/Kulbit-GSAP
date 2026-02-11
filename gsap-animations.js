@@ -15,12 +15,827 @@ function initAnimations() {
     initStagesAnimation();
     initProcessAnimation();
     initServicesAnimation();
+    initBenefitsGraphAnimation();
+    initBenefitsAnimationSequence();
+    initBenefitsCirclesStyle();
+    initBenefitsCardsAnimation();
+    initStageBenefitsParallax(); // Parallax for previous section
+    initTeamAnimation(); // Team section character animation
 }
 
 /**
- * Initializes the Preloader Animation
- * Selects elements via [data-anim-preloader] attributes
+ * ----------------------------------------------------------------------------------
+ * Stage (Previous Section) Parallax Pinning
+ * ----------------------------------------------------------------------------------
+ * Pins the #stage-top-benefits section so the Benefits section slides over it.
+ * Unpins (moves up) when Benefits section triggers (at 50% height).
  */
+function initStageBenefitsParallax() {
+    const stageSection = document.querySelector('#stage-top-benefits');
+    // Find benefits section (using a known child if class 'benefits-section' isn't on the section tag)
+    // Looking at HTML, benefits section seems to be the one containing .benefits-container or following #stage-top-benefits
+    // Let's look for the next sibling of stageSection or use dashedLine check
+    const benefitsSection = stageSection ? stageSection.nextElementSibling : null;
+
+    if (!stageSection || !benefitsSection) return;
+
+    ScrollTrigger.create({
+        trigger: stageSection,
+        start: "top top",
+        endTrigger: benefitsSection,
+        end: "top 50%", // Unpin when top of Benefits hits 50% of viewport
+        pin: true,
+        pinSpacing: false, // Allow overlap
+        markers: false
+    });
+}
+
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Benefits Graph Animation
+ * ----------------------------------------------------------------------------------
+ * Animates the "drawing" of filled paths using clip-path.
+ * Sequence: Dark Line -> White Line -> Gradient Fade In
+ * Targets: .benefits-graph-svg.desktop-only
+ */
+function initBenefitsGraphAnimation() {
+    // Select all desktop-only benefits graphs
+    const graphs = document.querySelectorAll('.benefits-graph-svg.desktop-only');
+
+    graphs.forEach((graph) => {
+        // 1. Select Elements
+
+        // The separate SVG containing the dark line (class .position-absolute-100)
+        const lineSvgContainer = graph.querySelector('.position-absolute-100');
+
+        // The main SVG containing gradient path and white path
+        const mainSvg = graph.querySelector('svg:not(.position-absolute-100)');
+
+        if (!lineSvgContainer || !mainSvg) return;
+
+        // Inside mainSvg:
+        // By inspection: 1st path is Gradient, 2nd path is White Fill
+        const gradientPath = mainSvg.querySelector('path:nth-child(1)');
+        const whitePath = mainSvg.querySelector('path:nth-child(2)');
+
+        // Inside lineSvgContainer: Dark Line Path
+        const darkPath = lineSvgContainer.querySelector('path');
+
+        if (!gradientPath || !whitePath || !darkPath) return;
+
+        // 2. Set Initial States
+        // Hide Graphs initially as requested
+        gsap.set(graph, { opacity: 0 }); // Hide the entire graph container
+
+        /* 
+        // TEMPORARILY DISABLED ANIMATION
+        // Hide Gradient Path initially
+        gsap.set(gradientPath, { opacity: 0 });
+
+        // prepare clip-path for "drawing" effect on the filled paths
+        const hiddenClip = "inset(0% 100% 0% 0%)";
+        const visibleClip = "inset(0% 0% 0% 0%)";
+
+        gsap.set(lineSvgContainer, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+        gsap.set(whitePath, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+        // Create timeline
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: graph,
+                start: "top 75%",
+                end: "bottom center",
+                toggleActions: "play none none reverse",
+                markers: false
+            }
+        });
+
+        tl.to(lineSvgContainer, {
+            clipPath: visibleClip,
+            webkitClipPath: visibleClip,
+            duration: 1.2,
+            ease: "power2.inOut"
+        });
+
+        tl.to(whitePath, {
+            clipPath: visibleClip,
+            webkitClipPath: visibleClip,
+            duration: 1.2,
+            ease: "power2.inOut"
+        }, "-=0.2");
+
+        tl.to(gradientPath, {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out"
+        }); 
+        */
+    });
+}
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Benefits Animation Sequence
+ * ----------------------------------------------------------------------------------
+ * Coordinates the drawing of Dashed Line, Traditional Line, and appearance of Circles & Text.
+ * Trigger: When Benefits section hits 30% viewport (top 70%).
+ */
+function initBenefitsAnimationSequence() {
+    // 1. Select Elements
+    const section = document.querySelector('.benefits'); // Assuming section class
+    // Fallback if section class not found, find a common parent using a known element
+    const dashedLine = document.querySelector('.benefits-dashed-line.desktop-only');
+    const traditionalLine = document.querySelector('.traditional-line-svg.desktop-only');
+    const circles = document.querySelectorAll('.benefits-circle[data-benefit-circle]'); // 1, 2, 3, 4, 5
+
+    // Texts associated with Traditional Line
+    const traditionalLineParent = traditionalLine ? traditionalLine.closest('.benefit-tradidional-line') : null;
+    const textLegacy = traditionalLineParent ? traditionalLineParent.querySelector('.taditional-text') : null;
+    const textNew = document.querySelector('.taditional-text.is-second');
+    const kulbitText = document.querySelector('.kulbit-text-wrapper');
+    const weeksLabel = document.querySelector('.benefits-week.if-four.desktop-only');
+    const weekThreeLabel = document.querySelector('.benefits-week.is-three.desktop-only');
+    const weekOneLabel = document.querySelector('.benefits-week.desktop-only:not(.is-two):not(.is-three):not(.if-four)');
+    const weekTwoLabel = document.querySelector('.benefits-week.is-two.desktop-only');
+    const cardsWrapper = document.querySelector('.benefits-cards-wrapper');
+    const scrollMore = document.querySelector('.benefits-scroll-to-see-more.desktop-only');
+
+    // Select color lines
+    const colorLines = document.querySelectorAll('.benefits-color-line');
+
+    if (!dashedLine || !traditionalLine) return;
+
+    // Use loop to find specific circles easily
+    const getCircle = (id) => document.querySelector(`.benefits-circle[data-benefit-circle="${id}"]`);
+
+    // 2. Initial States
+    // Lines: Hidden via clip-path
+    const hiddenClip = "inset(0% 100% 0% 0%)";
+    const visibleClip = "inset(0% 0% 0% 0%)";
+
+    gsap.set(dashedLine, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+    gsap.set(traditionalLine, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+    // Hide Kulbit Text & Text New
+    if (kulbitText) gsap.set(kulbitText, { opacity: 0, y: 20 });
+    if (textNew) gsap.set(textNew, { opacity: 0, y: 20 });
+
+    // Hide Weeks Label
+    if (weeksLabel) gsap.set(weeksLabel, { opacity: 0, y: 20 });
+    if (weekThreeLabel) gsap.set(weekThreeLabel, { opacity: 0, y: 20 });
+    if (weekOneLabel) gsap.set(weekOneLabel, { opacity: 0, y: 20 });
+    if (weekTwoLabel) gsap.set(weekTwoLabel, { opacity: 0, y: 20 });
+
+    // Hide Cards Wrapper & Scroll Indicator (use autoAlpha to match initBenefitsCardsAnimation)
+    if (cardsWrapper) gsap.set(cardsWrapper, { autoAlpha: 0, y: 30 });
+    if (scrollMore) gsap.set(scrollMore, { autoAlpha: 0, y: 20 });
+
+    // Position Color Lines Left (Hidden)
+    if (colorLines.length) gsap.set(colorLines, { xPercent: -101 });
+
+    // Circles: Hidden (opacity 0)
+    // User requested "appear with opacity".
+    if (circles.length) gsap.set(circles, { opacity: 0 });
+
+    // Texts: Hidden (opacity 0, y 20)
+    // Only animate the FIRST text (textLegacy) for now
+    if (textLegacy) gsap.set(textLegacy, { opacity: 0, y: 20 });
+
+
+    // 3. Create Timeline (Scrubbed with Scroll)
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: section, // Scroll through the entire section
+            start: "top top", // Start when section hits top
+            end: "bottom bottom", // End when section hits bottom
+            scrub: 1, // Smooth scrubbing
+            markers: false // Set to true for debugging if needed
+        }
+    });
+
+    // Dashed line reversal handled by scrub automatically
+
+
+    // --- Action 1: Draw Lines Together ---
+    const lineDuration = 1.2; // Faster draw (User requested speed up)
+
+    tl.to(dashedLine, {
+        clipPath: visibleClip,
+        webkitClipPath: visibleClip,
+        duration: lineDuration,
+        ease: "none" // Linear draw for consistent speed for circle timing
+    }, "start");
+
+    tl.to(traditionalLine, {
+        clipPath: visibleClip,
+        webkitClipPath: visibleClip,
+        duration: lineDuration,
+        ease: "none"
+    }, "start");
+
+    // --- Action 2: Show Circles as Line Passes ---
+    // Timings adjusted earlier to sync with line position (fix "late" appearance)
+    const fadeDur = 0.3; // Snappier fade
+
+    // Circle 1: 0% (Immediately)
+    tl.to(getCircle(1), { opacity: 1, duration: fadeDur }, "start");
+
+    // Circle 2: ~20% (Earlie than 25%)
+    tl.to(getCircle(2), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.18}`);
+
+    // Circle 3: ~45% (Earlier than 50%)
+    tl.to(getCircle(3), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.42}`);
+
+    // Circle 4: ~70% (Earlier than 75%)
+    tl.to(getCircle(4), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.68}`);
+
+    // Circle 5: ~95% (Near End)
+    tl.to(getCircle(5), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.92}`);
+
+
+    // --- Action 3: Show Text & Label at End ---
+    if (textLegacy) {
+        tl.to(textLegacy, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${lineDuration}`); // Starts right after lines finish
+    }
+
+    if (weeksLabel) {
+        tl.to(weeksLabel, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${lineDuration}`); // Sync with text
+    }
+
+    // --- Action 4: Slide Red Color Line from Left ---
+    const redColorLine = document.querySelector('.benefits-color-line.is-red');
+    if (redColorLine) {
+        tl.to(redColorLine, {
+            xPercent: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, `start+=${lineDuration + 0.5}`); // Starts 0.5s after lines finish (bigger gap)
+
+        // Traditional Line: Smoothly repaint to white/10% opacity as Red Line appears
+        if (traditionalLine) {
+            const path = traditionalLine.querySelector('path');
+            if (path) {
+                tl.to(path, {
+                    fill: "rgba(255, 255, 255, 0.1)", // White with 10% opacity
+                    duration: 1,
+                    ease: "power2.out"
+                }, `start+=${lineDuration + 0.5}`); // Sync with Red Color Line
+            }
+        }
+
+        // Circle 5: Turn White when Red Line finishes moving (arrives at 0%)
+        const circle5 = getCircle(5);
+        if (circle5) {
+            tl.to(circle5, {
+                borderColor: "#ffffff",
+                duration: 0.5,
+                ease: "power2.out"
+            }, `start+=${lineDuration + 0.5 + 1}`);
+        }
+    }
+
+    // --- Action 5: Slide Blue Color Line + Kulbit Text + Week 4-8 ---
+    const blueLineStart = lineDuration + 0.5 + 1 + 0.5;
+    const blueColorLine = document.querySelector('.benefits-color-line:not(.is-red)');
+    if (blueColorLine) {
+        tl.to(blueColorLine, {
+            xPercent: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, `start+=${blueLineStart}`);
+
+        // Circle 5: Revert to original color when Blue Line starts
+        const circle5 = getCircle(5);
+        if (circle5) {
+            tl.to(circle5, {
+                borderColor: "#363636",
+                duration: 0.5,
+                ease: "power2.out"
+            }, `start+=${blueLineStart}`);
+        }
+    }
+
+    // Kulbit Text: slide up + fade in (synced with blue line)
+    if (kulbitText) {
+        tl.to(kulbitText, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${blueLineStart}`);
+    }
+
+    // Week 4-8 Label: slide up + fade in (synced with blue line)
+    if (weekThreeLabel) {
+        tl.to(weekThreeLabel, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${blueLineStart}`);
+    }
+
+    // --- Action 6: Fade Out Traditional Text ---
+    const phase2Start = blueLineStart + 1 + 0.5; // After blue line (1s) + gap
+    if (textLegacy) {
+        tl.to(textLegacy, {
+            opacity: 0,
+            y: -20,
+            duration: 0.6,
+            ease: "power2.in"
+        }, `start+=${phase2Start}`);
+    }
+
+    // --- Action 7: Reverse-Draw Traditional Line (disappear) ---
+    // Clip from left to right (opposite of initial draw)
+    const reverseLineStart = phase2Start + 0.6 + 0.2; // After text fades + small gap
+    if (traditionalLine) {
+        tl.to(traditionalLine, {
+            clipPath: hiddenClip,
+            webkitClipPath: hiddenClip,
+            duration: 1.2,
+            ease: "none"
+        }, `start+=${reverseLineStart}`);
+    }
+
+    // --- Action 8: Show Second Traditional Text (after reverse line) ---
+    const secondTextStart = reverseLineStart + 1.2 + 0.3; // After line disappears + gap
+    if (textNew) {
+        tl.to(textNew, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${secondTextStart}`);
+    }
+
+    // --- Action 9: Draw Graph SVGs Sequentially + Show Week Labels ---
+    // Select graph containers and their dark-line SVGs (.position-absolute-100 only)
+    const graphContainers = document.querySelectorAll('.benefits-graph-svg.desktop-only');
+    const graphSvgs = document.querySelectorAll('.benefits-graph-svg.desktop-only .position-absolute-100');
+
+    // Show graph containers but hide the main SVG (gradient + white paths)
+    const graphsStart = secondTextStart + 0.8 + 0.3; // After is-second text + gap
+    if (graphContainers.length) {
+        graphContainers.forEach(g => {
+            const mainSvg = g.querySelector('svg:not(.position-absolute-100)');
+            if (mainSvg) gsap.set(mainSvg, { opacity: 0 });
+            tl.set(g, { opacity: 1 }, `start+=${graphsStart}`);
+        });
+    }
+
+    // Set dark-line SVGs initial clip-path (hidden)
+    if (graphSvgs.length) {
+        gsap.set(graphSvgs, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+    }
+
+    const graphDrawDuration = 1.0;
+    const graphGap = 0.3;
+
+    // Graph 1
+    if (graphSvgs[0]) {
+        tl.to(graphSvgs[0], {
+            clipPath: visibleClip,
+            webkitClipPath: visibleClip,
+            duration: graphDrawDuration,
+            ease: "power2.inOut"
+        }, `start+=${graphsStart}`);
+    }
+
+    // Week 1: after graph 1
+    const week1Start = graphsStart + graphDrawDuration;
+    if (weekOneLabel) {
+        tl.to(weekOneLabel, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        }, `start+=${week1Start}`);
+    }
+
+    // Graph 2: after graph 1 + gap
+    const graph2Start = week1Start + graphGap;
+    if (graphSvgs[1]) {
+        tl.to(graphSvgs[1], {
+            clipPath: visibleClip,
+            webkitClipPath: visibleClip,
+            duration: graphDrawDuration,
+            ease: "power2.inOut"
+        }, `start+=${graph2Start}`);
+    }
+
+    // Week 2-3: after graph 2
+    const week2Start = graph2Start + graphDrawDuration;
+    if (weekTwoLabel) {
+        tl.to(weekTwoLabel, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        }, `start+=${week2Start}`);
+    }
+
+    // Graph 3: after graph 2 + gap
+    const graph3Start = week2Start + graphGap;
+    if (graphSvgs[2]) {
+        tl.to(graphSvgs[2], {
+            clipPath: visibleClip,
+            webkitClipPath: visibleClip,
+            duration: graphDrawDuration,
+            ease: "power2.inOut"
+        }, `start+=${graph3Start}`);
+    }
+
+    // --- Action 10: Show Cards Wrapper + Scroll Indicator + Complete Graph 1 + Circle 2 White ---
+    const finalPhaseStart = graph3Start + graphDrawDuration + 0.3;
+
+    // Show Cards Wrapper (autoAlpha resets visibility: hidden)
+    if (cardsWrapper) {
+        tl.to(cardsWrapper, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${finalPhaseStart}`);
+    }
+
+    // Show Scroll To See More
+    if (scrollMore) {
+        tl.to(scrollMore, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, `start+=${finalPhaseStart}`);
+    }
+
+    // Complete Graph 1: Show white line + gradient (main SVG)
+    const graph1Container = graphContainers[0];
+    if (graph1Container) {
+        const mainSvg1 = graph1Container.querySelector('svg:not(.position-absolute-100)');
+        if (mainSvg1) {
+            const whitePath1 = mainSvg1.querySelector('path:nth-child(2)');
+            const gradientPath1 = mainSvg1.querySelector('path:nth-child(1)');
+
+            // Show main SVG
+            tl.set(mainSvg1, { opacity: 1 }, `start+=${finalPhaseStart}`);
+
+            // Hide gradient initially, draw white line
+            if (gradientPath1) gsap.set(gradientPath1, { opacity: 0 });
+            if (whitePath1) gsap.set(whitePath1, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+            // Draw white line
+            if (whitePath1) {
+                tl.to(whitePath1, {
+                    clipPath: visibleClip,
+                    webkitClipPath: visibleClip,
+                    duration: 1.0,
+                    ease: "power2.inOut"
+                }, `start+=${finalPhaseStart}`);
+            }
+
+            // Fade in gradient after white line
+            if (gradientPath1) {
+                tl.to(gradientPath1, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, `start+=${finalPhaseStart + 0.8}`);
+            }
+        }
+    }
+
+    // Circle 2: change border to white after graph 1 completes
+    const circle2 = getCircle(2);
+    if (circle2) {
+        tl.to(circle2, {
+            borderColor: "#ffffff",
+            duration: 0.5,
+            ease: "power2.out"
+        }, `start+=${finalPhaseStart + 1.0}`);
+    }
+
+    // --- Action 11: Cards Falling Sequence (Scrubbed) ---
+    // Logic: As user scrolls, cards stacked behind move up as the front card falls away.
+
+    const cardsStart = finalPhaseStart + 1.5; // Gap before cards start moving
+    const cards = document.querySelectorAll('.benefits-card[data-benefit-card]');
+
+    if (cards.length >= 3) {
+        // --- Step 1: Card 1 falls, Card 2 -> Pos 1, Card 3 -> Pos 2 ---
+        const step1Duration = 3; // Duration relative to scroll distance
+
+        // Card 1: Falls down/left + fades out
+        tl.to(cards[0], {
+            xPercent: -50, // Move left
+            yPercent: 50,  // Move down
+            rotation: -10, // Slight tilt
+            opacity: 0,
+            duration: step1Duration,
+            ease: "power1.inOut" // Smooth scrub
+        }, `start+=${cardsStart}`);
+
+        // Graph 2 + Circle 3 Sync Logic
+        // As Card 2 moves to Pos 1:
+        // 1. Draw White Line (during move)
+        // 2. Fade Gradient + Circle 3 Border (AFTER move completes)
+        const graph2 = document.querySelector('.benefits-graph-svg.is-two.desktop-only');
+        if (graph2) {
+            const mainSvg2 = graph2.querySelector('svg:not(.position-absolute-100)');
+            if (mainSvg2) {
+                const whitePath2 = mainSvg2.querySelector('path:nth-child(2)');
+                const gradientPath2 = mainSvg2.querySelector('path:nth-child(1)');
+
+                // Initial setup
+                tl.set(mainSvg2, { opacity: 1 }, `start+=${cardsStart}`);
+                if (gradientPath2) gsap.set(gradientPath2, { opacity: 0 });
+                if (whitePath2) gsap.set(whitePath2, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+                // Animate White Line (Sync with Card Move)
+                if (whitePath2) {
+                    tl.to(whitePath2, {
+                        clipPath: visibleClip,
+                        webkitClipPath: visibleClip,
+                        duration: step1Duration,
+                        ease: "power1.inOut"
+                    }, `start+=${cardsStart}`);
+                }
+
+                // Animate Gradient + Circle 3 (DELAYED until after line finishes)
+                const endOfStep1 = cardsStart + step1Duration;
+                if (gradientPath2) {
+                    tl.to(gradientPath2, {
+                        opacity: 1,
+                        duration: 0.8, // Smooth fade in
+                        ease: "power2.out"
+                    }, `start+=${endOfStep1}`);
+                }
+
+                // Circle 3: White Border at END of Step 1
+                const circle3 = getCircle(3);
+                if (circle3) {
+                    tl.to(circle3, {
+                        borderColor: "#ffffff",
+                        duration: 0.5,
+                        ease: "power2.out"
+                    }, `start+=${endOfStep1}`);
+                }
+            }
+        }
+
+        // Card 2: Moves to Position 1 (Top Center)
+        // Needs to animate 'top' to 0% because it started at 50%
+        tl.to(cards[1], {
+            xPercent: 0,
+            top: "0%", // Move UP to top
+            yPercent: 0, // Reset centering offset
+            scale: 1,
+            zIndex: 3, // Visual priority
+            duration: step1Duration,
+            ease: "power1.inOut"
+        }, `start+=${cardsStart}`)
+            .to(cards[1].children, {
+                opacity: 1,
+                duration: step1Duration * 0.5
+            }, `start+=${cardsStart}`);
+
+        // Card 3: Moves to Position 2 (Right 50%)
+        // Stays visually centered (top 50%, yPercent -50 assumed from initial state)
+        tl.to(cards[2], {
+            xPercent: 50,
+            scale: 0.85,
+            zIndex: 2,
+            duration: step1Duration,
+            ease: "power1.inOut"
+        }, `start+=${cardsStart}`);
+
+
+        // --- Step 2: Card 2 falls, Card 3 -> Pos 1 ---
+        // Add a GAP (pause) before Step 2 starts
+        const pauseBetweenSteps = 2;
+        const step2Start = cardsStart + step1Duration + pauseBetweenSteps;
+        const step2Duration = 3;
+
+        // Card 2: Falls down/left + fades out (RESTORED)
+        tl.to(cards[1], {
+            xPercent: -50,
+            yPercent: 50,
+            rotation: -10,
+            opacity: 0,
+            duration: step2Duration,
+            ease: "power1.inOut"
+        }, `start+=${step2Start}`);
+
+        // Graph 3 + Circle 4 Sync Logic (Step 2)
+        // Similar to Step 1: Draw during move, fill after move
+        const graph3 = document.querySelector('.benefits-graph-svg.is-three.desktop-only');
+        if (graph3) {
+            const mainSvg3 = graph3.querySelector('svg:not(.position-absolute-100)');
+            if (mainSvg3) {
+                const whitePath3 = mainSvg3.querySelector('path:nth-child(2)');
+                const gradientPath3 = mainSvg3.querySelector('path:nth-child(1)');
+
+                // Initial setup
+                tl.set(mainSvg3, { opacity: 1 }, `start+=${step2Start}`);
+                if (gradientPath3) gsap.set(gradientPath3, { opacity: 0 });
+                if (whitePath3) gsap.set(whitePath3, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+                // Animate White Line (Sync with Card Move)
+                if (whitePath3) {
+                    tl.to(whitePath3, {
+                        clipPath: visibleClip,
+                        webkitClipPath: visibleClip,
+                        duration: step2Duration,
+                        ease: "power1.inOut"
+                    }, `start+=${step2Start}`);
+                }
+
+                // Animate Gradient + Circle 4 (DELAYED until after line finishes)
+                const endOfStep2 = step2Start + step2Duration;
+                if (gradientPath3) {
+                    tl.to(gradientPath3, {
+                        opacity: 1,
+                        duration: 0.8,
+                        ease: "power2.out"
+                    }, `start+=${endOfStep2}`);
+                }
+
+                // Circle 4: White Border at END of Step 2
+                const circle4 = getCircle(4);
+                if (circle4) {
+                    tl.to(circle4, {
+                        borderColor: "#ffffff",
+                        duration: 0.5,
+                        ease: "power2.out"
+                    }, `start+=${endOfStep2}`);
+                }
+            }
+        }
+
+        // Card 3: Moves to Position 1 (Top Center)
+        tl.to(cards[2], {
+            xPercent: 0,
+            top: "0%", // Move UP to top
+            yPercent: 0, // Reset centering offset
+            scale: 1,
+            zIndex: 3,
+            duration: step2Duration,
+            ease: "power1.inOut"
+        }, `start+=${step2Start}`)
+            .to(cards[2].children, {
+                opacity: 1,
+                duration: step2Duration * 0.5
+            }, `start+=${step2Start}`);
+    }
+
+}
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Benefits Circles Initial Style
+ * ----------------------------------------------------------------------------------
+ * Sets initial styles for benefits circles via JS to allow for future dynamic changes.
+ * Circles 2-5 start with a dark border (#363636).
+ */
+function initBenefitsCirclesStyle() {
+    // Select circles 2, 3, 4, 5 by attribute (excluding "1")
+    const darkBorderCircles = document.querySelectorAll('.benefits-circle[data-benefit-circle]:not([data-benefit-circle="1"])');
+
+    // Set initial border color
+    gsap.set(darkBorderCircles, {
+        borderColor: "#363636"
+    });
+}
+
+
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Benefits Cards & Scroll Indicator Animation
+ * ----------------------------------------------------------------------------------
+ * Animates the cards wrapper and "scroll to see more" indicator.
+ * Effect: Fade in + Slide Up on scroll.
+ * Also stacks cards on top of each other (via JS positioning).
+ */
+function initBenefitsCardsAnimation() {
+    const cardsWrapper = document.querySelector('.benefits-cards-wrapper');
+    const scrollIndicator = document.querySelector('.benefits-scroll-to-see-more.desktop-only');
+    const cards = document.querySelectorAll('.benefits-card[data-benefit-card]');
+
+    if (!cardsWrapper && !scrollIndicator) return;
+
+    // --- Stack cards on top of each other ---
+    if (cardsWrapper && cards.length > 0) {
+        gsap.set(cardsWrapper, {
+            position: "relative",
+            overflow: "visible"
+        });
+
+        // Card configs: [z-index, xPercent, scale, vertically centered]
+        const cardConfigs = [
+            { zIndex: 3, xPercent: 0, scale: 1, centered: false },  // Card 1: on top, aligned top
+            { zIndex: 2, xPercent: 50, scale: 0.85, centered: true },   // Card 2: shifted right 50%, centered
+            { zIndex: 1, xPercent: 90, scale: 0.72, centered: true }    // Card 3: shifted right 90%, centered
+        ];
+
+        cards.forEach((card, index) => {
+            const config = cardConfigs[index] || cardConfigs[cardConfigs.length - 1];
+            gsap.set(card, {
+                position: "absolute",
+                top: config.centered ? "50%" : 0,
+                left: 0,
+                width: "100%",
+                zIndex: config.zIndex,
+                xPercent: config.xPercent,
+                yPercent: config.centered ? -50 : 0,
+                scale: config.scale,
+                transformOrigin: config.centered ? "left center" : "left top"
+            });
+
+            // Set content opacity to 10% for cards 2 and 3 (index > 0)
+            if (index > 0) {
+                gsap.set(card.children, { opacity: 0.1 });
+            }
+        });
+    }
+
+    // --- Scroll Trigger Animation (RESET: User requested to remove falling effect for now) ---
+    // Ready for rewrite.
+    /*
+    const section = document.querySelector('.benefits');
+
+    // Create a timeline linked to the section's scroll progress
+    // We rely on CSS position: sticky on the container, so we DON'T need pin: true here.
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: section, // Scan through the whole section
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1,
+            // markers: true // Uncomment for debugging
+        }
+    });
+
+    // Step 1: Card 1 falls away, Card 2 moves to front, Card 3 moves to second pos
+    tl.to(cards[0], {
+        xPercent: -100,
+        yPercent: 100,
+        rotation: -10,
+        opacity: 0,
+        duration: 1
+    })
+    .to(cards[1], {
+        xPercent: 0,
+        scale: 1,
+        yPercent: 0, // Centered
+        zIndex: 3, // Bring to front visually
+        duration: 1
+    }, "<") // Sync with Card 1
+    .to(cards[1].children, {
+        opacity: 1,
+        duration: 0.5
+    }, "<")
+    .to(cards[2], {
+        xPercent: 50,
+        scale: 0.85,
+        zIndex: 2,
+        duration: 1
+    }, "<");
+
+    // Step 2: Card 2 falls away, Card 3 moves to front
+    tl.to(cards[1], {
+        xPercent: -100,
+        yPercent: 100,
+        rotation: -10,
+        opacity: 0,
+        duration: 1
+    })
+    .to(cards[2], {
+        xPercent: 0,
+        scale: 1,
+        yPercent: 0,
+        zIndex: 3,
+        duration: 1
+    }, "<")
+    .to(cards[2].children, {
+        opacity: 1,
+        duration: 0.5
+    }, "<");
+    */
+}
+
+
 function initPreloader() {
 
     // Helper to select by attribute
@@ -1321,6 +2136,344 @@ function initServicesAnimation() {
             tl.to({}, { duration: 0.2 });
         }
     });
+}
+
+
+// ****************************************************************************
+// Team Section Animation
+// ****************************************************************************
+
+function initTeamAnimation() {
+    const section = document.querySelector('.team');
+    const teamHeading = document.querySelector('.team-head-right-second');
+
+    if (!section || !teamHeading) return;
+
+    // Elements to hide initially (team-head-left should remain visible)
+    const teamHeadRight = document.querySelector('.team-head-right');
+    const teamCards = document.querySelector('.team-cards-wrapper');
+    const teamBottomSection = document.querySelector('.team-head-right-bottom');
+
+    // Hide and position elements for entrance animation
+    const elementsToHide = [teamHeadRight, teamCards].filter(el => el);
+    gsap.set(elementsToHide, { opacity: 0, y: 50 }); // Start below and hidden
+
+    // Hide team-head-right-bottom completely (will appear via scramble)
+    if (teamBottomSection) {
+        gsap.set(teamBottomSection, { opacity: 0 });
+    }
+
+    // Helper to recursively split text nodes into chars
+    const splitTextNodesRecursively = (element) => {
+        [...element.childNodes].forEach(child => {
+            if (child.nodeType === Node.TEXT_NODE) {
+                const text = child.textContent;
+                if (text.trim() === '') return;
+
+                const newContent = document.createDocumentFragment();
+                text.split('').forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.style.opacity = '0';
+                    span.style.transition = 'none';
+                    span.dataset.animChar = "true";
+                    newContent.appendChild(span);
+                });
+                element.replaceChild(newContent, child);
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                splitTextNodesRecursively(child);
+            }
+        });
+    };
+
+    // Desktop only
+    const mm = ScrollTrigger.matchMedia();
+
+    mm.add("(min-width: 992px)", () => {
+        // Split text into character spans (only once)
+        if (teamHeading.querySelectorAll('[data-anim-char="true"]').length === 0) {
+            splitTextNodesRecursively(teamHeading);
+        }
+
+        // Select all character spans
+        const chars = teamHeading.querySelectorAll('[data-anim-char="true"]');
+
+        // Animate characters when section reaches 50% viewport (slower typing)
+        gsap.to(chars, {
+            opacity: 1,
+            duration: 0.1, // Increased from 0.05 for slower typing
+            stagger: 0.05, // Increased from 0.02 for slower typing
+            ease: "none",
+            scrollTrigger: {
+                trigger: section,
+                start: "top bottom-=30%", // Start when section top is 30% into viewport from bottom
+                end: "top top",           // End when section top reaches screen top
+                scrub: true,
+                markers: false
+            }
+        });
+    });
+
+    // After typing completes: move typed text up and fade out
+    gsap.to(teamHeading, {
+        y: -50,
+        opacity: 0,
+        ease: "power2.in",
+        scrollTrigger: {
+            trigger: section,
+            start: "top top",       // Start when section reaches top
+            end: "top top-=15%",    // Quick animation
+            scrub: true,
+            markers: false
+        }
+    });
+
+    // Show team-head-right after typed text exits
+    if (teamHeadRight) {
+        gsap.to(teamHeadRight, {
+            opacity: 1,
+            y: 0,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: section,
+                start: "top top-=15%",  // Start right after typed text starts exiting
+                end: "top top-=40%",    // Finish entrance
+                scrub: true,
+                markers: false
+            }
+        });
+    }
+
+    // Show team-cards-wrapper after team-head-right is fully visible
+    if (teamCards) {
+        gsap.to(teamCards, {
+            opacity: 1,
+            y: 0,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: section,
+                start: "top top-=40%",  // Start after team-head-right finishes
+                end: "top top-=65%",    // Smooth entrance
+                scrub: true,
+                markers: false
+            }
+        });
+    }
+
+
+    // Move team-head-right-bottom up and fade out quickly (after gap)
+    if (teamBottomSection) {
+        gsap.fromTo(teamBottomSection,
+            { opacity: 1, y: 0 },
+            {
+                y: -50,
+                opacity: 0,
+                ease: "power2.in",
+                immediateRender: false, // Prevent rendering at start (keeps it hidden for scramble)
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top-=75%",  // Start after gap (was -65%)
+                    end: "top top-=85%",    // Quick fade out
+                    scrub: true,
+                    markers: false
+                }
+            }
+        );
+    }
+
+    // Move team-cards-wrapper up by 14.125rem simultaneously
+    if (teamCards) {
+        gsap.fromTo(teamCards,
+            { y: 0 },
+            {
+                y: "-14.125rem",  // Move up to -14.125rem (from 0)
+                ease: "none",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top-=75%",  // Start after a gap
+                    end: "top top-=100%",   // Smooth upward movement
+                    scrub: true,
+                    markers: false
+                }
+            }
+        );
+    }
+
+    // Reveal team-blur-top when cards start moving up
+    const teamBlurTop = document.querySelector('.team-blur-top');
+    if (teamBlurTop) {
+        gsap.set(teamBlurTop, { opacity: 0 }); // Hide initially
+
+        // Fade in before grid wrappers start moving (during the gap)
+        gsap.to(teamBlurTop, {
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+                trigger: section,
+                start: "top top-=100%",  // Start after cards finish moving
+                end: "top top-=110%",    // End right before grid starts moving
+                scrub: true,
+                markers: false
+            }
+        });
+
+        // Fade out as first wrapper disappears (so it doesn't overlay second wrapper)
+        gsap.to(teamBlurTop, {
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: section,
+                start: "top top-=135%",  // Start near end of first wrapper fade
+                end: "top top-=145%",    // Quick fade out after wrapper is gone
+                scrub: true,
+                markers: false
+            }
+        });
+    }
+
+    // Move both team-grid-wrapper elements up, fade out first wrapper
+    const teamGridWrappers = gsap.utils.toArray('.team-grid-wrapper');
+    if (teamGridWrappers.length === 2) {
+        const firstWrapper = teamGridWrappers[0];
+        const secondWrapper = teamGridWrappers[1];
+
+        // Desktop only - calculate distance dynamically
+        const mm = ScrollTrigger.matchMedia();
+        mm.add("(min-width: 992px)", () => {
+            // Calculate the distance: first wrapper's height + gap between them
+            const firstRect = firstWrapper.getBoundingClientRect();
+            const secondRect = secondWrapper.getBoundingClientRect();
+            const distanceToMove = secondRect.top - firstRect.top; // Distance from first to second
+
+            // Both wrappers move up by the calculated distance
+            gsap.to([firstWrapper, secondWrapper], {
+                y: `-=${distanceToMove}px`,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top-=110%",  // Start after a gap (was -100%)
+                    end: "top top-=140%",    // Smooth upward movement
+                    scrub: true,
+                    markers: false
+                }
+            });
+
+            // First wrapper fades out during movement
+            gsap.to(firstWrapper, {
+                opacity: 0,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top-=110%",  // Same timing as movement (was -100%)
+                    end: "top top-=140%",
+                    scrub: true,
+                    markers: false
+                }
+            });
+        });
+    }
+
+
+    // Scramble text in team-head-right-bottom after main content appears
+    if (teamBottomSection) {
+        const teamBottomParagraph = teamBottomSection.querySelector('p');
+
+        if (teamBottomParagraph) {
+            // Helper to extract all text nodes including those in nested spans
+            const getAllTextNodes = (root) => {
+                const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+                const nodes = [];
+                let n;
+                while ((n = walker.nextNode())) {
+                    if (n.textContent.trim().length > 0) {
+                        nodes.push(n);
+                    }
+                }
+                return nodes;
+            };
+
+            // Get all text nodes
+            const textNodes = getAllTextNodes(teamBottomParagraph);
+            const textItems = textNodes.map(node => ({
+                node,
+                text: node.textContent
+            }));
+
+            // Lock height to prevent layout shift
+            const currentHeight = teamBottomSection.getBoundingClientRect().height;
+            if (currentHeight > 0) {
+                teamBottomSection.style.minHeight = `${currentHeight}px`;
+            }
+
+            // Clear all text initially
+            textItems.forEach(item => item.node.textContent = "");
+
+            // Create timeline for scramble effect
+            const scrambleTl = gsap.timeline({
+                paused: true,
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top-=40%",
+                    once: true,
+                    onEnter: () => {
+                        // Make section visible when scramble starts
+                        gsap.set(teamBottomSection, { opacity: 1 });
+                        scrambleTl.play(0);
+                    }
+                }
+            });
+
+            // Animate each text node with scramble effect
+            textItems.forEach((item, i) => {
+                scrambleTl.to(
+                    item.node,
+                    {
+                        duration: 0.8,
+                        scrambleText: {
+                            text: item.text,
+                            chars: "01!<>-_\\/[]{}—=+*^?#",
+                            revealDelay: 0,
+                            speed: 0.6
+                        }
+                    },
+                    i * 0.1  // Stagger each text node slightly
+                );
+            });
+        }
+    }
+
+    // Fade out previous section's container as team section enters
+    const previousSectionContainer = document.querySelector('.benefits .container.is-stiky-benefits');
+    if (previousSectionContainer) {
+        gsap.to(previousSectionContainer, {
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: section,
+                start: "top bottom",      // Start immediately when team section enters viewport
+                end: "top 15%",           // End when team section is at 85% of viewport (100% - 15% = 85%)
+                scrub: true,
+                markers: false
+            }
+        });
+    }
+
+    // Fade out team container as footer enters viewport
+    const footer = document.querySelector('.footer');
+    const teamContainer = section.querySelector('.container');
+    if (footer && teamContainer) {
+        gsap.to(teamContainer, {
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: footer,
+                start: "top bottom",     // Start when footer enters viewport from bottom
+                end: "top 50%",          // End when footer is at 50% viewport height
+                scrub: true,
+                markers: false
+            }
+        });
+    }
 }
 
 // Initialize when DOM is ready
