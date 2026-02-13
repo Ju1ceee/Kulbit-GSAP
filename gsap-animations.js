@@ -2056,13 +2056,13 @@ function initAmbassadorsAnimation() {
         // Loop sequence
 
         // Card 1 Exit
-        // Movement takes 1s, but Opacity fades faster (0.5s) per request
+        // Movement takes 1s, but Opacity fades faster (0.3s) per new request
         tl.to(card1, { y: "-100%", duration: 1 });
-        tl.to(card1, { opacity: 0, duration: 0.5 }, "<");
+        tl.to(card1, { opacity: 0, duration: 0.3 }, "<");
 
         if (cardText1) {
-            // Text 1 moves up and fades out FASTER (0.4s) to create gap before Text 2
-            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.4 }, "<");
+            // Text 1 moves up and fades out fast (0.3s)
+            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.3 }, "<");
         }
 
         // Card 2 Enter (starts before Card 1 finishes)
@@ -2070,8 +2070,9 @@ function initAmbassadorsAnimation() {
 
         if (cardText2) {
             // Text 2 moves up from bottom and fades in
-            // Added delay (<+=0.2) to ensure Text 1 is gone before Text 2 starts appearing
-            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<+=0.2");
+            // Delayed significantly (<+=0.5) to ensure it starts way after Text 1 is gone
+            // Card 2 starts at T=0.5 -> Text 2 starts at T=1.0. Text 1 ended at T=0.3. Gap = 0.7s.
+            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<+=0.5");
         }
 
         // Pause
