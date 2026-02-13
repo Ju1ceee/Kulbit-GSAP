@@ -2510,13 +2510,13 @@ function initSmoothScroll() {
 
                 // 1. Try Lenis (if available globally)
                 if (window.lenis) {
-                    window.lenis.scrollTo(scrollTarget);
+                    window.lenis.scrollTo(scrollTarget, { offset: 0, immediate: false });
                 }
                 // 2. Try GSAP ScrollToPlugin (if registered)
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
-                        scrollTo: scrollTarget,
+                        scrollTo: { y: scrollTarget, offsetY: 0 },
                         ease: "power2.out"
                     });
                 }
