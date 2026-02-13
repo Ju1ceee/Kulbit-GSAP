@@ -1997,7 +1997,7 @@ function initAmbassadorsAnimation() {
     const card2 = document.querySelector('[data-anim-ambassador="card-2"]');
     const card3 = document.querySelector('[data-anim-ambassador="card-3"]');
 
-    // Select Text Elements
+    // Text elements
     const cardText1 = document.querySelector('[data-anim-ambassador="card-text-1"]');
     const cardText2 = document.querySelector('[data-anim-ambassador="card-text-2"]');
 
@@ -2017,9 +2017,9 @@ function initAmbassadorsAnimation() {
 
     gsap.set([card2, card3], { y: "100%", opacity: 0 });
 
-    // Setup Text Animation
-    if (cardText1 && cardText2) {
-        gsap.set(cardText2, { y: "100%", opacity: 0 }); // Prepare text 2 entrance
+    // Setup Text 2 (hidden initially, pushed down)
+    if (cardText2) {
+        gsap.set(cardText2, { y: "100%", opacity: 0 });
     }
 
     if (section.querySelector('.progress-bar-white-line')) {
@@ -2055,17 +2055,23 @@ function initAmbassadorsAnimation() {
 
         // Loop sequence
 
-        // Card 1 Exit
+        // Card 1 Exit match with Text 1 Exit
         tl.to(card1, { y: "-100%", opacity: 0, duration: 1 });
 
-        // Text Swap (Happens with Card 1 Exit)
-        if (cardText1 && cardText2) {
-            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 1 }, "<") // Sync with Card 1 Exit
-                .to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<");   // Sync with Card 1 Exit
+        if (cardText1) {
+            // Text 1 moves up and fades out together with Card 1
+            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 1 }, "<");
         }
 
         // Card 2 Enter (starts before Card 1 finishes)
         tl.to(card2, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
+
+        if (cardText2) {
+            // Text 2 moves up from bottom and fades in, synced with Card 2 arrival
+            // Adjust timing ("<") to match Card 2 start, or slightly after
+            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<");
+        }
+
         // Pause
         tl.to({}, { duration: 0.5 });
         // Card 2 Exit
