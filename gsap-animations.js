@@ -2545,5 +2545,80 @@ function initHeroVideoPause() {
     });
 }
 
+
+
+/**
+ * Initialize Dynamic Anchors
+ * Calculates section positions after load/resize and places absolute divs as anchors.
+ * Solves issue with pinned sections having variable scroll positions.
+ */
+function initDynamicAnchors() {
+    const anchorMap = {
+        "Home": ".hero",
+        "Clients": ".our-ambassadors",
+        "Cases": ".cases",
+        "Team": ".team",
+        "What We Provide": ".our-services"
+    };
+
+    function updateAnchors() {
+        // Remove existing dynamic anchors to avoid building up
+        document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
+
+        for (const [id, selector] of Object.entries(anchorMap)) {
+            const section = document.querySelector(selector);
+            if (section) {
+                // Check if an element with this ID already exists (and isn't our dynamic one)
+                // If it's the section itself, we might want to remove the ID from the section to avoid conflict
+                // But for now, we'll just create the anchor. Note: IDs must be unique.
+                const existingId = document.getElementById(id);
+                if (existingId && !existingId.classList.contains('dynamic-anchor')) {
+                    // console.warn(`Element with ID ${id} already exists. Removing ID to allow dynamic anchor.`);
+                    existingId.removeAttribute('id');
+                }
+
+                // Calculate scroll position
+                // We use offsetTop, but need to be careful about accumulative offsets if nested
+                // Using getBoundingClientRect().top + window.scrollY is often safer for absolute page pos
+                const rect = section.getBoundingClientRect();
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const absoluteTop = rect.top + scrollTop;
+
+                const anchor = document.createElement('div');
+                anchor.id = id;
+                anchor.classList.add('dynamic-anchor');
+                anchor.style.position = 'absolute';
+                anchor.style.top = `${absoluteTop}px`;
+                anchor.style.left = '0';
+                anchor.style.width = '1px';
+                anchor.style.height = '1px';
+                anchor.style.visibility = 'hidden';
+                anchor.style.pointerEvents = 'none';
+
+                // Append to body to be independent of section flow/pinning
+                document.body.appendChild(anchor);
+            }
+        }
+    }
+
+    // Run on generic load
+    window.addEventListener('load', updateAnchors);
+
+    // Run on resize (debounced slightly or just raw if simple)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateAnchors, 200);
+    });
+
+    // Also run immediately in case we're late
+    if (document.readyState === 'complete') {
+        updateAnchors();
+    }
+}
+
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", initAnimations);
+document.addEventListener("DOMContentLoaded", () => {
+    initAnimations();
+    initDynamicAnchors(); // Initialize dynamic anchors
+});
