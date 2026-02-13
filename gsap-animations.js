@@ -26,11 +26,10 @@ function initAnimations() {
         initBenefitsCardsAnimation();
         initStageBenefitsParallax(); // Parallax for previous section
         initTeamAnimation(); // Team section character animation
-
-        // Initialize Smooth Scroll for Desktop
-        // Returns cleanup function to remove listeners
-        return initSmoothScroll();
     });
+
+    // Initialize Global Smooth Scroll (All Devices)
+    initSmoothScroll();
 }
 
 /**
@@ -2492,47 +2491,37 @@ function initTeamAnimation() {
 function initSmoothScroll() {
     const links = document.querySelectorAll('a[href^="#"]');
 
-    const clickHandler = (e) => {
-        const link = e.currentTarget;
-        const href = link.getAttribute('href');
-        // Skip empty or invalid hrefs
-        if (!href || href === "#") return;
-
-        const targetId = href.substring(1);
-        const target = document.getElementById(targetId);
-
-        if (target) {
-            e.preventDefault();
-
-            // 1. Try Lenis (if available globally)
-            if (window.lenis) {
-                window.lenis.scrollTo(target);
-            }
-            // 2. Try GSAP ScrollToPlugin (if registered)
-            else if (gsap.plugins.scrollTo) {
-                gsap.to(window, {
-                    duration: 1,
-                    scrollTo: target,
-                    ease: "power2.out"
-                });
-            }
-            // 3. Fallback to Native Smooth Scroll
-            else {
-                target.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    };
-
     links.forEach(link => {
-        link.addEventListener('click', clickHandler);
-    });
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            // Skip empty or invalid hrefs
+            if (!href || href === "#") return;
 
-    // Return cleanup function for ScrollTrigger.matchMedia
-    return () => {
-        links.forEach(link => {
-            link.removeEventListener('click', clickHandler);
+            const targetId = href.substring(1);
+            const target = document.getElementById(targetId);
+
+            if (target) {
+                e.preventDefault();
+
+                // 1. Try Lenis (if available globally)
+                if (window.lenis) {
+                    window.lenis.scrollTo(target);
+                }
+                // 2. Try GSAP ScrollToPlugin (if registered)
+                else if (gsap.plugins.scrollTo) {
+                    gsap.to(window, {
+                        duration: 1,
+                        scrollTo: target,
+                        ease: "power2.out"
+                    });
+                }
+                // 3. Fallback to Native Smooth Scroll
+                else {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
         });
-    };
+    });
 }
 
 function initHeroVideoPause() {
