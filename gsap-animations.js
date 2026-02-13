@@ -2055,21 +2055,23 @@ function initAmbassadorsAnimation() {
 
         // Loop sequence
 
-        // Card 1 Exit match with Text 1 Exit
-        tl.to(card1, { y: "-100%", opacity: 0, duration: 1 });
+        // Card 1 Exit
+        // Movement takes 1s, but Opacity fades faster (0.5s) per request
+        tl.to(card1, { y: "-100%", duration: 1 });
+        tl.to(card1, { opacity: 0, duration: 0.5 }, "<");
 
         if (cardText1) {
-            // Text 1 moves up and fades out together with Card 1
-            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 1 }, "<");
+            // Text 1 moves up and fades out FASTER (0.4s) to create gap before Text 2
+            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.4 }, "<");
         }
 
         // Card 2 Enter (starts before Card 1 finishes)
         tl.to(card2, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
 
         if (cardText2) {
-            // Text 2 moves up from bottom and fades in, synced with Card 2 arrival
-            // Adjust timing ("<") to match Card 2 start, or slightly after
-            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<");
+            // Text 2 moves up from bottom and fades in
+            // Added delay (<+=0.2) to ensure Text 1 is gone before Text 2 starts appearing
+            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<+=0.2");
         }
 
         // Pause
