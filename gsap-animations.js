@@ -6,21 +6,31 @@ gsap.registerPlugin(ScrollTrigger);
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    // Initialize specific section animations
-    initPreloader(); // Run Preloader first
-    initHeroAnimation();
-    initScrambleText(); // Initialize Scramble effects
-    initAmbassadorsAnimation();
-    initStageSecondAnimation();
-    initStagesAnimation();
-    initProcessAnimation();
-    initServicesAnimation();
-    initBenefitsGraphAnimation();
-    initBenefitsAnimationSequence();
-    initBenefitsCirclesStyle();
-    initBenefitsCardsAnimation();
-    initStageBenefitsParallax(); // Parallax for previous section
-    initTeamAnimation(); // Team section character animation
+    // Desktop-only animations (min-width: 480px)
+    // Mobile animations are handled in mobile-animations.js
+    const mm = ScrollTrigger.matchMedia();
+
+    mm.add("(min-width: 480px)", () => {
+        // Initialize specific section animations (DESKTOP ONLY)
+        initPreloader(); // Run Preloader first
+        initHeroAnimation();
+        initScrambleText(); // Initialize Scramble effects
+        initAmbassadorsAnimation();
+        initStageSecondAnimation();
+        initStagesAnimation();
+        initProcessAnimation();
+        initServicesAnimation();
+        initBenefitsGraphAnimation();
+        initBenefitsAnimationSequence();
+        initBenefitsCirclesStyle();
+        initBenefitsCardsAnimation();
+        initStageBenefitsParallax(); // Parallax for previous section
+        initTeamAnimation(); // Team section character animation
+
+        // Initialize Smooth Scroll for Desktop
+        // Returns cleanup function to remove listeners
+        return initSmoothScroll();
+    });
 }
 
 /**
@@ -1008,7 +1018,12 @@ function initScrambleText() {
     // Helpers
     const lockHeight = (el) => {
         const h = el.getBoundingClientRect().height;
-        if (h > 0) el.style.minHeight = `${h}px`;
+        const w = el.getBoundingClientRect().width;
+        if (h > 0) {
+            el.style.height = `${h}px`;
+            el.style.width = `${w}px`; // Lock width too if possible to minimize reflow
+            el.style.overflow = "hidden"; // Prevent visual overflow if it wraps momentarily
+        }
     };
 
     const splitTextNode = (node) => {
@@ -1225,33 +1240,25 @@ function initStageSecondAnimation() {
         });
     };
 
-    // 4. Wrap in MatchMedia for Desktop Only enforcement
-    const mm = ScrollTrigger.matchMedia();
+    // Prepare text (split into spans) - now runs on all screen sizes
+    if (heading.querySelectorAll('[data-anim-char="true"]').length === 0) {
+        splitTextNodesRecursively(heading);
+    }
 
-    mm.add("(min-width: 992px)", () => {
+    // Select all those new spans
+    const chars = heading.querySelectorAll('[data-anim-char="true"]');
 
-        // 1. Prepare text (split into spans) - Only do this on desktop match to avoid hiding text on mobile
-        // Note: This logic runs once when matching. Reverting completely on resize requires manual cleanup, 
-        // but for now this ensures it only runs if we are on desktop.
-        if (heading.querySelectorAll('[data-anim-char="true"]').length === 0) {
-            splitTextNodesRecursively(heading);
+    // Animate them
+    gsap.to(chars, {
+        opacity: 1,
+        duration: 0.05,
+        stagger: 0.02,
+        ease: "none",
+        scrollTrigger: {
+            trigger: heading,
+            start: "top 80%",
+            markers: false
         }
-
-        // 2. Select all those new spans
-        const chars = heading.querySelectorAll('[data-anim-char="true"]');
-
-        // 3. Animate them
-        gsap.to(chars, {
-            opacity: 1,
-            duration: 0.05,
-            stagger: 0.02,
-            ease: "none",
-            scrollTrigger: {
-                trigger: heading,
-                start: "top 80%",
-                markers: false
-            }
-        });
     });
 }
 
@@ -2474,6 +2481,74 @@ function initTeamAnimation() {
             }
         });
     }
+}
+
+
+/**
+ * Global Smooth Scroll for Anchor Links
+ * Handles generic anchors and specfic IDs: Home, Clients, Cases, Team, What We Provide
+ * Supports Lenis, GSAP ScrollTo, and Native fallback.
+ */
+function initSmoothScroll() {
+    const links = document.querySelectorAll('a[href^="#"]');
+
+    const clickHandler = (e) => {
+        const link = e.currentTarget;
+        const href = link.getAttribute('href');
+        // Skip empty or invalid hrefs
+        if (!href || href === "#") return;
+
+        const targetId = href.substring(1);
+        const target = document.getElementById(targetId);
+
+        if (target) {
+            e.preventDefault();
+
+            // 1. Try Lenis (if available globally)
+            if (window.lenis) {
+                window.lenis.scrollTo(target);
+            }
+            // 2. Try GSAP ScrollToPlugin (if registered)
+            else if (gsap.plugins.scrollTo) {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: target,
+                    ease: "power2.out"
+                });
+            }
+            // 3. Fallback to Native Smooth Scroll
+            else {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
+    links.forEach(link => {
+        link.addEventListener('click', clickHandler);
+    });
+
+    // Return cleanup function for ScrollTrigger.matchMedia
+    return () => {
+        links.forEach(link => {
+            link.removeEventListener('click', clickHandler);
+        });
+    };
+}
+
+function initHeroVideoPause() {
+    const video = document.getElementById('my-custom-video');
+    const nextSection = document.querySelector('.our-ambassadors');
+
+    if (!video || !nextSection) return;
+
+    ScrollTrigger.create({
+        trigger: nextSection,
+        start: "top top",
+        onEnter: () => {
+            video.pause();
+        },
+        markers: false
+    });
 }
 
 // Initialize when DOM is ready
