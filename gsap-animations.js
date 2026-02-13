@@ -2503,21 +2503,26 @@ function initSmoothScroll() {
             if (target) {
                 e.preventDefault();
 
+                // Check if target is inside a pin-spacer (GSAP ScrollTrigger)
+                // If so, scroll to the spacer's top (start of section)
+                const pinSpacer = target.closest(".pin-spacer");
+                const scrollTarget = pinSpacer || target;
+
                 // 1. Try Lenis (if available globally)
                 if (window.lenis) {
-                    window.lenis.scrollTo(target);
+                    window.lenis.scrollTo(scrollTarget);
                 }
                 // 2. Try GSAP ScrollToPlugin (if registered)
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
-                        scrollTo: target,
+                        scrollTo: scrollTarget,
                         ease: "power2.out"
                     });
                 }
                 // 3. Fallback to Native Smooth Scroll
                 else {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    scrollTarget.scrollIntoView({ behavior: 'smooth' });
                 }
             }
         });
