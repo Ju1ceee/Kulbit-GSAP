@@ -35,7 +35,12 @@ function initMobileAnimations() {
         initMobileStageHeading();
         initMobileScrambleText();
         initMobileTeamAnimation();
+        initMobileTeamAnimation();
         initMobileFooterParallax();
+
+        // Initialize Smooth Scroll for Mobile
+        // Returns cleanup function
+        return initSmoothScrollMobile();
     });
 
     // Video pause (works on all devices, not just mobile)
@@ -1295,3 +1300,58 @@ function initMobileFooterParallax() {
         }
     });
 }
+
+/**
+ * Global Smooth Scroll for Anchor Links (Mobile Context)
+ * Handles generic anchors and specfic IDs
+ */
+function initSmoothScrollMobile() {
+    const links = document.querySelectorAll('a[href^="#"]');
+
+    const clickHandler = (e) => {
+        const link = e.currentTarget;
+        const href = link.getAttribute('href');
+        // Skip empty or invalid hrefs
+        if (!href || href === "#") return;
+
+        const targetId = href.substring(1);
+        const target = document.getElementById(targetId);
+
+        if (target) {
+            e.preventDefault();
+
+            // 1. Try Lenis (if available globally)
+            if (window.lenis) {
+                window.lenis.scrollTo(target);
+            }
+            // 2. Try GSAP ScrollToPlugin (if registered)
+            else if (gsap.plugins.scrollTo) {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: target,
+                    ease: "power2.out"
+                });
+            }
+            // 3. Fallback to Native Smooth Scroll
+            else {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
+    links.forEach(link => {
+        link.addEventListener('click', clickHandler);
+    });
+
+    // Return cleanup function for ScrollTrigger.matchMedia
+    return () => {
+        links.forEach(link => {
+            link.removeEventListener('click', clickHandler);
+        });
+    };
+}
+
+// Initialize when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    initMobileAnimations();
+});
