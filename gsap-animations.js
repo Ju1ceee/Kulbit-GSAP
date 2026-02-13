@@ -862,7 +862,11 @@ function initPreloader() {
     const masks = $$("mask-square");
     const sq1 = $("small-square-one");
     const sq2 = $("small-square-two");
+
     const marquee = $("marquee-text");
+
+    // New Sound Button
+    const soundBtn = document.querySelector('.sound-btn');
 
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
 
@@ -898,6 +902,7 @@ function initPreloader() {
         gsap.set(secondTexts, { autoAlpha: 0, y: "2.5rem" });
     }
     if (button) gsap.set(button, { autoAlpha: 0 });
+    if (soundBtn) gsap.set(soundBtn, { autoAlpha: 0 });
 
     // --- Fake percent counter ---
     const counter = { p: 0 };
@@ -989,6 +994,11 @@ function initPreloader() {
     }
     if (button) {
         tl.to(button, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
+
+        // Sync sound button
+        if (soundBtn) {
+            tl.to(soundBtn, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
+        }
 
         // Manual Exit Logic
         button.addEventListener("click", () => {
