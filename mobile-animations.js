@@ -615,7 +615,7 @@ function initMobileServices() {
 
 
 // Initialize when DOM is ready
-
+document.addEventListener("DOMContentLoaded", initMobileAnimations);
 
 /**
  * ----------------------------------------------------------------------------------
@@ -1402,12 +1402,8 @@ function initDynamicAnchorsMobile() {
 }
 
 // Initialize when DOM is ready
-// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    // Mobile/Tablet only check
-    if (window.innerWidth < 992) {
-        initMobileAnimations();
-        initSmoothScrollMobile();
-        initDynamicAnchorsMobile();
-    }
+    initMobileAnimations();
+    initSmoothScrollMobile();
+    initDynamicAnchorsMobile();
 });
