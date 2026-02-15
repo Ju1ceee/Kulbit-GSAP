@@ -615,7 +615,7 @@ function initMobileServices() {
 
 
 // Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", initMobileAnimations);
+
 
 /**
  * ----------------------------------------------------------------------------------
@@ -1315,29 +1315,99 @@ function initSmoothScrollMobile() {
             if (target) {
                 e.preventDefault();
 
+                // Check if target is inside a pin-spacer (GSAP ScrollTrigger)
+                // If so, scroll to the spacer's top (start of section)
+                const pinSpacer = target.closest(".pin-spacer");
+                const scrollTarget = pinSpacer || target;
+
                 // 1. Try Lenis (if available globally)
                 if (window.lenis) {
-                    window.lenis.scrollTo(target);
+                    window.lenis.scrollTo(scrollTarget, { offset: 0, immediate: false });
                 }
                 // 2. Try GSAP ScrollToPlugin (if registered)
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
-                        scrollTo: target,
+                        scrollTo: { y: scrollTarget, offsetY: 0 },
                         ease: "power2.out"
                     });
                 }
                 // 3. Fallback to Native Smooth Scroll
                 else {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    scrollTarget.scrollIntoView({ behavior: 'smooth' });
                 }
             }
         });
     });
 }
 
+
+
+/**
+ * Initialize Dynamic Anchors (Mobile Context)
+ * Calculates section positions after load/resize and places absolute divs as anchors.
+ */
+function initDynamicAnchorsMobile() {
+    const anchorMap = {
+        "Home": ".hero",
+        "Clients": ".our-ambassadors",
+        "Cases": ".cases",
+        "Team": ".team",
+        "What We Provide": ".our-services"
+    };
+
+    function updateAnchors() {
+        // Remove existing dynamic anchors (handled by global script too, but safe to repeat)
+        document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
+
+        for (const [id, selector] of Object.entries(anchorMap)) {
+            const section = document.querySelector(selector);
+            if (section) {
+                const existingId = document.getElementById(id);
+                if (existingId && !existingId.classList.contains('dynamic-anchor')) {
+                    existingId.removeAttribute('id');
+                }
+
+                const rect = section.getBoundingClientRect();
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const absoluteTop = rect.top + scrollTop;
+
+                const anchor = document.createElement('div');
+                anchor.id = id;
+                anchor.classList.add('dynamic-anchor');
+                anchor.style.position = 'absolute';
+                anchor.style.top = `${absoluteTop}px`;
+                anchor.style.left = '0';
+                anchor.style.width = '1px';
+                anchor.style.height = '1px';
+                anchor.style.visibility = 'hidden';
+                anchor.style.pointerEvents = 'none';
+
+                document.body.appendChild(anchor);
+            }
+        }
+    }
+
+    window.addEventListener('load', updateAnchors);
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateAnchors, 200);
+    });
+
+    if (document.readyState === 'complete') {
+        updateAnchors();
+    }
+}
+
+// Initialize when DOM is ready
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    initMobileAnimations();
-    initSmoothScrollMobile();
+    // Mobile/Tablet only check
+    if (window.innerWidth < 992) {
+        initMobileAnimations();
+        initSmoothScrollMobile();
+        initDynamicAnchorsMobile();
+    }
 });
