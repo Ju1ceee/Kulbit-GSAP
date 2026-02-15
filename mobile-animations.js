@@ -35,11 +35,14 @@ function initMobileAnimations() {
         initMobileStageHeading();
         initMobileScrambleText();
         initMobileTeamAnimation();
-        initMobileFooterParallax();
-    });
 
-    // Video pause (works on all devices, not just mobile)
-    initHeroVideoPause();
+        initMobileFooterParallax();
+
+        // Mobile-only utilities
+        initHeroVideoPause();
+        initSmoothScrollMobile();
+        initDynamicAnchorsMobile();
+    });
 }
 
 function initHeroVideoPause() {
@@ -1306,8 +1309,13 @@ function initSmoothScrollMobile() {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
+
+
             // Skip empty or invalid hrefs
             if (!href || href === "#") return;
+
+            // Runtime check: Ignore if desktop
+            if (window.innerWidth >= 480) return;
 
             const targetId = href.substring(1);
             const target = document.getElementById(targetId);
@@ -1360,6 +1368,9 @@ function initDynamicAnchorsMobile() {
         // Remove existing dynamic anchors (handled by global script too, but safe to repeat)
         document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
+        // Runtime check: Ignore if desktop
+        if (window.innerWidth >= 480) return;
+
         for (const [id, selector] of Object.entries(anchorMap)) {
             const section = document.querySelector(selector);
             if (section) {
@@ -1402,8 +1413,7 @@ function initDynamicAnchorsMobile() {
 }
 
 // Initialize when DOM is ready
+// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     initMobileAnimations();
-    initSmoothScrollMobile();
-    initDynamicAnchorsMobile();
 });
