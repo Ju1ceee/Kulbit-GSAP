@@ -1063,13 +1063,13 @@ function initMobileTeamAnimation() {
     if (!section || !teamHeading) return;
 
     // Elements to hide initially (matching desktop logic usually, but simplified for mobile if needed)
-    // Looking at desktop initTeamAnimation: teamHeadRight, teamCards, teamBottomSection are hidden
     const teamHeadRight = section.querySelector('.team-head-right');
-    const teamCards = section.querySelector('.team-cards-wrapper');
+    // Select ALL grid wrappers (there are two on mobile)
+    const teamGridWrappers = section.querySelectorAll('.team-grid-wrapper');
     const teamBottomSection = section.querySelector('.team-head-right-bottom');
 
     // Hide initially
-    const elementsToHide = [teamHeadRight, teamCards].filter(el => el);
+    const elementsToHide = [teamHeadRight, ...teamGridWrappers].filter(el => el);
     gsap.set(elementsToHide, { opacity: 0, y: 30 }); // Slight slide up potential later or just hidden
     if (teamBottomSection) gsap.set(teamBottomSection, { opacity: 0 });
 
@@ -1118,6 +1118,39 @@ function initMobileTeamAnimation() {
             markers: false
         }
     });
+
+    // Animate Team Head Right (Metadata) Entry
+    if (teamHeadRight) {
+        gsap.to(teamHeadRight, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            scrollTrigger: {
+                trigger: section,
+                start: "top 60%",
+                end: "top 40%",
+                scrub: true,
+                markers: false
+            }
+        });
+    }
+
+    // Animate ALL Grid Wrappers Entry
+    if (teamGridWrappers.length > 0) {
+        gsap.to(teamGridWrappers, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.1, // Stagger them slightly
+            scrollTrigger: {
+                trigger: section,
+                start: "top 50%", // Start after head-right
+                end: "top 20%",
+                scrub: true,
+                markers: false
+            }
+        });
+    }
 }
 
 /**
