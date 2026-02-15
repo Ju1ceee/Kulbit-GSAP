@@ -852,6 +852,12 @@ function initPreloader() {
     const $$ = (v) => document.querySelectorAll(`[data-anim-preloader="${v}"]`);
 
     const wrapper = $("wrapper");
+
+    // Disable on mobile/tablet (temporary request)
+    if (window.innerWidth < 992) {
+        if (wrapper) wrapper.style.display = 'none';
+        return;
+    }
     const button = $("button");
     const mainText = $("main-text");
     const secondTexts = $$("precent-second-text");
@@ -1963,6 +1969,7 @@ function initProcessAnimation() {
         if (d) descriptionsPhase2.push(d);
     });
 
+    // 1. Hide Descriptions 5-8 (Phase 2 Text)
     if (descriptionsPhase2.length) {
         tlProcess.to(descriptionsPhase2, {
             autoAlpha: 0,
@@ -1971,6 +1978,31 @@ function initProcessAnimation() {
             ease: "none"
         }, "+=0.5"); // Wait a bit after map starts
     }
+
+    // 2. Hide Blue Wrapper (Phase 2 Bar Lines + Descriptions Container)
+    if (blueWrapper) {
+        tlProcess.to(blueWrapper, {
+            autoAlpha: 0,
+            duration: 1,
+            ease: "none"
+        }, "<"); // Sync with text exit
+    }
+
+    // 3. Hide Blue Dots & Map (data-anim-process-dots="2")
+    const dotsWrapper2 = section.querySelector('[data-anim-process-dots="2"]');
+    if (dotsWrapper2) {
+        tlProcess.to(dotsWrapper2, {
+            autoAlpha: 0,
+            duration: 1,
+            ease: "none"
+        }, "<");
+    }
+
+    // 4. Ensure Red Graphics are fully gone (if they were at 0.2)
+    const dotsWrapper1_cleanup = section.querySelector('[data-anim-process-dots="1"]');
+    const redMapSvg_cleanup = section.querySelector('.map-svg');
+    if (dotsWrapper1_cleanup) tlProcess.to(dotsWrapper1_cleanup, { autoAlpha: 0, duration: 1 }, "<");
+    if (redMapSvg_cleanup) tlProcess.to(redMapSvg_cleanup, { autoAlpha: 0, duration: 1 }, "<");
 
 
     // --- Phase 3: Icons (Steps 9-12) ---
