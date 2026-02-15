@@ -1,6 +1,47 @@
 // Register GSAP Plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// --- Global Scroll Lock Helpers ---
+function preventDefault(e) {
+    e.preventDefault();
+}
+
+function preventDefaultForScrollKeys(e) {
+    const keys = { 37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1 };
+    if (keys[e.keyCode]) {
+        preventDefault(e);
+        return false;
+    }
+}
+
+function disableScroll() {
+    // Stop Lenis
+    if (window.lenis) window.lenis.stop();
+
+    // CSS Lock
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Event Listeners (passive: false is crucial for preventDefault)
+    window.addEventListener('wheel', preventDefault, { passive: false });
+    window.addEventListener('touchmove', preventDefault, { passive: false });
+    window.addEventListener('keydown', preventDefaultForScrollKeys, { passive: false });
+}
+
+function enableScroll() {
+    // Start Lenis
+    if (window.lenis) window.lenis.start();
+
+    // CSS Unlock
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+
+    // Remove Event Listeners
+    window.removeEventListener('wheel', preventDefault);
+    window.removeEventListener('touchmove', preventDefault);
+    window.removeEventListener('keydown', preventDefaultForScrollKeys);
+}
+
 /**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
@@ -871,6 +912,14 @@ function initPreloader() {
 
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
 
+    // Scroll Lock for Preloader (Desktop)
+    try {
+        window.scrollTo(0, 0);
+        disableScroll();
+    } catch (e) {
+        console.warn("Scroll disable failed:", e);
+    }
+
     const root = document.documentElement;
     const cssVar = (name, fallback) => {
         const v = getComputedStyle(root).getPropertyValue(name).trim();
@@ -1003,16 +1052,12 @@ function initPreloader() {
 
         // Manual Exit Logic
         button.addEventListener("click", () => {
+            enableScroll(); // Allow scrolling
             gsap.to(wrapper, {
                 autoAlpha: 0,
                 duration: 0.5,
                 onComplete: () => {
                     gsap.set(wrapper, { display: "none", pointerEvents: "none" });
-
-                    // Unlock Scroll (Desktop)
-                    document.body.style.overflow = "auto";
-                    document.documentElement.style.overflow = "auto";
-                    if (window.lenis) window.lenis.start();
                 }
             });
         });
@@ -2526,55 +2571,11 @@ function initTeamAnimation() {
 /**
  * Disable Scroll when specific element is visible
  * Attribute: scroll-disable-element
- */
-/**
- * Disable Scroll when specific element is visible
- * Attribute: scroll-disable-element
  * Improved to handle Lenis, native scroll, and touch events
  */
 function initScrollDisableObserver() {
     const targets = document.querySelectorAll('[scroll-disable-element]');
     if (!targets.length) return;
-
-    function preventDefault(e) {
-        e.preventDefault();
-    }
-
-    function disableScroll() {
-        // Stop Lenis
-        if (window.lenis) window.lenis.stop();
-
-        // CSS Lock
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-
-        // Event Listeners (passive: false is crucial for preventDefault)
-        window.addEventListener('wheel', preventDefault, { passive: false });
-        window.addEventListener('touchmove', preventDefault, { passive: false });
-        window.addEventListener('keydown', preventDefaultForScrollKeys, { passive: false });
-    }
-
-    function enableScroll() {
-        // Start Lenis
-        if (window.lenis) window.lenis.start();
-
-        // CSS Unlock
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-
-        // Remove Event Listeners
-        window.removeEventListener('wheel', preventDefault);
-        window.removeEventListener('touchmove', preventDefault);
-        window.removeEventListener('keydown', preventDefaultForScrollKeys);
-    }
-
-    function preventDefaultForScrollKeys(e) {
-        const keys = { 37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1 };
-        if (keys[e.keyCode]) {
-            preventDefault(e);
-            return false;
-        }
-    }
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
