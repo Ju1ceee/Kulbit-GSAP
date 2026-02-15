@@ -6,6 +6,9 @@ gsap.registerPlugin(ScrollTrigger);
  * This allows us to separate logic for each section
  */
 function initAnimations() {
+    if (window.hasInitDesktopAnimations) return;
+    window.hasInitDesktopAnimations = true;
+
     // Desktop-only animations (min-width: 480px)
     // Mobile animations are handled in mobile-animations.js
     const mm = ScrollTrigger.matchMedia();
