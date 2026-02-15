@@ -1344,6 +1344,32 @@ function initSmoothScrollMobile() {
 
 
 /**
+ * Disable Scroll when specific element is visible
+ * Attribute: scroll-disable-element
+ */
+function initScrollDisableObserver() {
+    const targets = document.querySelectorAll('[scroll-disable-element]');
+    if (!targets.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Disable Scroll
+                if (window.lenis) window.lenis.stop();
+                document.body.style.overflow = 'hidden';
+            } else {
+                // Enable Scroll
+                if (window.lenis) window.lenis.start();
+                document.body.style.overflow = '';
+            }
+        });
+    }, { threshold: 0.1 }); // Trigger when 10% visible
+
+    targets.forEach(target => observer.observe(target));
+}
+
+
+/**
  * Initialize Dynamic Anchors (Mobile Context)
  * Calculates section positions after load/resize and places absolute divs as anchors.
  */
@@ -1408,6 +1434,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.innerWidth < 992) {
         initMobileAnimations();
         initSmoothScrollMobile();
+        initDynamicAnchorsMobile();
+        initScrollDisableObserver();
         initDynamicAnchorsMobile();
     }
 });
