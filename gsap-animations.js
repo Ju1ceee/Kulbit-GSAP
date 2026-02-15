@@ -2652,7 +2652,11 @@ function initDynamicAnchors() {
 }
 
 // Initialize when DOM is ready
+// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    initAnimations();
-    initDynamicAnchors(); // Initialize dynamic anchors
+    // Desktop only check
+    if (window.innerWidth >= 992) {
+        initAnimations();
+        initDynamicAnchors(); // Initialize dynamic anchors
+    }
 });
