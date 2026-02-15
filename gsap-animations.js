@@ -912,13 +912,8 @@ function initPreloader() {
 
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
 
-    // Scroll Lock for Preloader (Desktop)
-    try {
-        window.scrollTo(0, 0);
-        disableScroll();
-    } catch (e) {
-        console.warn("Scroll disable failed:", e);
-    }
+    // Scroll Lock REMOVED by user request
+    // We allow scrolling during preloader, but will reset to top on close.
 
     const root = document.documentElement;
     const cssVar = (name, fallback) => {
@@ -1052,7 +1047,14 @@ function initPreloader() {
 
         // Manual Exit Logic
         button.addEventListener("click", () => {
-            enableScroll(); // Allow scrolling
+            // Instant Scroll to Top
+            window.scrollTo(0, 0);
+            if (window.lenis && typeof window.lenis.scrollTo === 'function') {
+                window.lenis.scrollTo(0, { immediate: true });
+            }
+
+            enableScroll(); // Ensures Lenis starts and overflow is reset
+
             gsap.to(wrapper, {
                 autoAlpha: 0,
                 duration: 0.5,
