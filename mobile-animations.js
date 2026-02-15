@@ -1147,7 +1147,7 @@ function initMobileFooterParallax() {
     });
 
     // Configurable gap before footer arrives
-    const footerArrivalGap = 1100; // pixels of scroll where nothing happens before footer covers
+    const footerArrivalGap = 0; // Reduced to 0 to prevent excessive empty scroll
 
     // Add EXTRA margin to footer to push it down further
     gsap.set(footer, {
@@ -1206,7 +1206,7 @@ function initMobileFooterParallax() {
         // 5. Team Content Entry (Head Right + Cards + Blur)
         const teamHeadRight = teamSection.querySelector('.team-head-right');
         const teamCardsWrapper = teamSection.querySelector('.team-cards-wrapper');
-        const teamGridWrapper = teamSection.querySelector('.team-grid-wrapper');
+        const teamGridWrappers = teamSection.querySelectorAll('.team-grid-wrapper'); // Select ALL wrappers
         const teamBlurTop = teamSection.querySelectorAll('.team-blur-top');
 
         // Configurable offset for team-grid-wrapper
@@ -1275,8 +1275,8 @@ function initMobileFooterParallax() {
                 }, ">"); // Start after previous animations finish
             }
 
-            if (teamGridWrapper) {
-                textExitTl.to(teamGridWrapper, {
+            if (teamGridWrappers.length) {
+                textExitTl.to(teamGridWrappers, {
                     y: teamGridWrapperOffset,
                     duration: 4, // MUCH slower/longer duration relative to other steps
                     ease: "none"
