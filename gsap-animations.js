@@ -2522,23 +2522,64 @@ function initTeamAnimation() {
  * Disable Scroll when specific element is visible
  * Attribute: scroll-disable-element
  */
+/**
+ * Disable Scroll when specific element is visible
+ * Attribute: scroll-disable-element
+ * Improved to handle Lenis, native scroll, and touch events
+ */
 function initScrollDisableObserver() {
     const targets = document.querySelectorAll('[scroll-disable-element]');
     if (!targets.length) return;
 
+    function preventDefault(e) {
+        e.preventDefault();
+    }
+
+    function disableScroll() {
+        // Stop Lenis
+        if (window.lenis) window.lenis.stop();
+
+        // CSS Lock
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+
+        // Event Listeners (passive: false is crucial for preventDefault)
+        window.addEventListener('wheel', preventDefault, { passive: false });
+        window.addEventListener('touchmove', preventDefault, { passive: false });
+        window.addEventListener('keydown', preventDefaultForScrollKeys, { passive: false });
+    }
+
+    function enableScroll() {
+        // Start Lenis
+        if (window.lenis) window.lenis.start();
+
+        // CSS Unlock
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+
+        // Remove Event Listeners
+        window.removeEventListener('wheel', preventDefault);
+        window.removeEventListener('touchmove', preventDefault);
+        window.removeEventListener('keydown', preventDefaultForScrollKeys);
+    }
+
+    function preventDefaultForScrollKeys(e) {
+        const keys = { 37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1 };
+        if (keys[e.keyCode]) {
+            preventDefault(e);
+            return false;
+        }
+    }
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Disable Scroll
-                if (window.lenis) window.lenis.stop();
-                document.body.style.overflow = 'hidden';
+                disableScroll();
             } else {
-                // Enable Scroll
-                if (window.lenis) window.lenis.start();
-                document.body.style.overflow = '';
+                enableScroll();
             }
         });
-    }, { threshold: 0.1 }); // Trigger when 10% visible
+    }, { threshold: 0.1 });
 
     targets.forEach(target => observer.observe(target));
 }
