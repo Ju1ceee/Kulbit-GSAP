@@ -30,6 +30,7 @@ function initAnimations() {
 
     // Initialize Global Smooth Scroll (All Devices)
     initSmoothScroll();
+    initScrollDisableObserver();
 }
 
 /**
@@ -2516,6 +2517,31 @@ function initTeamAnimation() {
     }
 }
 
+
+/**
+ * Disable Scroll when specific element is visible
+ * Attribute: scroll-disable-element
+ */
+function initScrollDisableObserver() {
+    const targets = document.querySelectorAll('[scroll-disable-element]');
+    if (!targets.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Disable Scroll
+                if (window.lenis) window.lenis.stop();
+                document.body.style.overflow = 'hidden';
+            } else {
+                // Enable Scroll
+                if (window.lenis) window.lenis.start();
+                document.body.style.overflow = '';
+            }
+        });
+    }, { threshold: 0.1 }); // Trigger when 10% visible
+
+    targets.forEach(target => observer.observe(target));
+}
 
 /**
  * Global Smooth Scroll for Anchor Links
