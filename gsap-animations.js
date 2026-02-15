@@ -1,47 +1,6 @@
 // Register GSAP Plugins
 gsap.registerPlugin(ScrollTrigger);
 
-// --- Global Scroll Lock Helpers ---
-function preventDefault(e) {
-    e.preventDefault();
-}
-
-function preventDefaultForScrollKeys(e) {
-    const keys = { 37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1 };
-    if (keys[e.keyCode]) {
-        preventDefault(e);
-        return false;
-    }
-}
-
-function disableScroll() {
-    // Stop Lenis
-    if (window.lenis) window.lenis.stop();
-
-    // CSS Lock
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
-    // Event Listeners (passive: false is crucial for preventDefault)
-    window.addEventListener('wheel', preventDefault, { passive: false });
-    window.addEventListener('touchmove', preventDefault, { passive: false });
-    window.addEventListener('keydown', preventDefaultForScrollKeys, { passive: false });
-}
-
-function enableScroll() {
-    // Start Lenis
-    if (window.lenis) window.lenis.start();
-
-    // CSS Unlock
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-
-    // Remove Event Listeners
-    window.removeEventListener('wheel', preventDefault);
-    window.removeEventListener('touchmove', preventDefault);
-    window.removeEventListener('keydown', preventDefaultForScrollKeys);
-}
-
 /**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
@@ -71,7 +30,6 @@ function initAnimations() {
 
     // Initialize Global Smooth Scroll (All Devices)
     initSmoothScroll();
-    initScrollDisableObserver();
 }
 
 /**
@@ -912,9 +870,6 @@ function initPreloader() {
 
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
 
-    // Scroll Lock REMOVED by user request
-    // We allow scrolling during preloader, but will reset to top on close.
-
     const root = document.documentElement;
     const cssVar = (name, fallback) => {
         const v = getComputedStyle(root).getPropertyValue(name).trim();
@@ -1047,14 +1002,6 @@ function initPreloader() {
 
         // Manual Exit Logic
         button.addEventListener("click", () => {
-            // Instant Scroll to Top
-            window.scrollTo(0, 0);
-            if (window.lenis && typeof window.lenis.scrollTo === 'function') {
-                window.lenis.scrollTo(0, { immediate: true });
-            }
-
-            enableScroll(); // Ensures Lenis starts and overflow is reset
-
             gsap.to(wrapper, {
                 autoAlpha: 0,
                 duration: 0.5,
@@ -2569,28 +2516,6 @@ function initTeamAnimation() {
     }
 }
 
-
-/**
- * Disable Scroll when specific element is visible
- * Attribute: scroll-disable-element
- * Improved to handle Lenis, native scroll, and touch events
- */
-function initScrollDisableObserver() {
-    const targets = document.querySelectorAll('[scroll-disable-element]');
-    if (!targets.length) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                disableScroll();
-            } else {
-                enableScroll();
-            }
-        });
-    }, { threshold: 0.1 });
-
-    targets.forEach(target => observer.observe(target));
-}
 
 /**
  * Global Smooth Scroll for Anchor Links
