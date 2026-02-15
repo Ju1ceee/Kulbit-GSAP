@@ -7,13 +7,16 @@
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
 function initMobileAnimations() {
-    console.log("Initializing Mobile Animations...");
+    if (window.hasInitMobileAnimations) return;
+    window.hasInitMobileAnimations = true;
+
+    // console.log("Initializing Mobile Animations...");
 
     // MatchMedia for Mobile Only (max-width: 479px)
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(max-width: 479px)", () => {
-        console.log("Mobile context active (<= 479px)");
+        // console.log("Mobile context active (<= 479px)");
 
         // --- Mobile Specific Animations Start Here ---
 
@@ -550,7 +553,7 @@ function initMobileProcess() {
 }
 
 function initMobileServices() {
-    console.log("Initializing Mobile Services Animation");
+    // console.log("Initializing Mobile Services Animation");
     const section = document.querySelector('.our-services');
     if (!section) return;
 
