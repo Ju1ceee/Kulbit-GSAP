@@ -588,8 +588,6 @@ function initMobileServices() {
 
     // 2. Cards Wrapper slides up to top (Phase 1)
     // synchronized with text fade
-    // 2. Cards Wrapper slides up to top (Phase 1)
-    // synchronized with text fade
     tl.to(cardsWrapper, {
         y: () => {
             const containerRect = container.getBoundingClientRect();
@@ -619,17 +617,6 @@ function initMobileServices() {
     }, ">"); // Starts immediately after previous tween completes
 }
 
-
-// Initialize when DOM is ready
-document.addEventListener("DOMContentLoaded", initMobileAnimations);
-
-/**
- * ----------------------------------------------------------------------------------
- * Mobile Benefits Animation
- * ----------------------------------------------------------------------------------
- * Reveals all graph SVGs and the traditional line SVG simultaneously when the section appears.
- * Uses a clip-path wipe effect to simulate "drawing".
- */
 /**
  * ----------------------------------------------------------------------------------
  * Mobile Benefits Animation
@@ -815,8 +802,6 @@ function initMobileBenefitsCards() {
     // Card 3: Back (Small)
     gsap.set(card3, { zIndex: 1, scale: 0.5 });
 
-
-    // --- 2. Animation Timeline ---
 
     // --- 2. Animation Timeline ---
 
@@ -1448,7 +1433,6 @@ function initDynamicAnchorsMobile() {
     }
 }
 
-// Initialize when DOM is ready
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     initMobileAnimations();
