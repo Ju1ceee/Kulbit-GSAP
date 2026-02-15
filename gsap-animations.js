@@ -850,9 +850,6 @@ function initPreloader() {
 
     // Helper to select by attribute
     const $ = (v) => document.querySelector(`[data-anim-preloader="${v}"]`);
-
-    // Lock Scroll Initially (Desktop)
-    togglePageScroll(false);
     const $$ = (v) => document.querySelectorAll(`[data-anim-preloader="${v}"]`);
 
     const wrapper = $("wrapper");
@@ -1011,8 +1008,11 @@ function initPreloader() {
                 duration: 0.5,
                 onComplete: () => {
                     gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+
                     // Unlock Scroll (Desktop)
-                    togglePageScroll(true);
+                    document.body.style.overflow = "auto";
+                    document.documentElement.style.overflow = "auto";
+                    if (window.lenis) window.lenis.start();
                 }
             });
         });
