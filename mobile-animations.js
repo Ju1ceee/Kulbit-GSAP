@@ -3,43 +3,44 @@
  * Handles interactions for mobile devices separate from desktop logic.
  */
 
-// Register GSAP plugins (ensure they are loaded)
-gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
+// GSAP plugins are registered in Webflow
 
 function initMobileAnimations() {
     console.log("Initializing Mobile Animations...");
 
-    // MatchMedia for Mobile Only (max-width: 479px)
+    // MatchMedia for Mobile/Tablet (max-width: 991px)
     const mm = ScrollTrigger.matchMedia();
 
-    mm.add("(max-width: 479px)", () => {
-        console.log("Mobile context active (<= 479px)");
+    mm.add("(max-width: 991px)", () => {
+        console.log("Mobile/Tablet context active (<= 991px)");
 
-        // --- Mobile Specific Animations Start Here ---
+        // Mobile Phone Specifics (max-width: 479px)
+        const mmMobile = ScrollTrigger.matchMedia();
+        mmMobile.add("(max-width: 479px)", () => {
+            // 1. Hero Section Mobile
+            initMobileHero();
 
-        // 1. Hero Section Mobile
-        initMobileHero();
+            // 2. Ambassadors Section Mobile
+            initMobileAmbassadors();
 
-        // 2. Ambassadors Section Mobile
-        initMobileAmbassadors();
+            // 3. Process Section Mobile
+            initMobileProcess();
 
-        // 3. Process Section Mobile
-        initMobileProcess();
+            // 4. Team Section Mobile
+            initMobileServices();
 
-        // 4. Team Section Mobile
-        initMobileServices();
+            // 5. Benefits Section Mobile
+            initMobileBenefits();
+            initMobileBenefitsCards();
+            initMobileStageHeading();
+            initMobileScrambleText();
+            initMobileTeamAnimation();
+            initMobileFooterParallax();
+        });
 
-        // 5. Benefits Section Mobile
-        initMobileBenefits();
-        initMobileBenefitsCards();
-        initMobileStageHeading();
-        initMobileScrambleText();
-        initMobileTeamAnimation();
-        initMobileFooterParallax();
+        // Video pause (works on all devices, triggered here for mobile context)
+        initHeroVideoPause();
     });
-
-    // Video pause (works on all devices, not just mobile)
-    initHeroVideoPause();
 }
 
 function initHeroVideoPause() {
@@ -1405,9 +1406,11 @@ function initDynamicAnchorsMobile() {
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     // Mobile/Tablet only check
-    if (window.innerWidth < 992) {
-        initMobileAnimations();
-        initSmoothScrollMobile();
-        initDynamicAnchorsMobile();
-    }
+    ScrollTrigger.matchMedia({
+        "(max-width: 991px)": function () {
+            initMobileAnimations();
+            initSmoothScrollMobile();
+            initDynamicAnchorsMobile();
+        }
+    });
 });
