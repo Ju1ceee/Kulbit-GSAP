@@ -1145,7 +1145,7 @@ function initMobileFooterParallax() {
     });
 
     // Configurable gap before footer arrives
-    const footerArrivalGap = 1100; // pixels of scroll where nothing happens before footer covers
+    const footerArrivalGap = 0; // pixels of scroll where nothing happens before footer covers
 
     // Add EXTRA margin to footer to push it down further
     gsap.set(footer, {
@@ -1163,7 +1163,7 @@ function initMobileFooterParallax() {
     ScrollTrigger.create({
         trigger: teamSection,
         start: "top top", // Stick as soon as it hits top
-        end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, // Include gap so it stays pinned longer
+        end: `+=${footer.offsetHeight + teamHeight + footerArrivalGap}`, // Include gap so it stays pinned longer
         pin: true,
         pinSpacing: false,
         scrub: true,
@@ -1180,7 +1180,7 @@ function initMobileFooterParallax() {
             scrollTrigger: {
                 trigger: teamSection, // Use section itself as trigger
                 start: "top top+=50", // Start shortly after pinning (typing finishes at top top)
-                end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, // Include gap so timeline matches pin duration
+                end: `+=${footer.offsetHeight + teamHeight + footerArrivalGap}`, // Include gap so timeline matches pin duration
                 scrub: true
             }
         });
