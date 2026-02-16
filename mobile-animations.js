@@ -35,7 +35,6 @@ function initMobileAnimations() {
             initMobileStageHeading();
             initMobileScrambleText();
             initMobileTeamAnimation();
-            initMobileFooterParallax();
         });
 
         // Video pause (works on all devices, triggered here for mobile context)
@@ -1145,7 +1144,7 @@ function initMobileFooterParallax() {
     });
 
     // Configurable gap before footer arrives
-    const footerArrivalGap = 0; // pixels of scroll where nothing happens before footer covers
+    const footerArrivalGap = 1100; // pixels of scroll where nothing happens before footer covers
 
     // Add EXTRA margin to footer to push it down further
     gsap.set(footer, {
@@ -1163,7 +1162,7 @@ function initMobileFooterParallax() {
     ScrollTrigger.create({
         trigger: teamSection,
         start: "top top", // Stick as soon as it hits top
-        end: `+=${footer.offsetHeight + teamHeight + footerArrivalGap}`, // Include gap so it stays pinned longer
+        end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, // Include gap so it stays pinned longer
         pin: true,
         pinSpacing: false,
         scrub: true,
@@ -1180,7 +1179,7 @@ function initMobileFooterParallax() {
             scrollTrigger: {
                 trigger: teamSection, // Use section itself as trigger
                 start: "top top+=50", // Start shortly after pinning (typing finishes at top top)
-                end: `+=${footer.offsetHeight + teamHeight + footerArrivalGap}`, // Include gap so timeline matches pin duration
+                end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, // Include gap so timeline matches pin duration
                 scrub: true
             }
         });
@@ -1281,20 +1280,13 @@ function initMobileFooterParallax() {
                 }, ">"); // Sequenced AFTER blur
             }
 
+            // Add Empty Gap at End of Timeline (proportional to footerArrivalGap)
+            // This ensures animation finishes, then stillness for a while before scroll ends
+            textExitTl.to({}, { duration: 2 });
         }
     }
 
     // Fade out the REST of the content slowly as footer covers (e.g. cards if visible)
-    gsap.to(teamContent, {
-        opacity: 0,
-        ease: "none",
-        scrollTrigger: {
-            trigger: footer,
-            start: "top bottom",
-            end: "top top",
-            scrub: true
-        }
-    });
 }
 
 /**
