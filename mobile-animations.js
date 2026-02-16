@@ -3,8 +3,8 @@
  * Handles interactions for mobile devices separate from desktop logic.
  */
 
-// Register GSAP plugins (ensure they are loaded)
-gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
+// GSAP Plugins are registered in Webflow
+// gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
 function initMobileAnimations() {
     console.log("Initializing Mobile Animations...");
