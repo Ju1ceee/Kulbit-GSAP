@@ -6,6 +6,7 @@
  * This allows us to separate logic for each section
  */
 function initAnimations() {
+    console.log("GSAP Animations Local-v2.1 Loaded"); // Verify update
     // Desktop-only animations (min-width: 480px)
     // Mobile animations are handled in mobile-animations.js
     const mm = ScrollTrigger.matchMedia();
@@ -1134,7 +1135,6 @@ function initScrambleText() {
 
 
 function initHeroAnimation() {
-    // Select Section
     const section = document.querySelector('.hero');
     if (!section) return;
 
