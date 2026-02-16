@@ -40,6 +40,9 @@ function initMobileAnimations() {
 
         // Video pause (works on all devices, triggered here for mobile context)
         initHeroVideoPause();
+
+        // Initialize Scroll Disabler
+        initScrollDisableLogic();
     });
 }
 
@@ -1354,7 +1357,7 @@ function initDynamicAnchorsMobile() {
         "Clients": ".our-ambassadors",
         "Cases": ".cases",
         "Team": ".team",
-        "What We Provide": ".our-services"
+        "what-we-provide": ".our-services"
     };
 
     function updateAnchors() {
@@ -1414,3 +1417,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Scroll Disable Logic
+ * ----------------------------------------------------------------------------------
+ * Disables page scroll if any element with attribute 'scroll-disable-element' is visible.
+ */
+function initScrollDisableLogic() {
+    const elements = document.querySelectorAll('[scroll-disable-element]');
+    if (!elements.length) return;
+
+    const checkScroll = () => {
+        let isAnyVisible = false;
+        elements.forEach(el => {
+            const style = window.getComputedStyle(el);
+            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                isAnyVisible = true;
+            }
+        });
+
+        if (isAnyVisible) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    };
+
+    const observer = new MutationObserver(checkScroll);
+    elements.forEach(el => {
+        observer.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+    });
+
+    // Initial check
+    checkScroll();
+}
