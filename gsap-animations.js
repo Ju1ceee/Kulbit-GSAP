@@ -31,6 +31,9 @@ function initAnimations() {
 
         // Initialize Scroll Disabler
         initScrollDisableLogic();
+
+        // Video Pause on Scroll
+        initHeroVideoPause();
     });
 }
 
@@ -2702,4 +2705,25 @@ function initScrollDisableLogic() {
 
     // Initial check
     checkScroll();
+}
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Hero Video Pause
+ * ----------------------------------------------------------------------------------
+ * Pauses video when next section covers it to save resources.
+ */
+function initHeroVideoPause() {
+    const video = document.getElementById('my-custom-video');
+    const nextSection = document.querySelector('.our-ambassadors');
+
+    if (!video || !nextSection) return;
+
+    ScrollTrigger.create({
+        trigger: nextSection,
+        start: "top top", // When next section hits top of viewport (hero is likely gone)
+        onEnter: () => video.pause(),
+        onLeaveBack: () => video.play(),
+        markers: false
+    });
 }
