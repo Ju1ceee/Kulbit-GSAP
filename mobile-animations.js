@@ -3,8 +3,8 @@
  * Handles interactions for mobile devices separate from desktop logic.
  */
 
-// GSAP Plugins are registered in Webflow
-// gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
+// Register GSAP plugins (ensure they are loaded)
+gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
 function initMobileAnimations() {
     console.log("Initializing Mobile Animations...");
@@ -1406,16 +1406,8 @@ function initDynamicAnchorsMobile() {
 document.addEventListener("DOMContentLoaded", () => {
     // Mobile/Tablet only check
     if (window.innerWidth < 992) {
-        if (typeof gsap === 'undefined') {
-            console.error("GSAP is not loaded. Mobile animations skipped.");
-            return;
-        }
-        try {
-            initMobileAnimations();
-            initSmoothScrollMobile();
-            initDynamicAnchorsMobile();
-        } catch (e) {
-            console.error("Kulbit Mobile Animations Error:", e);
-        }
+        initMobileAnimations();
+        initSmoothScrollMobile();
+        initDynamicAnchorsMobile();
     }
 });
