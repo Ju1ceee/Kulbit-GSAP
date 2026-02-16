@@ -2656,6 +2656,10 @@ function initDynamicAnchors() {
 document.addEventListener("DOMContentLoaded", () => {
     // Desktop only check
     if (window.innerWidth >= 992) {
+        if (typeof gsap === 'undefined') {
+            console.error("GSAP is not loaded. Desktop animations skipped.");
+            return;
+        }
         initAnimations();
         initDynamicAnchors(); // Initialize dynamic anchors
     }
