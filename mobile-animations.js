@@ -1406,8 +1406,16 @@ function initDynamicAnchorsMobile() {
 document.addEventListener("DOMContentLoaded", () => {
     // Mobile/Tablet only check
     if (window.innerWidth < 992) {
-        initMobileAnimations();
-        initSmoothScrollMobile();
-        initDynamicAnchorsMobile();
+        if (typeof gsap === 'undefined') {
+            console.error("GSAP is not loaded. Mobile animations skipped.");
+            return;
+        }
+        try {
+            initMobileAnimations();
+            initSmoothScrollMobile();
+            initDynamicAnchorsMobile();
+        } catch (e) {
+            console.error("Kulbit Mobile Animations Error:", e);
+        }
     }
 });
