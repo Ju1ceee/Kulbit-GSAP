@@ -7,16 +7,13 @@
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
 function initMobileAnimations() {
-    if (window.hasInitMobileAnimations) return;
-    window.hasInitMobileAnimations = true;
-
-    // console.log("Initializing Mobile Animations...");
+    console.log("Initializing Mobile Animations...");
 
     // MatchMedia for Mobile Only (max-width: 479px)
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(max-width: 479px)", () => {
-        // console.log("Mobile context active (<= 479px)");
+        console.log("Mobile context active (<= 479px)");
 
         // --- Mobile Specific Animations Start Here ---
 
@@ -38,14 +35,11 @@ function initMobileAnimations() {
         initMobileStageHeading();
         initMobileScrambleText();
         initMobileTeamAnimation();
-
         initMobileFooterParallax();
-
-        // Mobile-only utilities
-        initHeroVideoPause();
-        initSmoothScrollMobile();
-        initDynamicAnchorsMobile();
     });
+
+    // Video pause (works on all devices, not just mobile)
+    initHeroVideoPause();
 }
 
 function initHeroVideoPause() {
@@ -553,7 +547,7 @@ function initMobileProcess() {
 }
 
 function initMobileServices() {
-    // console.log("Initializing Mobile Services Animation");
+    console.log("Initializing Mobile Services Animation");
     const section = document.querySelector('.our-services');
     if (!section) return;
 
@@ -588,6 +582,8 @@ function initMobileServices() {
 
     // 2. Cards Wrapper slides up to top (Phase 1)
     // synchronized with text fade
+    // 2. Cards Wrapper slides up to top (Phase 1)
+    // synchronized with text fade
     tl.to(cardsWrapper, {
         y: () => {
             const containerRect = container.getBoundingClientRect();
@@ -617,6 +613,17 @@ function initMobileServices() {
     }, ">"); // Starts immediately after previous tween completes
 }
 
+
+// Initialize when DOM is ready
+
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Mobile Benefits Animation
+ * ----------------------------------------------------------------------------------
+ * Reveals all graph SVGs and the traditional line SVG simultaneously when the section appears.
+ * Uses a clip-path wipe effect to simulate "drawing".
+ */
 /**
  * ----------------------------------------------------------------------------------
  * Mobile Benefits Animation
@@ -802,6 +809,8 @@ function initMobileBenefitsCards() {
     // Card 3: Back (Small)
     gsap.set(card3, { zIndex: 1, scale: 0.5 });
 
+
+    // --- 2. Animation Timeline ---
 
     // --- 2. Animation Timeline ---
 
@@ -1048,13 +1057,13 @@ function initMobileTeamAnimation() {
     if (!section || !teamHeading) return;
 
     // Elements to hide initially (matching desktop logic usually, but simplified for mobile if needed)
+    // Looking at desktop initTeamAnimation: teamHeadRight, teamCards, teamBottomSection are hidden
     const teamHeadRight = section.querySelector('.team-head-right');
-    // Select ALL grid wrappers (there are two on mobile)
-    const teamGridWrappers = section.querySelectorAll('.team-grid-wrapper');
+    const teamCards = section.querySelector('.team-cards-wrapper');
     const teamBottomSection = section.querySelector('.team-head-right-bottom');
 
     // Hide initially
-    const elementsToHide = [teamHeadRight, ...teamGridWrappers].filter(el => el);
+    const elementsToHide = [teamHeadRight, teamCards].filter(el => el);
     gsap.set(elementsToHide, { opacity: 0, y: 30 }); // Slight slide up potential later or just hidden
     if (teamBottomSection) gsap.set(teamBottomSection, { opacity: 0 });
 
@@ -1103,39 +1112,6 @@ function initMobileTeamAnimation() {
             markers: false
         }
     });
-
-    // Animate Team Head Right (Metadata) Entry
-    if (teamHeadRight) {
-        gsap.to(teamHeadRight, {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            scrollTrigger: {
-                trigger: section,
-                start: "top 60%",
-                end: "top 40%",
-                scrub: true,
-                markers: false
-            }
-        });
-    }
-
-    // Animate ALL Grid Wrappers Entry
-    if (teamGridWrappers.length > 0) {
-        gsap.to(teamGridWrappers, {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            stagger: 0.1, // Stagger them slightly
-            scrollTrigger: {
-                trigger: section,
-                start: "top 50%", // Start after head-right
-                end: "top 20%",
-                scrub: true,
-                markers: false
-            }
-        });
-    }
 }
 
 /**
@@ -1330,13 +1306,8 @@ function initSmoothScrollMobile() {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
-
-
             // Skip empty or invalid hrefs
             if (!href || href === "#") return;
-
-            // Runtime check: Ignore if desktop
-            if (window.innerWidth >= 480) return;
 
             const targetId = href.substring(1);
             const target = document.getElementById(targetId);
@@ -1389,9 +1360,6 @@ function initDynamicAnchorsMobile() {
         // Remove existing dynamic anchors (handled by global script too, but safe to repeat)
         document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
-        // Runtime check: Ignore if desktop
-        if (window.innerWidth >= 480) return;
-
         for (const [id, selector] of Object.entries(anchorMap)) {
             const section = document.querySelector(selector);
             if (section) {
@@ -1434,6 +1402,12 @@ function initDynamicAnchorsMobile() {
 }
 
 // Initialize when DOM is ready
+// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    initMobileAnimations();
+    // Mobile/Tablet only check
+    if (window.innerWidth < 992) {
+        initMobileAnimations();
+        initSmoothScrollMobile();
+        initDynamicAnchorsMobile();
+    }
 });
