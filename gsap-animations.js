@@ -1138,12 +1138,12 @@ function initHeroAnimation() {
     const section = document.querySelector('.hero');
     if (!section) return;
 
-    // Select Elements via Attributes
-    const contentWrapper = section.querySelector('[data-anim-hero="text-block"]');
-    const videoWrapper = section.querySelector('[data-anim-hero="video-wrapper"]');
-    const bgVideo = section.querySelector('[data-anim-hero="video-block"]');
-    const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
-    const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
+    // Select Elements via Attributes with Class Fallbacks for robustness
+    const contentWrapper = section.querySelector('[data-anim-hero="text-block"]') || section.querySelector('.hero-content-wrapper');
+    const videoWrapper = section.querySelector('[data-anim-hero="video-wrapper"]') || section.querySelector('.video-wrapper');
+    const bgVideo = section.querySelector('[data-anim-hero="video-block"]') || section.querySelector('.hero-bg-video');
+    const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]') || section.querySelector('.hero-left-gradient');
+    const videoMask = section.querySelector('[data-anim-hero="video-mask"]') || section.querySelector('.video-mask');
 
     // Safety Check: detailed logging to help user identify missing elements
     if (!contentWrapper || !videoWrapper || !bgVideo || !leftGradient || !videoMask) {
