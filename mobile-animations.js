@@ -1281,9 +1281,6 @@ function initMobileFooterParallax() {
                 }, ">"); // Sequenced AFTER blur
             }
 
-            // Add Empty Gap at End of Timeline (proportional to footerArrivalGap)
-            // This ensures animation finishes, then stillness for a while before scroll ends
-            textExitTl.to({}, { duration: 2 });
         }
     }
 
