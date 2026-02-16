@@ -1145,6 +1145,14 @@ function initHeroAnimation() {
     const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
     const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
+    // Safety Check: detailed logging to help user identify missing elements
+    if (!contentWrapper || !videoWrapper || !bgVideo || !leftGradient || !videoMask) {
+        console.warn("GSAP [Hero]: One or more elements not found. Animation skipped.", {
+            contentWrapper, videoWrapper, bgVideo, leftGradient, videoMask
+        });
+        return;
+    }
+
 
     // Use matchMedia to create responsive animations
     ScrollTrigger.matchMedia({
