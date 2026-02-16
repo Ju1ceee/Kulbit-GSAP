@@ -28,6 +28,9 @@ function initAnimations() {
 
         // Initialize Global Smooth Scroll (Desktop Only)
         initSmoothScroll();
+
+        // Initialize Scroll Disabler
+        initScrollDisableLogic();
     });
 }
 
@@ -1001,6 +1004,7 @@ function initPreloader() {
 
         // Manual Exit Logic
         button.addEventListener("click", () => {
+            window.scrollTo(0, 0);
             gsap.to(wrapper, {
                 autoAlpha: 0,
                 duration: 0.5,
@@ -2591,7 +2595,7 @@ function initDynamicAnchors() {
         "Clients": ".our-ambassadors",
         "Cases": ".cases",
         "Team": ".team",
-        "What We Provide": ".our-services"
+        "what-we-provide": ".our-services"
     };
 
     function updateAnchors() {
@@ -2661,3 +2665,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+/**
+ * ----------------------------------------------------------------------------------
+ * Scroll Disable Logic
+ * ----------------------------------------------------------------------------------
+ * Disables page scroll if any element with attribute 'scroll-disable-element' is visible.
+ */
+function initScrollDisableLogic() {
+    const elements = document.querySelectorAll('[scroll-disable-element]');
+    if (!elements.length) return;
+
+    const checkScroll = () => {
+        let isAnyVisible = false;
+        elements.forEach(el => {
+            const style = window.getComputedStyle(el);
+            // Check if element is taking up space or visible
+            // Note: Opacity 0 might still block clicks, but user asked for "visible".
+            // Usually overlays are display:none when closed.
+            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                isAnyVisible = true;
+            }
+        });
+
+        if (isAnyVisible) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    };
+
+    const observer = new MutationObserver(checkScroll);
+    elements.forEach(el => {
+        observer.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+    });
+
+    // Initial check
+    checkScroll();
+}
