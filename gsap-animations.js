@@ -1,12 +1,11 @@
-// GSAP Plugins are registered in Webflow
-// gsap.registerPlugin(ScrollTrigger);
+// Register GSAP Plugins
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    console.log("GSAP Animations Local-v2.1 Loaded"); // Verify update
     // Desktop-only animations (min-width: 480px)
     // Mobile animations are handled in mobile-animations.js
     const mm = ScrollTrigger.matchMedia();
@@ -1135,23 +1134,16 @@ function initScrambleText() {
 
 
 function initHeroAnimation() {
+    // Select Section
     const section = document.querySelector('.hero');
     if (!section) return;
 
-    // Select Elements via Attributes with Class Fallbacks for robustness
-    const contentWrapper = section.querySelector('[data-anim-hero="text-block"]') || section.querySelector('.hero-content-wrapper');
-    const videoWrapper = section.querySelector('[data-anim-hero="video-wrapper"]') || section.querySelector('.video-wrapper');
-    const bgVideo = section.querySelector('[data-anim-hero="video-block"]') || section.querySelector('.hero-bg-video');
-    const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]') || section.querySelector('.hero-left-gradient');
-    const videoMask = section.querySelector('[data-anim-hero="video-mask"]') || section.querySelector('.video-mask');
-
-    // Safety Check: detailed logging to help user identify missing elements
-    if (!contentWrapper || !videoWrapper || !bgVideo || !leftGradient || !videoMask) {
-        console.warn("GSAP [Hero]: One or more elements not found. Animation skipped.", {
-            contentWrapper, videoWrapper, bgVideo, leftGradient, videoMask
-        });
-        return;
-    }
+    // Select Elements via Attributes
+    const contentWrapper = section.querySelector('[data-anim-hero="text-block"]');
+    const videoWrapper = section.querySelector('[data-anim-hero="video-wrapper"]');
+    const bgVideo = section.querySelector('[data-anim-hero="video-block"]');
+    const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
+    const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
 
     // Use matchMedia to create responsive animations
@@ -2664,10 +2656,6 @@ function initDynamicAnchors() {
 document.addEventListener("DOMContentLoaded", () => {
     // Desktop only check
     if (window.innerWidth >= 992) {
-        if (typeof gsap === 'undefined') {
-            console.error("GSAP is not loaded. Desktop animations skipped.");
-            return;
-        }
         initAnimations();
         initDynamicAnchors(); // Initialize dynamic anchors
     }
