@@ -35,6 +35,7 @@ function initMobileAnimations() {
             initMobileStageHeading();
             initMobileScrambleText();
             initMobileTeamAnimation();
+            initMobileFooterParallax();
         });
 
         // Video pause (works on all devices, triggered here for mobile context)
@@ -56,6 +57,9 @@ function initHeroVideoPause() {
         start: "top top",
         onEnter: () => {
             video.pause();
+        },
+        onLeaveBack: () => {
+            video.play();
         },
         markers: false
     });
@@ -1287,6 +1291,16 @@ function initMobileFooterParallax() {
     }
 
     // Fade out the REST of the content slowly as footer covers (e.g. cards if visible)
+    gsap.to(teamContent, {
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+            trigger: footer,
+            start: "top bottom",
+            end: "top top",
+            scrub: true
+        }
+    });
 }
 
 /**
