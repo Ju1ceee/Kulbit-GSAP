@@ -1,16 +1,15 @@
-// Register GSAP Plugins
-gsap.registerPlugin(ScrollTrigger);
+// GSAP Plugins are registered in Webflow
 
 /**
  * Main initialization function for all site animations
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    // Desktop-only animations (min-width: 480px)
+    // Desktop-only animations (min-width: 992px)
     // Mobile animations are handled in mobile-animations.js
     const mm = ScrollTrigger.matchMedia();
 
-    mm.add("(min-width: 480px)", () => {
+    mm.add("(min-width: 992px)", () => {
         // Initialize specific section animations (DESKTOP ONLY)
         initPreloader(); // Run Preloader first
         initHeroAnimation();
@@ -26,10 +25,10 @@ function initAnimations() {
         initBenefitsCardsAnimation();
         initStageBenefitsParallax(); // Parallax for previous section
         initTeamAnimation(); // Team section character animation
-    });
 
-    // Initialize Global Smooth Scroll (All Devices)
-    initSmoothScroll();
+        // Initialize Global Smooth Scroll (Desktop Only)
+        initSmoothScroll();
+    });
 }
 
 /**
@@ -2655,8 +2654,10 @@ function initDynamicAnchors() {
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     // Desktop only check
-    if (window.innerWidth >= 992) {
-        initAnimations();
-        initDynamicAnchors(); // Initialize dynamic anchors
-    }
+    ScrollTrigger.matchMedia({
+        "(min-width: 992px)": function () {
+            initAnimations();
+            initDynamicAnchors(); // Initialize dynamic anchors
+        }
+    });
 });
