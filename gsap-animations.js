@@ -6,18 +6,13 @@ gsap.registerPlugin(ScrollTrigger);
  * This allows us to separate logic for each section
  */
 function initAnimations() {
-    if (window.hasInitDesktopAnimations) return;
-    window.hasInitDesktopAnimations = true;
-
     // Desktop-only animations (min-width: 480px)
     // Mobile animations are handled in mobile-animations.js
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 480px)", () => {
         // Initialize specific section animations (DESKTOP ONLY)
-        // Note: initPreloader should be global if not present in mobile script, 
-        // but we moved it out to ensure it runs.
-
+        initPreloader(); // Run Preloader first
         initHeroAnimation();
         initScrambleText(); // Initialize Scramble effects
         initAmbassadorsAnimation();
@@ -31,16 +26,9 @@ function initAnimations() {
         initBenefitsCardsAnimation();
         initStageBenefitsParallax(); // Parallax for previous section
         initTeamAnimation(); // Team section character animation
-
-        // Video Pause Logic (Desktop Context)
-        initHeroVideoPause();
     });
 
-    // Initialize Global Smooth Scroll (Desktop Only via internal check)
-    // Run Preloader (Global)
-    initPreloader();
-
-    // Smooth Scroll
+    // Initialize Global Smooth Scroll (All Devices)
     initSmoothScroll();
 }
 
@@ -2543,10 +2531,6 @@ function initSmoothScroll() {
             // Skip empty or invalid hrefs
             if (!href || href === "#") return;
 
-            // Runtime check: if mobile, do not run desktop smooth scroll
-            // This prevents conflict with mobile-animations.js
-            if (window.innerWidth < 480) return;
-
             const targetId = href.substring(1);
             const target = document.getElementById(targetId);
 
@@ -2615,9 +2599,6 @@ function initDynamicAnchors() {
         // Remove existing dynamic anchors to avoid building up
         document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
-        // Runtime check: Ignore if mobile (mobile script handles it)
-        if (window.innerWidth < 480) return;
-
         for (const [id, selector] of Object.entries(anchorMap)) {
             const section = document.querySelector(selector);
             if (section) {
@@ -2672,8 +2653,10 @@ function initDynamicAnchors() {
 
 // Initialize when DOM is ready
 // Initialize when DOM is ready
-// Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    initAnimations();
-    initDynamicAnchors(); // Initialize dynamic anchors
+    // Desktop only check
+    if (window.innerWidth >= 992) {
+        initAnimations();
+        initDynamicAnchors(); // Initialize dynamic anchors
+    }
 });
