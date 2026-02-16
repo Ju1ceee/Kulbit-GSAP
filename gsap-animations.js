@@ -1148,12 +1148,6 @@ function initHeroAnimation() {
     const leftGradient = section.querySelector('[data-anim-hero="text-gradient"]');
     const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
-    // Safety Check: Ensure critical elements exist before animating
-    if (!contentWrapper || !videoWrapper || !leftGradient) {
-        console.warn("GSAP Hero Animation skipped: Missing required elements.");
-        return;
-    }
-
 
     // Use matchMedia to create responsive animations
     ScrollTrigger.matchMedia({
