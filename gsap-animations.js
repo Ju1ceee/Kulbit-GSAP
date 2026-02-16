@@ -1,5 +1,5 @@
-// Register GSAP Plugins
-gsap.registerPlugin(ScrollTrigger);
+// GSAP Plugins are registered in Webflow
+// gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Main initialization function for all site animations
