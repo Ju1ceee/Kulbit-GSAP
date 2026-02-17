@@ -6,7 +6,7 @@ function initMobileAnimations() {
 
         const mmMobile = ScrollTrigger.matchMedia();
         mmMobile.add("(max-width: 479px)", () => {
-
+            
             initMobileHero();
 
             initMobileAmbassadors();
@@ -20,7 +20,7 @@ function initMobileAnimations() {
             initMobileStageHeading();
             initMobileScrambleText();
             initMobileTeamAnimation();
-
+            initMobileFooterParallax();
         });
 
         initHeroVideoPause();
@@ -51,7 +51,7 @@ function initHeroVideoPause() {
 function initMobileHero() {
     const heroSection = document.querySelector('.hero');
     if (!heroSection) {
-
+        
         return;
     }
 
@@ -72,17 +72,17 @@ function initMobileHero() {
     });
 
     if (heroContent) {
-
+        
         tl.to(heroContent, { y: "120%", ease: "none", duration: 0.8 }, 0);
     }
 
     if (heroGradient) {
-
+        
         tl.to(heroGradient, { y: "220%", ease: "none", duration: 0.8 }, 0);
     }
 
     if (videoElements.length > 0) {
-
+        
         tl.to(videoElements, { height: "100vh", ease: "none", duration: 0.8 }, 0);
     }
 
@@ -140,7 +140,7 @@ function initMobileAmbassadors() {
 
     gsap.set(container1, { opacity: 1, y: 0, visibility: "visible" });
     gsap.set(row1_1, { opacity: 1, y: 0, visibility: "visible" });
-    gsap.set(row2_1, { opacity: 1, y: 0, visibility: "visible" });
+    gsap.set(row2_1, { opacity: 1, y: 0, visibility: "visible" }); 
 
     ScrollTrigger.refresh();
 
@@ -148,9 +148,9 @@ function initMobileAmbassadors() {
         scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: "+=300%",
+            end: "+=300%", 
             pin: true,
-            pinSpacing: false,
+            pinSpacing: false, 
             scrub: true
         }
     });
@@ -221,7 +221,7 @@ function initMobileProcess() {
         6: [section.querySelector('[data-anim-process-dot="2-2"]')],
         7: [section.querySelector('[data-anim-process-dot="2-3"]'), section.querySelector('[data-anim-process-dot="2-4"]')],
         8: [section.querySelector('[data-anim-process-dot="2-5"]')],
-
+        
     };
 
     for (let key in dots) {
@@ -233,14 +233,14 @@ function initMobileProcess() {
     if (redMapSvg) gsap.set(redMapSvg, { autoAlpha: 0 });
 
     if (redMaskPath && redFillLayer && redMapSvg) {
-
+        
         const redLength = redMaskPath.getTotalLength();
         gsap.set(redMaskPath, { strokeDasharray: redLength, strokeDashoffset: redLength });
         gsap.set(redFillLayer, { autoAlpha: 0 });
 
         tlRedMap.to(redMapSvg, { autoAlpha: 1, duration: 0.1, ease: "none" });
         tlRedMap.to(redMaskPath, { strokeDashoffset: 0, duration: 0.8, ease: "none" }, "<");
-
+        
         tlRedMap.to(redFillLayer, { autoAlpha: 1, duration: 0.2, ease: "power2.out" });
     }
 
@@ -249,13 +249,13 @@ function initMobileProcess() {
 
     let tlBlueMap = gsap.timeline({ paused: true });
     if (blueMaskPath && blueFillLayer) {
-
+        
         const blueLength = blueMaskPath.getTotalLength();
         gsap.set(blueMaskPath, { strokeDasharray: blueLength, strokeDashoffset: blueLength, autoAlpha: 1 });
         gsap.set(blueFillLayer, { autoAlpha: 0 });
 
         tlBlueMap.to(blueMaskPath, { strokeDashoffset: 0, duration: 0.8, ease: "none" });
-
+        
         tlBlueMap.to(blueFillLayer, { autoAlpha: 1, duration: 0.05, ease: "power2.out" });
     }
 
@@ -273,7 +273,7 @@ function initMobileProcess() {
             gsap.set(cards[i], { position: "absolute", top: 0, left: 0, width: "100%", visibility: "visible", opacity: 0 });
             const height = cards[i].offsetHeight;
             cardPositions[i] = { top: 0 };
-            cardPositions[i + 1] = { top: `${height - 2}px` };
+            cardPositions[i + 1] = { top: `${height - 2}px` }; 
             gsap.set(cards[i], { visibility: "hidden" });
         }
     }
@@ -304,9 +304,9 @@ function initMobileProcess() {
         scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: "+=800%",
+            end: "+=800%",    
             pin: true,
-            pinSpacing: false,
+            pinSpacing: false, 
             scrub: 1
         }
     });
@@ -369,10 +369,10 @@ function initMobileProcess() {
     if (cards[1] || cards[2]) {
         tl.addLabel("exit1-2");
         if (cards[1]) animateStepOut(1, "exit1-2");
-        if (cards[2]) animateStepOut(2, "exit1-2");
+        if (cards[2]) animateStepOut(2, "exit1-2"); 
     }
 
-    tl.to({}, { duration: 0.2 });
+    tl.to({}, { duration: 0.2 }); 
 
     if (cards[3]) { animateStepIn(3); }
     tl.to({}, { duration: 0.2 });
@@ -463,7 +463,7 @@ function initMobileProcess() {
 }
 
 function initMobileServices() {
-
+    
     const section = document.querySelector('.our-services');
     if (!section) return;
 
@@ -476,9 +476,9 @@ function initMobileServices() {
     const tl = gsap.timeline({
         scrollTrigger: {
             trigger: section,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.1,
+            start: "top top", 
+            end: "bottom bottom", 
+            scrub: 0.1, 
         }
     });
 
@@ -495,9 +495,9 @@ function initMobileServices() {
         y: () => {
             const containerRect = container.getBoundingClientRect();
             const cardsRect = cardsWrapper.getBoundingClientRect();
-
+            
             const offset = parseFloat(getComputedStyle(document.documentElement).fontSize) * -3;
-
+            
             return -(cardsRect.top - containerRect.top) + offset;
         },
         duration: 3,
@@ -513,7 +513,7 @@ function initMobileServices() {
         },
         duration: 10,
         ease: "none"
-    }, ">");
+    }, ">"); 
 }
 
 function initMobileBenefits() {
@@ -540,7 +540,7 @@ function initMobileBenefits() {
     const blueLines = section.querySelectorAll('.benefits-color-line:not(.is-red)');
 
     const weekLabels = section.querySelectorAll('.benefits-week.is-three, .benefits-week.if-four');
-    const traditionalText = section.querySelectorAll('.taditional-text');
+    const traditionalText = section.querySelectorAll('.taditional-text'); 
     const kulbitText = section.querySelector('.kulbit-text-wrapper');
 
     const textTargets = [...weekLabels, ...traditionalText, ...(kulbitText ? [kulbitText] : [])];
@@ -562,7 +562,7 @@ function initMobileBenefits() {
     const tl = gsap.timeline({
         scrollTrigger: {
             trigger: section,
-            start: "top 75%",
+            start: "top 75%", 
             markers: false
         }
     });
@@ -576,7 +576,7 @@ function initMobileBenefits() {
     });
 
     if (circles.length > 0) {
-
+        
         tl.to(circles[0], { opacity: 1, duration: 0.4 }, 0.2);
 
         if (circles[1]) tl.to(circles[1], { opacity: 1, duration: 0.4 }, 0.6);
@@ -597,7 +597,7 @@ function initMobileBenefits() {
             xPercent: 0,
             duration: 1.0,
             ease: "power2.out"
-        }, "<+=0.4");
+        }, "<+=0.4"); 
     }
 
     tl.to(textTargets, {
@@ -611,8 +611,8 @@ function initMobileBenefits() {
 
 function initMobileBenefitsCards() {
     const section = document.querySelector('.benefits');
-    const wrapper = document.querySelector('.benefits-cards-wrapper');
-
+    const wrapper = document.querySelector('.benefits-cards-wrapper'); 
+    
     const card1 = wrapper.querySelector('[data-benefit-card="1"]');
     const card2 = wrapper.querySelector('[data-benefit-card="2"]');
     const card3 = wrapper.querySelector('[data-benefit-card="3"]');
@@ -621,9 +621,9 @@ function initMobileBenefitsCards() {
 
     gsap.set(wrapper, {
         position: 'sticky',
-        height: '100vh',
+        height: '100vh', 
 
-        overflow: 'visible'
+        overflow: 'visible' 
     });
 
     const cards = [card1, card2, card3];
@@ -632,14 +632,14 @@ function initMobileBenefitsCards() {
         position: 'absolute',
         top: 0,
         left: 0,
-        width: '100%',
-        transformOrigin: '50% 50%'
+        width: '100%', 
+        transformOrigin: '50% 50%' 
     });
 
     gsap.set(card1, { zIndex: 3, scale: 1 });
-
+    
     gsap.set(card2, { zIndex: 2, scale: 0.5 });
-
+    
     gsap.set(card3, { zIndex: 1, scale: 0.5 });
 
     gsap.set(section, { height: "300vh", position: "sticky" });
@@ -652,7 +652,7 @@ function initMobileBenefitsCards() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: "center", 
         zIndex: 5
     });
 
@@ -660,17 +660,17 @@ function initMobileBenefitsCards() {
         scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: "bottom bottom",
-            pin: false,
+            end: "bottom bottom", 
+            pin: false, 
             scrub: 1,
-
+            
         }
     });
 
     tl.to(card1, {
-        yPercent: 150,
-        rotation: 5,
-
+        yPercent: 150, 
+        rotation: 5,   
+        
         duration: 1,
         ease: "power2.in"
     });
@@ -679,12 +679,12 @@ function initMobileBenefitsCards() {
         scale: 1,
         duration: 1,
         ease: "power1.inOut"
-    }, "<");
+    }, "<"); 
 
     tl.to(card2, {
         yPercent: 150,
         rotation: 5,
-
+        
         duration: 1,
         ease: "power2.in"
     });
@@ -693,7 +693,7 @@ function initMobileBenefitsCards() {
         scale: 1,
         duration: 1,
         ease: "power1.inOut"
-    }, "<");
+    }, "<"); 
 }
 
 function initMobileStageHeading() {
@@ -710,7 +710,7 @@ function initMobileStageHeading() {
                 text.split('').forEach(char => {
                     const span = document.createElement('span');
                     span.textContent = char;
-                    span.style.opacity = '0';
+                    span.style.opacity = '0'; 
                     span.style.transition = 'none';
                     span.dataset.animChar = "true";
                     newContent.appendChild(span);
@@ -735,7 +735,7 @@ function initMobileStageHeading() {
         ease: "none",
         scrollTrigger: {
             trigger: heading,
-            start: "top 85%",
+            start: "top 85%", 
             markers: false
         }
     });
@@ -750,8 +750,8 @@ function initMobileScrambleText() {
         const w = el.getBoundingClientRect().width;
         if (h > 0) {
             el.style.height = `${h}px`;
-            el.style.width = `${w}px`;
-
+            el.style.width = `${w}px`; 
+            
         }
     };
 
@@ -800,7 +800,7 @@ function initMobileScrambleText() {
                 try {
                     const created = splitTextNode(n);
                     created.forEach((cn) => animNodes.push(cn));
-                } catch (e) { }
+                } catch (e) {  }
             } else {
                 animNodes.push(n);
             }
@@ -814,7 +814,7 @@ function initMobileScrambleText() {
 
         items.forEach((it) => (it.node.textContent = ""));
 
-        const startViewport = el.getAttribute("data-scramble-start") || "95%";
+        const startViewport = el.getAttribute("data-scramble-start") || "95%"; 
         const duration = parseFloat(el.getAttribute("data-scramble-duration") || "0.9");
         const stagger = parseFloat(el.getAttribute("data-scramble-stagger") || "0.06");
 
@@ -823,7 +823,7 @@ function initMobileScrambleText() {
             defaults: { ease: "none" },
             scrollTrigger: {
                 trigger: el,
-                start: `top ${startViewport}`,
+                start: `top ${startViewport}`, 
                 once: true,
                 onEnter: () => tl.play(0),
             },
@@ -849,179 +849,198 @@ function initMobileScrambleText() {
 
 function initMobileTeamAnimation() {
     const section = document.querySelector('.team');
-    // We'll use team-head-right-second for the character animation, 
-    // but the main trigger is the section itself.
     const teamHeading = section ? section.querySelector('.team-head-right-second') : null;
 
-    if (!section) return;
+    if (!section || !teamHeading) return;
 
-    // Elements to animate
-    const teamHeadLeft = section.querySelector('.team-head-left');
-    // teamHeadRightSecond is 'teamHeading'
     const teamHeadRight = section.querySelector('.team-head-right');
-    const teamCardsWrapper = section.querySelector('.team-cards-wrapper');
+    const teamCards = section.querySelector('.team-cards-wrapper');
     const teamBottomSection = section.querySelector('.team-head-right-bottom');
-    const teamGridWrapper = section.querySelector('.team-grid-wrapper');
-    const teamBlurTop = section.querySelectorAll('.team-blur-top');
 
-    // 1. Initial States
-    // -----------------------------------------------------------------------
-    if (teamHeadRight) gsap.set(teamHeadRight, { y: 100, opacity: 0 });
-    if (teamCardsWrapper) gsap.set(teamCardsWrapper, { y: 100, opacity: 0 });
-    if (teamBlurTop.length) gsap.set(teamBlurTop, { opacity: 0 });
+    const elementsToHide = [teamHeadRight, teamCards].filter(el => el);
+    gsap.set(elementsToHide, { opacity: 0, y: 30 }); 
     if (teamBottomSection) gsap.set(teamBottomSection, { opacity: 0 });
 
-    // 2. Character Split Logic for Heading
-    // -----------------------------------------------------------------------
-    if (teamHeading) {
-        const splitTextNodesRecursively = (element) => {
-            [...element.childNodes].forEach(child => {
-                if (child.nodeType === Node.TEXT_NODE) {
-                    const text = child.textContent;
-                    if (text.trim() === '') return;
-                    const newContent = document.createDocumentFragment();
-                    text.split('').forEach(char => {
-                        const span = document.createElement('span');
-                        span.textContent = char;
-                        span.style.opacity = '0';
-                        span.style.transition = 'none';
-                        span.dataset.animChar = "true";
-                        newContent.appendChild(span);
-                    });
-                    element.replaceChild(newContent, child);
-                } else if (child.nodeType === Node.ELEMENT_NODE) {
-                    splitTextNodesRecursively(child);
-                }
-            });
-        };
+    const splitTextNodesRecursively = (element) => {
+        [...element.childNodes].forEach(child => {
+            if (child.nodeType === Node.TEXT_NODE) {
+                const text = child.textContent;
+                if (text.trim() === '') return; 
 
-        if (teamHeading.querySelectorAll('[data-anim-char="true"]').length === 0) {
-            splitTextNodesRecursively(teamHeading);
-        }
+                const newContent = document.createDocumentFragment();
+                text.split('').forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.style.opacity = '0';
+                    span.style.transition = 'none';
+                    span.dataset.animChar = "true";
+                    newContent.appendChild(span);
+                });
+                element.replaceChild(newContent, child);
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                splitTextNodesRecursively(child);
+            }
+        });
+    };
+
+    if (teamHeading.querySelectorAll('[data-anim-char="true"]').length === 0) {
+        splitTextNodesRecursively(teamHeading);
     }
 
-    // 3. Master Pinned Timeline
-    // -----------------------------------------------------------------------
-    // This pins the section and scrubs through the animation sequence.
-    // The length (end) determines how long the user scrolls to see the animation.
-    const tl = gsap.timeline({
+    const chars = teamHeading.querySelectorAll('[data-anim-char="true"]');
+
+    gsap.to(chars, {
+        opacity: 1,
+        duration: 0.1,
+        stagger: 0.05,
+        ease: "none",
         scrollTrigger: {
             trigger: section,
-            start: "top top",
-            end: "bottom bottom", // Match section height
+            
+            start: "top 70%", 
+            end: "top top",   
             scrub: true,
             markers: false
         }
     });
-
-    // 4. Animation Sequence
-    // -----------------------------------------------------------------------
-
-    // A) Reveal the Heading Characters first (or slightly before/during pin)
-    //    Since we are pinning at "top top", let's animate characters fast at the start.
-    if (teamHeading) {
-        const chars = teamHeading.querySelectorAll('[data-anim-char="true"]');
-        tl.to(chars, {
-            opacity: 1,
-            duration: 0.5, // Relative to scroll distance
-            stagger: 0.05,
-            ease: "none"
-        }, 0);
-    }
-
-    // B) Fade Out initial elements (Left Head and the Heading we just typed)
-    //    after they have been visible for a bit.
-    if (teamHeadLeft) {
-        tl.to(teamHeadLeft, {
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, ">+0.5");
-    }
-
-    if (teamHeading) {
-        tl.to(teamHeading, {
-            y: -100,
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    // C) Bring in Right Head and Cards
-    if (teamHeadRight) {
-        tl.to(teamHeadRight, {
-            y: 0, // from 100
-            opacity: 1,
-            duration: 1,
-            ease: "none"
-        }, ">-0.5");
-    }
-
-    if (teamCardsWrapper) {
-        tl.to(teamCardsWrapper, {
-            y: 0, // from 100
-            opacity: 1,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    // E) Reveal Blur FIRST
-    if (teamBlurTop.length) {
-        tl.to(teamBlurTop, {
-            opacity: 1,
-            duration: 0.5,
-            ease: "none"
-        }, ">");
-    }
-
-    // D) Move them up and out to make room for grid
-    if (teamHeadRight) {
-        tl.to(teamHeadRight, {
-            y: -150,
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, ">"); // After blur
-    }
-
-    if (teamCardsWrapper) {
-        tl.to(teamCardsWrapper, {
-            y: -320,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    if (teamGridWrapper) {
-        const teamGridWrapperOffset = "-70rem"; // Matches original logic
-        tl.to(teamGridWrapper, {
-            y: teamGridWrapperOffset,
-            duration: 4,
-            ease: "none"
-        }, "<");
-    }
-
-    // F) Final buffer
-    tl.to({}, { duration: 1 });
-
-    // G) Defer Footer Appearance - Integrated into Main Sequence
-    // -----------------------------------------------------------------------
-    const footer = document.querySelector('.footer');
-    if (footer) {
-        gsap.set(footer, { y: "100vh" });
-
-        // Start earlier but ensuring it's at the end
-        tl.to(footer, {
-            y: 0,
-            ease: "none",
-            duration: 1
-        }, ">-0.2");
-    }
 }
 
+function initMobileFooterParallax() {
+    const teamSection = document.querySelector('.team');
+    const footer = document.querySelector('.footer');
 
+    if (!teamSection || !footer) return;
+
+    const teamHeight = teamSection.offsetHeight;
+
+    gsap.set(footer, {
+        zIndex: 10,
+        position: "relative",
+        marginTop: teamHeight 
+    });
+
+    const footerArrivalGap = 1100; 
+
+    gsap.set(footer, {
+        marginTop: teamHeight + footerArrivalGap
+    });
+    gsap.set(teamSection, {
+        zIndex: 1,
+        position: "relative" 
+    });
+
+    const teamContent = teamSection.querySelector('.container') || teamSection.children;
+
+    ScrollTrigger.create({
+        trigger: teamSection,
+        start: "top top", 
+        end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, 
+        pin: true,
+        pinSpacing: false,
+        scrub: true,
+    });
+
+    const teamHeadLeft = teamSection.querySelector('.team-head-left');
+    const teamHeadRightSecond = teamSection.querySelector('.team-head-right-second');
+
+    if (teamHeadLeft && teamHeadRightSecond) {
+        const textExitTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: teamSection, 
+                start: "top top+=50", 
+                end: `+=${footer.offsetHeight + teamHeight + 1000 + footerArrivalGap}`, 
+                scrub: true
+            }
+        });
+
+        textExitTl.to(teamHeadLeft, {
+            opacity: 0,
+            duration: 0.3,
+            ease: "none"
+        });
+
+        textExitTl.to(teamHeadRightSecond, {
+            y: -100, 
+            opacity: 0,
+            duration: 1,
+            ease: "none"
+        }, "<0.1"); 
+
+        const teamHeadRight = teamSection.querySelector('.team-head-right');
+        const teamCardsWrapper = teamSection.querySelector('.team-cards-wrapper');
+        const teamGridWrapper = teamSection.querySelector('.team-grid-wrapper');
+        const teamBlurTop = teamSection.querySelectorAll('.team-blur-top');
+
+        const teamGridWrapperOffset = "-70rem";
+
+        if (teamHeadRight) gsap.set(teamHeadRight, { y: 100, opacity: 0 });
+        if (teamCardsWrapper) gsap.set(teamCardsWrapper, { y: 100, opacity: 0 });
+        if (teamBlurTop.length) gsap.set(teamBlurTop, { opacity: 0 });
+
+        if (teamHeadRight) {
+            textExitTl.to(teamHeadRight, {
+                y: "-5rem",
+                opacity: 1,
+                duration: 1,
+                ease: "none"
+            }, ">-0.2");
+        }
+
+        if (teamCardsWrapper) {
+            textExitTl.to(teamCardsWrapper, {
+                y: "-20rem",
+                opacity: 1,
+                duration: 1,
+                ease: "none"
+            }, "<"); 
+        }
+
+        if (teamHeadRight && teamCardsWrapper) {
+            
+            textExitTl.to(teamHeadRight, {
+                y: "-15rem", 
+                opacity: 0,
+                duration: 0.3, 
+                ease: "none"
+            }, ">+0.3"); 
+
+            textExitTl.to(teamCardsWrapper, {
+                y: "-32rem",
+                duration: 1,
+                ease: "none"
+            }, "<"); 
+
+            if (teamBlurTop.length) {
+                textExitTl.to(teamBlurTop, {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "none"
+                }, ">"); 
+            }
+
+            if (teamGridWrapper) {
+                textExitTl.to(teamGridWrapper, {
+                    y: teamGridWrapperOffset,
+                    duration: 4, 
+                    ease: "none"
+                }, ">"); 
+            }
+
+            textExitTl.to({}, { duration: 2 });
+        }
+    }
+
+    gsap.to(teamContent, {
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+            trigger: footer,
+            start: "top bottom",
+            end: "top top",
+            scrub: true
+        }
+    });
+}
 
 function initSmoothScrollMobile() {
     const links = document.querySelectorAll('a[href^="#"]');
@@ -1029,7 +1048,7 @@ function initSmoothScrollMobile() {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
-
+            
             if (!href || href === "#") return;
 
             const targetId = href.substring(1);
@@ -1044,7 +1063,7 @@ function initSmoothScrollMobile() {
                 if (window.lenis) {
                     window.lenis.scrollTo(scrollTarget, { offset: 0, immediate: false });
                 }
-
+                
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
@@ -1052,7 +1071,7 @@ function initSmoothScrollMobile() {
                         ease: "power2.out"
                     });
                 }
-
+                
                 else {
                     scrollTarget.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -1071,7 +1090,7 @@ function initDynamicAnchorsMobile() {
     };
 
     function updateAnchors() {
-
+        
         document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
         for (const [id, selector] of Object.entries(anchorMap)) {
@@ -1116,7 +1135,7 @@ function initDynamicAnchorsMobile() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
+    
     ScrollTrigger.matchMedia({
         "(max-width: 991px)": function () {
             initMobileAnimations();
