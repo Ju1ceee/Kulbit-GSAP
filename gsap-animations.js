@@ -3,10 +3,10 @@ function initAnimations() {
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 992px)", () => {
-        
-        initPreloader(); 
+
+        initPreloader();
         initHeroAnimation();
-        initScrambleText(); 
+        initScrambleText();
         initAmbassadorsAnimation();
         initStageSecondAnimation();
         initStagesAnimation();
@@ -16,8 +16,8 @@ function initAnimations() {
         initBenefitsAnimationSequence();
         initBenefitsCirclesStyle();
         initBenefitsCardsAnimation();
-        initStageBenefitsParallax(); 
-        initTeamAnimation(); 
+        initStageBenefitsParallax();
+        initTeamAnimation();
 
         initSmoothScroll();
 
@@ -38,15 +38,15 @@ function initStageBenefitsParallax() {
         trigger: stageSection,
         start: "top top",
         endTrigger: benefitsSection,
-        end: "top 50%", 
+        end: "top 50%",
         pin: true,
-        pinSpacing: false, 
+        pinSpacing: false,
         markers: false
     });
 }
 
 function initBenefitsGraphAnimation() {
-    
+
     const graphs = document.querySelectorAll('.benefits-graph-svg.desktop-only');
 
     graphs.forEach((graph) => {
@@ -64,18 +64,18 @@ function initBenefitsGraphAnimation() {
 
         if (!gradientPath || !whitePath || !darkPath) return;
 
-        gsap.set(graph, { opacity: 0 }); 
+        gsap.set(graph, { opacity: 0 });
 
     });
 }
 
 function initBenefitsAnimationSequence() {
-    
-    const section = document.querySelector('.benefits'); 
-    
+
+    const section = document.querySelector('.benefits');
+
     const dashedLine = document.querySelector('.benefits-dashed-line.desktop-only');
     const traditionalLine = document.querySelector('.traditional-line-svg.desktop-only');
-    const circles = document.querySelectorAll('.benefits-circle[data-benefit-circle]'); 
+    const circles = document.querySelectorAll('.benefits-circle[data-benefit-circle]');
 
     const traditionalLineParent = traditionalLine ? traditionalLine.closest('.benefit-tradidional-line') : null;
     const textLegacy = traditionalLineParent ? traditionalLineParent.querySelector('.taditional-text') : null;
@@ -119,21 +119,21 @@ function initBenefitsAnimationSequence() {
 
     const tl = gsap.timeline({
         scrollTrigger: {
-            trigger: section, 
-            start: "top top", 
-            end: "bottom bottom", 
-            scrub: 1, 
-            markers: false 
+            trigger: section,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1,
+            markers: false
         }
     });
 
-    const lineDuration = 1.2; 
+    const lineDuration = 1.2;
 
     tl.to(dashedLine, {
         clipPath: visibleClip,
         webkitClipPath: visibleClip,
         duration: lineDuration,
-        ease: "none" 
+        ease: "none"
     }, "start");
 
     tl.to(traditionalLine, {
@@ -143,7 +143,7 @@ function initBenefitsAnimationSequence() {
         ease: "none"
     }, "start");
 
-    const fadeDur = 0.3; 
+    const fadeDur = 0.3;
 
     tl.to(getCircle(1), { opacity: 1, duration: fadeDur }, "start");
 
@@ -161,7 +161,7 @@ function initBenefitsAnimationSequence() {
             y: 0,
             duration: 0.8,
             ease: "power2.out"
-        }, `start+=${lineDuration}`); 
+        }, `start+=${lineDuration}`);
     }
 
     if (weeksLabel) {
@@ -170,7 +170,7 @@ function initBenefitsAnimationSequence() {
             y: 0,
             duration: 0.8,
             ease: "power2.out"
-        }, `start+=${lineDuration}`); 
+        }, `start+=${lineDuration}`);
     }
 
     const redColorLine = document.querySelector('.benefits-color-line.is-red');
@@ -179,16 +179,16 @@ function initBenefitsAnimationSequence() {
             xPercent: 0,
             duration: 1,
             ease: "power2.out"
-        }, `start+=${lineDuration + 0.5}`); 
+        }, `start+=${lineDuration + 0.5}`);
 
         if (traditionalLine) {
             const path = traditionalLine.querySelector('path');
             if (path) {
                 tl.to(path, {
-                    fill: "rgba(255, 255, 255, 0.1)", 
+                    fill: "rgba(255, 255, 255, 0.1)",
                     duration: 1,
                     ease: "power2.out"
-                }, `start+=${lineDuration + 0.5}`); 
+                }, `start+=${lineDuration + 0.5}`);
             }
         }
 
@@ -239,7 +239,7 @@ function initBenefitsAnimationSequence() {
         }, `start+=${blueLineStart}`);
     }
 
-    const phase2Start = blueLineStart + 1 + 0.5; 
+    const phase2Start = blueLineStart + 1 + 0.5;
     if (textLegacy) {
         tl.to(textLegacy, {
             opacity: 0,
@@ -249,7 +249,7 @@ function initBenefitsAnimationSequence() {
         }, `start+=${phase2Start}`);
     }
 
-    const reverseLineStart = phase2Start + 0.6 + 0.2; 
+    const reverseLineStart = phase2Start + 0.6 + 0.2;
     if (traditionalLine) {
         tl.to(traditionalLine, {
             clipPath: hiddenClip,
@@ -259,7 +259,7 @@ function initBenefitsAnimationSequence() {
         }, `start+=${reverseLineStart}`);
     }
 
-    const secondTextStart = reverseLineStart + 1.2 + 0.3; 
+    const secondTextStart = reverseLineStart + 1.2 + 0.3;
     if (textNew) {
         tl.to(textNew, {
             opacity: 1,
@@ -272,7 +272,7 @@ function initBenefitsAnimationSequence() {
     const graphContainers = document.querySelectorAll('.benefits-graph-svg.desktop-only');
     const graphSvgs = document.querySelectorAll('.benefits-graph-svg.desktop-only .position-absolute-100');
 
-    const graphsStart = secondTextStart + 0.8 + 0.3; 
+    const graphsStart = secondTextStart + 0.8 + 0.3;
     if (graphContainers.length) {
         graphContainers.forEach(g => {
             const mainSvg = g.querySelector('svg:not(.position-absolute-100)');
@@ -397,20 +397,20 @@ function initBenefitsAnimationSequence() {
         }, `start+=${finalPhaseStart + 1.0}`);
     }
 
-    const cardsStart = finalPhaseStart + 1.5; 
+    const cardsStart = finalPhaseStart + 1.5;
     const cards = document.querySelectorAll('.benefits-card[data-benefit-card]');
 
     if (cards.length >= 3) {
-        
-        const step1Duration = 3; 
+
+        const step1Duration = 3;
 
         tl.to(cards[0], {
-            xPercent: -50, 
-            yPercent: 50,  
-            rotation: -10, 
+            xPercent: -50,
+            yPercent: 50,
+            rotation: -10,
             opacity: 0,
             duration: step1Duration,
-            ease: "power1.inOut" 
+            ease: "power1.inOut"
         }, `start+=${cardsStart}`);
 
         const graph2 = document.querySelector('.benefits-graph-svg.is-two.desktop-only');
@@ -437,7 +437,7 @@ function initBenefitsAnimationSequence() {
                 if (gradientPath2) {
                     tl.to(gradientPath2, {
                         opacity: 1,
-                        duration: 0.8, 
+                        duration: 0.8,
                         ease: "power2.out"
                     }, `start+=${endOfStep1}`);
                 }
@@ -455,10 +455,10 @@ function initBenefitsAnimationSequence() {
 
         tl.to(cards[1], {
             xPercent: 0,
-            top: "0%", 
-            yPercent: 0, 
+            top: "0%",
+            yPercent: 0,
             scale: 1,
-            zIndex: 3, 
+            zIndex: 3,
             duration: step1Duration,
             ease: "power1.inOut"
         }, `start+=${cardsStart}`)
@@ -530,8 +530,8 @@ function initBenefitsAnimationSequence() {
 
         tl.to(cards[2], {
             xPercent: 0,
-            top: "0%", 
-            yPercent: 0, 
+            top: "0%",
+            yPercent: 0,
             scale: 1,
             zIndex: 3,
             duration: step2Duration,
@@ -546,7 +546,7 @@ function initBenefitsAnimationSequence() {
 }
 
 function initBenefitsCirclesStyle() {
-    
+
     const darkBorderCircles = document.querySelectorAll('.benefits-circle[data-benefit-circle]:not([data-benefit-circle="1"])');
 
     gsap.set(darkBorderCircles, {
@@ -568,9 +568,9 @@ function initBenefitsCardsAnimation() {
         });
 
         const cardConfigs = [
-            { zIndex: 3, xPercent: 0, scale: 1, centered: false },  
-            { zIndex: 2, xPercent: 50, scale: 0.85, centered: true },   
-            { zIndex: 1, xPercent: 90, scale: 0.72, centered: true }    
+            { zIndex: 3, xPercent: 0, scale: 1, centered: false },
+            { zIndex: 2, xPercent: 50, scale: 0.85, centered: true },
+            { zIndex: 1, xPercent: 90, scale: 0.72, centered: true }
         ];
 
         cards.forEach((card, index) => {
@@ -760,8 +760,8 @@ function initScrambleText() {
         const w = el.getBoundingClientRect().width;
         if (h > 0) {
             el.style.height = `${h}px`;
-            el.style.width = `${w}px`; 
-            el.style.overflow = "hidden"; 
+            el.style.width = `${w}px`;
+            el.style.overflow = "hidden";
         }
     };
 
@@ -856,7 +856,7 @@ function initScrambleText() {
 }
 
 function initHeroAnimation() {
-    
+
     const section = document.querySelector('.hero');
     if (!section) return;
 
@@ -867,15 +867,15 @@ function initHeroAnimation() {
     const videoMask = section.querySelector('[data-anim-hero="video-mask"]');
 
     ScrollTrigger.matchMedia({
-        
+
         "(min-width: 992px)": function () {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: section,
                     start: "top top",
-                    end: "+=200%", 
-                    scrub: true,       
-                    markers: false,     
+                    end: "+=200%",
+                    scrub: true,
+                    markers: false,
                 }
             });
 
@@ -890,15 +890,15 @@ function initHeroAnimation() {
 
             tl.to(videoWrapper, {
                 height: "100vh",
-                width: "100vw",     
+                width: "100vw",
                 minWidth: "100vw",
 
-                position: "absolute", 
+                position: "absolute",
 
                 left: "50%",
                 x: "-50%",
 
-                top: "0rem", 
+                top: "0rem",
 
                 ease: "none",
                 force3D: true
@@ -910,19 +910,19 @@ function initHeroAnimation() {
         },
 
         "(max-width: 991px)": function () {
-            
+
         }
     });
 }
 
 function initStageSecondAnimation() {
-    
+
     const heading = document.querySelector('.stage-pre-heading');
 
     if (!heading) return;
 
     const splitTextNodesRecursively = (element) => {
-        
+
         [...element.childNodes].forEach(child => {
             if (child.nodeType === Node.TEXT_NODE) {
                 const text = child.textContent;
@@ -933,9 +933,9 @@ function initStageSecondAnimation() {
                 text.split('').forEach(char => {
                     const span = document.createElement('span');
                     span.textContent = char;
-                    span.style.opacity = '0'; 
-                    span.style.transition = 'none'; 
-                    span.dataset.animChar = "true"; 
+                    span.style.opacity = '0';
+                    span.style.transition = 'none';
+                    span.dataset.animChar = "true";
                     newContent.appendChild(span);
                 });
                 element.replaceChild(newContent, child);
@@ -977,7 +977,7 @@ function initStagesAnimation() {
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 992px)", () => {
-        
+
         gsap.set(progressBar, { x: "-100%" });
         gsap.set([mainCard, secondCard], { y: "10rem", opacity: 0 });
 
@@ -1019,7 +1019,7 @@ function initStagesAnimation() {
         const card1 = section.querySelector('[data-anim-card="1"]');
         const card2 = section.querySelector('[data-anim-card="2"]');
         const card3 = section.querySelector('[data-anim-card="3"]');
-        const cardSquare = section.querySelector('[data-anim-stage="square"]'); 
+        const cardSquare = section.querySelector('[data-anim-stage="square"]');
 
         if (card3) gsap.set(card3, { opacity: 0 });
 
@@ -1031,12 +1031,12 @@ function initStagesAnimation() {
         if (cardSquare) tlSticky.to(cardSquare, { backgroundColor: "#62B0FF", duration: 1 }, "phase2");
 
         if (card1 && card2 && card3) {
-            
+
             tlSticky.to(card1, { y: "-3.5rem", opacity: 0, duration: 0.3 }, "phase2");
 
             tlSticky.to(card2, { y: "-7.5rem", duration: 0.7 }, "phase2+=0.3");
             tlSticky.to(card3, { y: "-7.5rem", duration: 0.7 }, "phase2+=0.3");
-            tlSticky.to(card3, { opacity: 1, duration: 0.3 }, "phase2+=0.3"); 
+            tlSticky.to(card3, { opacity: 1, duration: 0.3 }, "phase2+=0.3");
 
             tlSticky.to(card1, { y: "15rem", duration: 0.1 }, "phase2+=1");
             tlSticky.set(card1, { zIndex: 10 }, "phase2+=1");
@@ -1050,7 +1050,7 @@ function initStagesAnimation() {
         if (cardSquare) tlSticky.to(cardSquare, { backgroundColor: "#FDFCFC", duration: 1 }, "phase3");
 
         if (card1 && card2 && card3) {
-            
+
             tlSticky.to(card2, { y: "-11rem", opacity: 0, duration: 0.3 }, "phase3");
 
             tlSticky.to(card3, { y: "-15rem", duration: 0.7 }, "phase3+=0.3");
@@ -1106,7 +1106,7 @@ function initStagesAnimation() {
                 trigger: section,
                 start: "top top-=800",
                 end: "bottom bottom",
-                toggleActions: "play none none reverse", 
+                toggleActions: "play none none reverse",
                 scrub: false,
                 markers: false
             }
@@ -1162,10 +1162,10 @@ function initStagesAnimation() {
         if (targetHeading && sourceHeading3 && sourceHeading2) {
             const targetSpan = targetHeading.querySelector('span');
             const sourceSpan3 = sourceHeading3.querySelector('span');
-            const sourceSpan2 = sourceHeading2.querySelector('span'); 
+            const sourceSpan2 = sourceHeading2.querySelector('span');
 
             if (targetSpan && sourceSpan3 && sourceSpan2) {
-                
+
                 tlPhase3.set(targetHeading, { height: targetHeading.offsetHeight, overflow: "hidden" }, "phase3");
 
                 sensitiveTypewriter(tlPhase3, targetSpan, sourceSpan2.textContent, sourceSpan3.textContent, "phase3");
@@ -1245,7 +1245,7 @@ function initProcessAnimation() {
         gsap.set(maskPath, {
             strokeDasharray: length,
             strokeDashoffset: length,
-            autoAlpha: 0 
+            autoAlpha: 0
         });
         gsap.set(fillLayer, { opacity: 0 });
 
@@ -1260,20 +1260,20 @@ function initProcessAnimation() {
     const tlProcess = gsap.timeline({
         scrollTrigger: {
             trigger: section,
-            start: "top top",     
-            end: "+=300%",        
-            scrub: 1,             
-            trackMarkers: false,  
-            
+            start: "top top",
+            end: "+=300%",
+            scrub: 1,
+            trackMarkers: false,
+
             pin: section.querySelector('[data-proces-anim-container="true"]') || true
         }
     });
 
     const stepsConfig = [
-        { id: 1, barX: "-10%", dotIds: ["1-1"] }, 
-        { id: 2, barX: "-20%", dotIds: ["1-5"] }, 
-        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] }, 
-        { id: 4, barX: "-80%", dotIds: ["1-4"] }  
+        { id: 1, barX: "-10%", dotIds: ["1-1"] },
+        { id: 2, barX: "-20%", dotIds: ["1-5"] },
+        { id: 3, barX: "-60%", dotIds: ["1-2", "1-3"] },
+        { id: 4, barX: "-80%", dotIds: ["1-4"] }
     ];
 
     stepsConfig.forEach((step) => {
@@ -1287,7 +1287,7 @@ function initProcessAnimation() {
         });
 
         if (desc) {
-            
+
             tlProcess.to(desc, {
                 y: "0rem",
                 autoAlpha: 1,
@@ -1308,7 +1308,7 @@ function initProcessAnimation() {
             if (dots.length) {
                 tlProcess.to(dots, {
                     autoAlpha: 1,
-                    duration: 1, 
+                    duration: 1,
                     ease: "none"
                 }, label);
             }
@@ -1323,7 +1323,7 @@ function initProcessAnimation() {
     let tlMap = gsap.timeline({ paused: true });
 
     if (redMaskPath && redFillLayer) {
-        
+
         tlMap.to(redMaskPath, {
             strokeDashoffset: 0,
             autoAlpha: 1,
@@ -1333,9 +1333,9 @@ function initProcessAnimation() {
 
         tlMap.to(redFillLayer, {
             autoAlpha: 1,
-            duration: 0.2, 
+            duration: 0.2,
             ease: "power2.out"
-        }); 
+        });
     }
 
     const playRedMap = () => {
@@ -1347,7 +1347,7 @@ function initProcessAnimation() {
     };
 
     tlProcess.to({}, {
-        duration: 0.1, 
+        duration: 0.1,
         onStart: playRedMap,
         onReverseComplete: reverseRedMap
     });
@@ -1362,26 +1362,26 @@ function initProcessAnimation() {
         tlProcess.to(phase1Descs, {
             y: "-5rem",
             autoAlpha: 0,
-            duration: 1, 
+            duration: 1,
             ease: "none"
-        }, "+=0.2"); 
+        }, "+=0.2");
     }
 
     if (dotsWrapper1) {
-        
+
         const childDots = dotsWrapper1.querySelectorAll('[data-anim-process-dot]');
         if (childDots.length) {
             tlProcess.to(childDots, {
                 autoAlpha: 0.2,
                 duration: 1,
                 ease: "none"
-            }, "<"); 
+            }, "<");
         }
     }
 
     if (redMapSvg) {
         tlProcess.to(redMapSvg, {
-            autoAlpha: 0.2, 
+            autoAlpha: 0.2,
             duration: 1,
             ease: "none"
         }, "<");
@@ -1389,7 +1389,7 @@ function initProcessAnimation() {
 
     if (redFillLayer) {
         tlProcess.to(redFillLayer, {
-            autoAlpha: 0, 
+            autoAlpha: 0,
             duration: 1,
             ease: "none"
         }, "<");
@@ -1400,13 +1400,13 @@ function initProcessAnimation() {
             autoAlpha: 1,
             duration: 0.1,
             ease: "none"
-        }, "+=0.1"); 
+        }, "+=0.1");
     }
 
     const stepsConfigPhase2 = [
         { id: 5, barX: "-70%", dotIds: ["2-1"] },
         { id: 6, barX: "-60%", dotIds: ["2-2"] },
-        { id: 7, barX: "-10%", dotIds: ["2-3", "2-4"] }, 
+        { id: 7, barX: "-10%", dotIds: ["2-3", "2-4"] },
         { id: 8, barX: "-20%", dotIds: ["2-5"] }
     ];
 
@@ -1421,7 +1421,7 @@ function initProcessAnimation() {
         });
 
         if (desc) {
-            
+
             let position = "+=0.2";
             if (step.id === 5) {
                 tlProcess.add("phase2Start", "+=0.2");
@@ -1464,7 +1464,7 @@ function initProcessAnimation() {
             width: "14rem",
             duration: 0.5,
             ease: "none"
-        }, "phase2Start"); 
+        }, "phase2Start");
     }
 
     tlProcess.to(infoSquare, {
@@ -1473,7 +1473,7 @@ function initProcessAnimation() {
         ease: "none",
         onStart: () => {
             if (infoTitle) {
-                
+
                 infoTitle.innerHTML = '<span id="brand-s1" style="color:#62B0FF"></span><br><span id="brand-s2" style="color:#ffffff"></span>';
 
                 gsap.to("#brand-s1", {
@@ -1488,10 +1488,10 @@ function initProcessAnimation() {
             }
         },
         onReverseComplete: () => {
-            
+
             if (infoTitle) infoTitle.textContent = originalTitleText;
         }
-    }, "<"); 
+    }, "<");
 
     const blueMaskPath = document.getElementById('blue-mask-path');
     const blueFillLayer = document.getElementById('blue-fill-layer');
@@ -1499,7 +1499,7 @@ function initProcessAnimation() {
     let tlBlueMap = gsap.timeline({ paused: true });
 
     if (blueMaskPath && blueFillLayer) {
-        
+
         tlBlueMap.to(blueMaskPath, {
             strokeDashoffset: 0,
             autoAlpha: 1,
@@ -1523,7 +1523,7 @@ function initProcessAnimation() {
     };
 
     tlProcess.to({}, {
-        duration: 0.1, 
+        duration: 0.1,
         onStart: playBlueMap,
         onReverseComplete: reverseBlueMap
     });
@@ -1542,7 +1542,7 @@ function initProcessAnimation() {
             y: "-5rem",
             duration: 1,
             ease: "none"
-        }, "+=0.5"); 
+        }, "+=0.5");
     }
 
     const stepsConfigPhase3 = [9, 10, 11, 12];
@@ -1565,7 +1565,7 @@ function initProcessAnimation() {
 
 function initAmbassadorsAnimation() {
     const section = document.querySelector('.our-ambassadors');
-    
+
     const wrapper = document.querySelector('[data-anim-ambassador-wrapper="true"]');
     const card1 = document.querySelector('[data-anim-ambassador="card-1"]');
     const card2 = document.querySelector('[data-anim-ambassador="card-2"]');
@@ -1617,7 +1617,7 @@ function initAmbassadorsAnimation() {
                 trigger: section,
                 start: "top top",
                 end: "bottom bottom",
-                
+
                 scrub: true,
                 markers: false
             }
@@ -1627,7 +1627,7 @@ function initAmbassadorsAnimation() {
         tl.to(card1, { opacity: 0, duration: 0.3 }, "<");
 
         if (cardText1) {
-            
+
             tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.3 }, "<");
         }
 
@@ -1639,7 +1639,7 @@ function initAmbassadorsAnimation() {
         }
 
         tl.to({}, { duration: 0.5 });
-        
+
         tl.to(card2, { y: "-100%", opacity: 0, duration: 1 });
 
         tl.to(card3, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
@@ -1657,12 +1657,12 @@ function initServicesAnimation() {
     if (!cardsWrapper || !mainWrapper) return;
 
     ScrollTrigger.matchMedia({
-        
+
         "(min-width: 992px)": function () {
 
             const allCards = section.querySelectorAll('.our-services-cards-wrapper');
             if (allCards.length < 5) {
-                
+
                 return;
             }
 
@@ -1670,7 +1670,7 @@ function initServicesAnimation() {
             const card5 = allCards[4];
 
             const getScrollAmount = () => {
-                
+
                 const dist = card5.offsetLeft - card1.offsetLeft;
                 return -dist;
             };
@@ -1687,8 +1687,8 @@ function initServicesAnimation() {
                 ease: "power2.out",
                 scrollTrigger: {
                     trigger: section,
-                    start: "top 80%", 
-                    toggleActions: "play none none reverse", 
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
                     markers: false
                 }
             });
@@ -1698,7 +1698,7 @@ function initServicesAnimation() {
                     trigger: section,
                     start: "top top",
                     end: "bottom bottom",
-                    pin: false, 
+                    pin: false,
                     scrub: 1,
                     invalidateOnRefresh: true,
                     markers: false
@@ -1708,7 +1708,7 @@ function initServicesAnimation() {
             tl.to(allCards, {
                 x: () => getScrollAmount(),
                 ease: "none",
-                duration: 1 
+                duration: 1
             });
 
             tl.to({}, { duration: 0.2 });
@@ -1720,14 +1720,20 @@ function initTeamAnimation() {
     const section = document.querySelector('.team');
     const teamHeading = document.querySelector('.team-head-right-second');
 
+    if (section) gsap.set(section, { height: "1000vh" });
+
     if (!section || !teamHeading) return;
 
     const teamHeadRight = document.querySelector('.team-head-right');
     const teamCards = document.querySelector('.team-cards-wrapper');
     const teamBottomSection = document.querySelector('.team-head-right-bottom');
+    const footer = document.querySelector('.footer');
+
+    // 1. Initial configuration
+    if (section) gsap.set(section, { height: "250vh" }); // Reduced from 1000vh to remove dead space
 
     const elementsToHide = [teamHeadRight, teamCards].filter(el => el);
-    gsap.set(elementsToHide, { opacity: 0, y: 50 }); 
+    gsap.set(elementsToHide, { opacity: 0, y: 50 });
 
     if (teamBottomSection) {
         gsap.set(teamBottomSection, { opacity: 0 });
@@ -1758,7 +1764,7 @@ function initTeamAnimation() {
     const mm = ScrollTrigger.matchMedia();
 
     mm.add("(min-width: 992px)", () => {
-        
+
         if (teamHeading.querySelectorAll('[data-anim-char="true"]').length === 0) {
             splitTextNodesRecursively(teamHeading);
         }
@@ -1767,13 +1773,13 @@ function initTeamAnimation() {
 
         gsap.to(chars, {
             opacity: 1,
-            duration: 0.1, 
-            stagger: 0.05, 
+            duration: 0.1,
+            stagger: 0.05,
             ease: "none",
             scrollTrigger: {
                 trigger: section,
-                start: "top bottom-=30%", 
-                end: "top top",           
+                start: "top bottom-=30%",
+                end: "top top",
                 scrub: true,
                 markers: false
             }
@@ -1786,8 +1792,8 @@ function initTeamAnimation() {
         ease: "power2.in",
         scrollTrigger: {
             trigger: section,
-            start: "top top",       
-            end: "top top-=15%",    
+            start: "top top",
+            end: "top top-=15%",
             scrub: true,
             markers: false
         }
@@ -1800,8 +1806,8 @@ function initTeamAnimation() {
             ease: "power2.out",
             scrollTrigger: {
                 trigger: section,
-                start: "top top-=15%",  
-                end: "top top-=40%",    
+                start: "top top-=15%",
+                end: "top top-=40%",
                 scrub: true,
                 markers: false
             }
@@ -1815,8 +1821,8 @@ function initTeamAnimation() {
             ease: "power2.out",
             scrollTrigger: {
                 trigger: section,
-                start: "top top-=40%",  
-                end: "top top-=65%",    
+                start: "top top-=40%",
+                end: "top top-=65%",
                 scrub: true,
                 markers: false
             }
@@ -1830,11 +1836,11 @@ function initTeamAnimation() {
                 y: -50,
                 opacity: 0,
                 ease: "power2.in",
-                immediateRender: false, 
+                immediateRender: false,
                 scrollTrigger: {
                     trigger: section,
-                    start: "top top-=75%",  
-                    end: "top top-=85%",    
+                    start: "top top-=75%",
+                    end: "top top-=85%",
                     scrub: true,
                     markers: false
                 }
@@ -1846,12 +1852,12 @@ function initTeamAnimation() {
         gsap.fromTo(teamCards,
             { y: 0 },
             {
-                y: "-14.125rem",  
+                y: "-14.125rem",
                 ease: "none",
                 scrollTrigger: {
                     trigger: section,
-                    start: "top top-=75%",  
-                    end: "top top-=100%",   
+                    start: "top top-=75%",
+                    end: "top top-=100%",
                     scrub: true,
                     markers: false
                 }
@@ -1861,15 +1867,15 @@ function initTeamAnimation() {
 
     const teamBlurTop = document.querySelector('.team-blur-top');
     if (teamBlurTop) {
-        gsap.set(teamBlurTop, { opacity: 0 }); 
+        gsap.set(teamBlurTop, { opacity: 0 });
 
         gsap.to(teamBlurTop, {
             opacity: 1,
             ease: "none",
             scrollTrigger: {
                 trigger: section,
-                start: "top top-=100%",  
-                end: "top top-=110%",    
+                start: "top top-=100%",
+                end: "top top-=110%",
                 scrub: true,
                 markers: false
             }
@@ -1880,8 +1886,8 @@ function initTeamAnimation() {
             ease: "none",
             scrollTrigger: {
                 trigger: section,
-                start: "top top-=135%",  
-                end: "top top-=145%",    
+                start: "top top-=135%",
+                end: "top top-=145%",
                 scrub: true,
                 markers: false
             }
@@ -1895,18 +1901,18 @@ function initTeamAnimation() {
 
         const mm = ScrollTrigger.matchMedia();
         mm.add("(min-width: 992px)", () => {
-            
+
             const firstRect = firstWrapper.getBoundingClientRect();
             const secondRect = secondWrapper.getBoundingClientRect();
-            const distanceToMove = secondRect.top - firstRect.top; 
+            const distanceToMove = secondRect.top - firstRect.top;
 
             gsap.to([firstWrapper, secondWrapper], {
                 y: `-=${distanceToMove}px`,
                 ease: "none",
                 scrollTrigger: {
                     trigger: section,
-                    start: "top top-=110%",  
-                    end: "top top-=140%",    
+                    start: "top top-=110%",
+                    end: "top top-=140%",
                     scrub: true,
                     markers: false
                 }
@@ -1917,7 +1923,7 @@ function initTeamAnimation() {
                 ease: "none",
                 scrollTrigger: {
                     trigger: section,
-                    start: "top top-=110%",  
+                    start: "top top-=110%",
                     end: "top top-=140%",
                     scrub: true,
                     markers: false
@@ -1930,7 +1936,7 @@ function initTeamAnimation() {
         const teamBottomParagraph = teamBottomSection.querySelector('p');
 
         if (teamBottomParagraph) {
-            
+
             const getAllTextNodes = (root) => {
                 const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
                 const nodes = [];
@@ -1963,7 +1969,7 @@ function initTeamAnimation() {
                     start: "top top-=40%",
                     once: true,
                     onEnter: () => {
-                        
+
                         gsap.set(teamBottomSection, { opacity: 1 });
                         scrambleTl.play(0);
                     }
@@ -1982,7 +1988,7 @@ function initTeamAnimation() {
                             speed: 0.6
                         }
                     },
-                    i * 0.1  
+                    i * 0.1
                 );
             });
         }
@@ -1995,25 +2001,28 @@ function initTeamAnimation() {
             ease: "none",
             scrollTrigger: {
                 trigger: section,
-                start: "top bottom",      
-                end: "top 15%",           
+                start: "top bottom",
+                end: "top 15%",
                 scrub: true,
                 markers: false
             }
         });
     }
 
-    const footer = document.querySelector('.footer');
-    const teamContainer = section.querySelector('.container');
-    if (footer && teamContainer) {
-        gsap.to(teamContainer, {
-            opacity: 0,
-            ease: "none",
+    if (footer) {
+        // Initial state: Pushed down by 100vh
+        gsap.set(footer, { y: "100vh", autoAlpha: 1 });
+
+        // Reveal animation: Slide up to y: 0
+        gsap.to(footer, {
+            y: 0,
+            duration: 1, // Slower duration for a smooth slide up
+            ease: "none", // Linear or slight ease
             scrollTrigger: {
-                trigger: footer,
-                start: "top bottom",     
-                end: "top 50%",          
-                scrub: true,
+                trigger: section,
+                start: "bottom bottom", // Start exactly when section bottom hits viewport bottom
+                end: "+=100%", // Scroll distance for the footer reveal
+                scrub: true, // Scrub the reveal to scroll position
                 markers: false
             }
         });
@@ -2026,7 +2035,7 @@ function initSmoothScroll() {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
-            
+
             if (!href || href === "#") return;
 
             const targetId = href.substring(1);
@@ -2041,7 +2050,7 @@ function initSmoothScroll() {
                 if (window.lenis) {
                     window.lenis.scrollTo(scrollTarget, { offset: 0, immediate: false });
                 }
-                
+
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
@@ -2049,7 +2058,7 @@ function initSmoothScroll() {
                         ease: "power2.out"
                     });
                 }
-                
+
                 else {
                     scrollTarget.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -2084,7 +2093,7 @@ function initDynamicAnchors() {
     };
 
     function updateAnchors() {
-        
+
         document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
         for (const [id, selector] of Object.entries(anchorMap)) {
@@ -2093,7 +2102,7 @@ function initDynamicAnchors() {
 
                 const existingId = document.getElementById(id);
                 if (existingId && !existingId.classList.contains('dynamic-anchor')) {
-                    
+
                     existingId.removeAttribute('id');
                 }
 
@@ -2131,11 +2140,11 @@ function initDynamicAnchors() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     ScrollTrigger.matchMedia({
         "(min-width: 992px)": function () {
             initAnimations();
-            initDynamicAnchors(); 
+            initDynamicAnchors();
         }
     });
 });
@@ -2177,7 +2186,7 @@ function initHeroVideoPause() {
 
     ScrollTrigger.create({
         trigger: nextSection,
-        start: "top top", 
+        start: "top top",
         onEnter: () => video.pause(),
         onLeaveBack: () => video.play(),
         markers: false
