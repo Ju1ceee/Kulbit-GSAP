@@ -1010,7 +1010,7 @@ function initMobileTeamAnimation() {
 
         tl.to(teamGridWrappers, {
             y: targetY,
-            duration: 4,
+            duration: 12,
             ease: "none"
         }, "<");
     }
