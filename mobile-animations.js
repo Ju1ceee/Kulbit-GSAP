@@ -861,8 +861,12 @@ function initMobileTeamAnimation() {
     const teamHeadRight = section.querySelector('.team-head-right');
     const teamCardsWrapper = section.querySelector('.team-cards-wrapper');
     const teamBottomSection = section.querySelector('.team-head-right-bottom');
-    const teamGridWrapper = section.querySelector('.team-grid-wrapper');
+    const teamGridWrappers = section.querySelectorAll('[data-team-move="1"], [data-team-move="2"]');
     const teamBlurTop = section.querySelectorAll('.team-blur-top');
+
+    // CONFIGURABLE VARIABLE: Height of the movement
+    // You can change '70rem' to any other value (e.g., '50rem', '100px', '50vh')
+    const moveDistance = "70rem";
 
     // 1. Initial States
     // -----------------------------------------------------------------------
@@ -994,10 +998,18 @@ function initMobileTeamAnimation() {
         }, "<");
     }
 
-    if (teamGridWrapper) {
-        const teamGridWrapperOffset = "-70rem"; // Matches original logic
-        tl.to(teamGridWrapper, {
-            y: teamGridWrapperOffset,
+    if (teamGridWrappers.length > 0) {
+        // Use the configured variable here, but invert it because we are moving up (negative Y)
+        // If the variable is "70rem", we want "-70rem".
+        // Note: If the user puts "-70rem", this logic might break, so we assume positive input or handle it.
+        // Safer way: just prepend "-" if it doesn't start with it.
+        let targetY = moveDistance.trim();
+        if (!targetY.startsWith("-")) {
+            targetY = "-" + targetY;
+        }
+
+        tl.to(teamGridWrappers, {
+            y: targetY,
             duration: 4,
             ease: "none"
         }, "<");
