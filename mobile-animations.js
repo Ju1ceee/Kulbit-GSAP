@@ -18,6 +18,7 @@ function initMobileAnimations() {
             initMobileBenefits();
             initMobileBenefitsCards();
             initMobileStageHeading();
+            initMobileStagesAnimation();
             initMobileScrambleText();
             initMobileTeamAnimation();
 
@@ -845,6 +846,299 @@ function initMobileScrambleText() {
             );
         });
     });
+}
+
+function initMobileStagesAnimation() {
+    const section = document.querySelector('.stages');
+    if (!section) return;
+
+    const secondWrapper = section.querySelector('[data-anim-stage="second-wrapper"]');
+    if (!secondWrapper) return;
+
+    const card1 = secondWrapper.querySelector('[data-anim-card="1"]');
+    const card2 = secondWrapper.querySelector('[data-anim-card="2"]');
+    const card3 = secondWrapper.querySelector('[data-anim-card="3"]');
+
+    if (!card1 && !card2 && !card3) return;
+
+    // Individual move distances per card (in rem)
+    const card1Rem = 2.5;
+    const card2Rem = 5;
+    const card3Rem = 3.5;
+
+    // Convert rem to px for GSAP
+    const remToPx = (rem) => rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+    // The total extra scroll distance needed for the animation (3 steps × 60vh each)
+    const scrollPerStep = window.innerHeight * 0.6;
+    const totalScroll = scrollPerStep * 3;
+
+    // ─── Sticky-scroll wrapper pattern ───────────────────────────────────────
+    // Wrap .stages in a spacer div that is tall enough to hold the animation.
+    // The section itself stays sticky inside it, so the next section only
+    // scrolls in AFTER the animation is complete.
+    const sectionHeight = section.offsetHeight;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+        position: -webkit-sticky;
+        position: sticky;
+        top: 1.5rem;
+        height: ${sectionHeight + totalScroll}px;
+    `;
+
+    // Insert wrapper before section, then move section inside it
+    section.parentNode.insertBefore(wrapper, section);
+    wrapper.appendChild(section);
+
+    // Ensure the section is sticky inside the wrapper
+    section.style.position = 'sticky';
+    section.style.top = '0';
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Set initial states — cards start at y:0, fully visible
+    const cards = [card1, card2, card3].filter(Boolean);
+    gsap.set(cards, { y: 0, opacity: 1 });
+
+    // Master timeline scrubbed to scroll — trigger is the WRAPPER, not the section
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: wrapper,
+            start: "top top",
+            end: `bottom bottom`,
+            scrub: 1,
+            markers: false
+        }
+    });
+
+    // Step 1 (0 → 1/3 of scroll): each card moves up by its own distance, card 1 fades out
+    if (card1) tl.to(card1, { y: `-=${remToPx(card1Rem)}`, duration: 1, ease: "none" }, 0);
+    if (card2) tl.to(card2, { y: `-=${remToPx(card2Rem)}`, duration: 1, ease: "none" }, 0);
+    if (card3) tl.to(card3, { y: `-=${remToPx(card3Rem)}`, duration: 1, ease: "none" }, 0);
+
+    if (card1) {
+        tl.to(card1, { opacity: 0, duration: 0.5, ease: "none" }, 0.5);
+    }
+
+    // Step 2 (1/3 → 2/3 of scroll): each card moves up again, card 2 fades out
+    if (card1) tl.to(card1, { y: `-=${remToPx(card1Rem)}`, duration: 1, ease: "none" }, 1);
+    if (card2) tl.to(card2, { y: `-=${remToPx(card2Rem)}`, duration: 1, ease: "none" }, 1);
+    if (card3) tl.to(card3, { y: `-=${remToPx(card3Rem)}`, duration: 1, ease: "none" }, 1);
+
+    if (card2) {
+        tl.to(card2, { opacity: 0, duration: 0.5, ease: "none" }, 1.5);
+    }
+
+    // Step 3 (2/3 → end of scroll): each card moves up one final time
+    if (card1) tl.to(card1, { y: `-=${remToPx(card1Rem)}`, duration: 1, ease: "none" }, 2);
+    if (card2) tl.to(card2, { y: `-=${remToPx(card2Rem)}`, duration: 1, ease: "none" }, 2);
+    if (card3) tl.to(card3, { y: `-=${remToPx(card3Rem)}`, duration: 1, ease: "none" }, 2);
+
+    // ─── Text / Image swap (same as desktop) ─────────────────────────────────
+    const mainCard = section.querySelector('[data-anim-stage="main-card"]');
+    if (!mainCard) return;
+
+    // Lock the main card and every child element's dimensions so nothing
+    // reflows during text/image swaps
+    mainCard.style.height = mainCard.offsetHeight + 'px';
+    mainCard.style.overflow = 'hidden';
+
+    mainCard.querySelectorAll('*').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) el.style.width = rect.width + 'px';
+        if (rect.height > 0) el.style.height = rect.height + 'px';
+        el.style.overflow = 'hidden';
+    });
+
+    const targetNumber = mainCard.querySelector('[data-stage-target="number"]');
+    const targetHeading = mainCard.querySelector('[data-stage-target="heading"]');
+    const targetParagraph = mainCard.querySelector('[data-stage-target="paragraph"]');
+    const targetImage = mainCard.querySelector('[data-stage-target="image"]');
+
+    const sourceNumber2 = section.querySelector('[data-stage-source="number-2"]');
+    const sourceHeading2 = section.querySelector('[data-stage-source="heading-2"]');
+    const sourceParagraph2 = section.querySelector('[data-stage-source="paragraph-2"]');
+    const sourceImage2 = section.querySelector('[data-stage-source="image-2"]');
+
+    const sourceNumber3 = section.querySelector('[data-stage-source="number-3"]');
+    const sourceHeading3 = section.querySelector('[data-stage-source="heading-3"]');
+    const sourceParagraph3 = section.querySelector('[data-stage-source="paragraph-3"]');
+    const sourceImage3 = section.querySelector('[data-stage-source="image-3"]');
+
+    // Stage line text elements (show/hide per step)
+    const stage1Num = section.querySelector('[data-anim-stage-text="num-1"]');
+    const stage1Title = section.querySelector('[data-anim-stage-text="title-1"]');
+    const stage2Num = section.querySelector('[data-anim-stage-text="num-2"]');
+    const stage2Title = section.querySelector('[data-anim-stage-text="title-2"]');
+    const stage3Num = section.querySelector('[data-anim-stage-text="num-3"]');
+    const stage3Title = section.querySelector('[data-anim-stage-text="title-3"]');
+
+    // Lock dimensions of every element that changes text so nothing reflows
+    const lockDimensions = (el) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) el.style.width = rect.width + 'px';
+        if (rect.height > 0) el.style.height = rect.height + 'px';
+        el.style.overflow = 'hidden';
+    };
+    [targetNumber, targetHeading, targetParagraph, stage1Num, stage1Title].forEach(lockDimensions);
+
+    // Stage label texts per stage (read directly from the hidden source elements)
+    const labelTexts = {
+        1: {
+            num: stage1Num ? stage1Num.textContent : '',
+            title: stage1Title ? stage1Title.textContent : ''
+        },
+        2: {
+            num: stage2Num ? stage2Num.textContent : '',
+            title: stage2Title ? stage2Title.textContent : ''
+        },
+        3: {
+            num: stage3Num ? stage3Num.textContent : '',
+            title: stage3Title ? stage3Title.textContent : ''
+        }
+    };
+
+    // Hide the is-second / is-3 duplicates — we only animate stage1Num/Title
+    [stage2Num, stage2Title, stage3Num, stage3Title].filter(Boolean)
+        .forEach(el => { el.style.display = 'none'; });
+
+    // Helper: rewrite the visible num/title via typewriter to the target stage's text
+    const showStageLabel = (stageIndex) => {
+        const texts = labelTexts[stageIndex];
+        if (!texts) return;
+        if (stage1Num) typewriter(stage1Num, stage1Num.textContent, texts.num);
+        if (stage1Title) typewriter(stage1Title, stage1Title.textContent, texts.title);
+    };
+
+    // Initial state is already stage 1 — no animation needed
+
+    // Snapshot original stage-1 content
+    const orig = {
+        number: targetNumber ? targetNumber.textContent : "",
+        headingSpan: (targetHeading && targetHeading.querySelector('span'))
+            ? targetHeading.querySelector('span').textContent : "",
+        paragraph: targetParagraph ? targetParagraph.textContent : "",
+        imageSrc: targetImage ? targetImage.src : "",
+        imageSrcset: targetImage ? targetImage.srcset : ""
+    };
+
+    // Helper: typewriter erase → retype on a DOM text node / element
+    const typewriter = (target, fromText, toText) => {
+        const tl = gsap.timeline();
+        const eraseProxy = { len: fromText.length };
+        tl.to(eraseProxy, {
+            len: 0, duration: 0.4, ease: "none",
+            onUpdate: () => { target.textContent = fromText.substring(0, Math.round(eraseProxy.len)); }
+        });
+        const typeProxy = { len: 0 };
+        tl.to(typeProxy, {
+            len: toText.length, duration: 0.6, ease: "none",
+            onUpdate: () => { target.textContent = toText.substring(0, Math.round(typeProxy.len)); }
+        });
+        return tl;
+    };
+
+    // Helper: crossfade image swap
+    const swapImage = (img, newSrc, newSrcset) => {
+        if (!img) return;
+        gsap.to(img, {
+            opacity: 0, duration: 0.2, onComplete: () => {
+                img.src = newSrc;
+                if (newSrcset) img.srcset = newSrcset;
+                gsap.to(img, { opacity: 1, duration: 0.2 });
+            }
+        });
+    };
+
+    // Helper: swap all content for a given stage
+    const swapToStage = (num, headingSpan, paragraph, imgSrc, imgSrcset, stageIndex) => {
+        if (targetNumber) typewriter(targetNumber, targetNumber.textContent, num);
+        if (targetHeading) {
+            const sp = targetHeading.querySelector('span');
+            if (sp) typewriter(sp, sp.textContent, headingSpan);
+        }
+        if (targetParagraph) typewriter(targetParagraph, targetParagraph.textContent, paragraph);
+        swapImage(targetImage, imgSrc, imgSrcset);
+
+        // Rewrite stage line labels via typewriter
+        showStageLabel(stageIndex);
+    };
+
+    // The wrapper scroll is divided into 3 equal thirds.
+    // Step boundary 1 = at 1/3 of wrapper height from top of wrapper
+    // Step boundary 2 = at 2/3 of wrapper height from top of wrapper
+    const wrapperH = sectionHeight + totalScroll;
+    const step1Offset = wrapperH / 3;
+    const step2Offset = (wrapperH / 3) * 2;
+
+    // ── Swap content the instant a card becomes fully invisible ──────────────
+    // We hook into the main scrubbed timeline's onUpdate to watch card opacity.
+    // The moment card1 opacity reaches 0 → swap to stage 2.
+    // The moment card2 opacity reaches 0 → swap to stage 3.
+    // Flags prevent repeated swaps on the same crossing.
+    let stage2Swapped = false;
+    let stage3Swapped = false;
+
+    tl.eventCallback('onUpdate', () => {
+        const card1Opacity = card1 ? gsap.getProperty(card1, 'opacity') : 1;
+        const card2Opacity = card2 ? gsap.getProperty(card2, 'opacity') : 1;
+        const isForward = tl.scrollTrigger ? tl.scrollTrigger.direction === 1 : true;
+
+        // Card 1 fully gone → swap to stage 2
+        if (isForward && !stage2Swapped && card1Opacity <= 0) {
+            stage2Swapped = true;
+            stage3Swapped = false;
+            if (sourceNumber2 && sourceHeading2 && sourceParagraph2 && sourceImage2) {
+                swapToStage(
+                    sourceNumber2.textContent,
+                    sourceHeading2.querySelector('span') ? sourceHeading2.querySelector('span').textContent : sourceHeading2.textContent,
+                    sourceParagraph2.textContent,
+                    sourceImage2.src, sourceImage2.srcset,
+                    2
+                );
+            }
+        }
+
+        // Card 2 fully gone → swap to stage 3
+        if (isForward && !stage3Swapped && card2Opacity <= 0) {
+            stage3Swapped = true;
+            if (sourceNumber3 && sourceHeading3 && sourceParagraph3 && sourceImage3) {
+                swapToStage(
+                    sourceNumber3.textContent,
+                    sourceHeading3.querySelector('span') ? sourceHeading3.querySelector('span').textContent : sourceHeading3.textContent,
+                    sourceParagraph3.textContent,
+                    sourceImage3.src, sourceImage3.srcset,
+                    3
+                );
+            }
+        }
+
+        // Scrolling back: card 2 reappears → restore stage 2
+        if (!isForward && stage3Swapped && card2Opacity > 0) {
+            stage3Swapped = false;
+            if (sourceNumber2 && sourceHeading2 && sourceParagraph2 && sourceImage2) {
+                swapToStage(
+                    sourceNumber2.textContent,
+                    sourceHeading2.querySelector('span') ? sourceHeading2.querySelector('span').textContent : sourceHeading2.textContent,
+                    sourceParagraph2.textContent,
+                    sourceImage2.src, sourceImage2.srcset,
+                    2
+                );
+            }
+        }
+
+        // Scrolling back: card 1 reappears → restore stage 1
+        if (!isForward && stage2Swapped && card1Opacity > 0) {
+            stage2Swapped = false;
+            swapToStage(
+                orig.number, orig.headingSpan, orig.paragraph,
+                orig.imageSrc, orig.imageSrcset,
+                1
+            );
+        }
+    });
+    // ─────────────────────────────────────────────────────────────────────────
 }
 
 function initMobileTeamAnimation() {
