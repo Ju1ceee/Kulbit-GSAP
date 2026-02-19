@@ -21,6 +21,7 @@ function initMobileAnimations() {
             initMobileStagesAnimation();
             initMobileScrambleText();
             initMobileTeamAnimation();
+            initMobileCasesAnimation();
 
         });
 
@@ -1143,191 +1144,118 @@ function initMobileStagesAnimation() {
 
 function initMobileTeamAnimation() {
     const section = document.querySelector('.team');
-    // We'll use team-head-right-second for the character animation, 
-    // but the main trigger is the section itself.
-    const teamHeading = section ? section.querySelector('.team-head-right-second') : null;
-
     if (!section) return;
 
-    // Elements to animate
-    const teamHeadLeft = section.querySelector('.team-head-left');
-    // teamHeadRightSecond is 'teamHeading'
-    const teamHeadRight = section.querySelector('.team-head-right');
-    const teamCardsWrapper = section.querySelector('.team-cards-wrapper');
-    const teamBottomSection = section.querySelector('.team-head-right-bottom');
-    const teamGridWrappers = section.querySelectorAll('[data-team-move="1"], [data-team-move="2"]');
-    const teamBlurTop = section.querySelectorAll('.team-blur-top');
+    // ── ✏️ CONFIGURABLE: distance grids move upward ───────────────────────
+    const GRID_MOVE_REM = '120rem'; // ← змінюй цей рядок
+    // ─────────────────────────────────────────────────────────────────────
 
-    // CONFIGURABLE VARIABLE: Height of the movement
-    // You can change '70rem' to any other value (e.g., '50rem', '100px', '50vh')
-    const moveDistance = "70rem";
+    const headLeft = section.querySelector('.team-head-left');
+    const headRight = section.querySelector('.team-head-right');
+    const headRightSecond = section.querySelector('.team-head-right-second');
+    const cardsWrapper = section.querySelector('.team-cards-wrapper');
+    const blurTop = section.querySelectorAll('.team-blur-top');
+    const gridWrappers = section.querySelectorAll('[data-team-move="1"], [data-team-move="2"]');
 
-    // 1. Initial States
-    // -----------------------------------------------------------------------
-    if (teamHeadRight) gsap.set(teamHeadRight, { y: 100, opacity: 0 });
-    if (teamCardsWrapper) gsap.set(teamCardsWrapper, { y: 100, opacity: 0 });
-    if (teamBlurTop.length) gsap.set(teamBlurTop, { opacity: 0 });
-    if (teamBottomSection) gsap.set(teamBottomSection, { opacity: 0 });
+    // ── Section stays sticky (never fixed) ───────────────────────────────
+    // The parent provides the extra scroll height; section sticks at top.
+    gsap.set(section, { position: 'sticky', top: 0 });
+    const parent = section.parentElement;
+    if (parent) gsap.set(parent, { minHeight: '1200vh' });
 
-    // 2. Character Split Logic for Heading
-    // -----------------------------------------------------------------------
-    if (teamHeading) {
-        const splitTextNodesRecursively = (element) => {
-            [...element.childNodes].forEach(child => {
+    // ── Initial states ────────────────────────────────────────────────────
+    if (headRight) gsap.set(headRight, { opacity: 0, y: 60 });
+    if (cardsWrapper) gsap.set(cardsWrapper, { opacity: 0, y: 60 });
+    if (headRightSecond) gsap.set(headRightSecond, { opacity: 0 });
+    if (blurTop.length) gsap.set(blurTop, { opacity: 0 });
+
+    // ── Split headRightSecond into char spans for typewriter ─────────────
+    const chars = [];
+    if (headRightSecond) {
+        const wrapChars = (node) => {
+            [...node.childNodes].forEach(child => {
                 if (child.nodeType === Node.TEXT_NODE) {
                     const text = child.textContent;
-                    if (text.trim() === '') return;
-                    const newContent = document.createDocumentFragment();
-                    text.split('').forEach(char => {
-                        const span = document.createElement('span');
-                        span.textContent = char;
-                        span.style.opacity = '0';
-                        span.style.transition = 'none';
-                        span.dataset.animChar = "true";
-                        newContent.appendChild(span);
+                    if (!text) return;
+                    const frag = document.createDocumentFragment();
+                    [...text].forEach(ch => {
+                        const s = document.createElement('span');
+                        s.textContent = ch;
+                        s.style.opacity = '0';
+                        frag.appendChild(s);
+                        chars.push(s);
                     });
-                    element.replaceChild(newContent, child);
+                    child.replaceWith(frag);
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
-                    splitTextNodesRecursively(child);
+                    wrapChars(child);
                 }
             });
         };
-
-        if (teamHeading.querySelectorAll('[data-anim-char="true"]').length === 0) {
-            splitTextNodesRecursively(teamHeading);
-        }
+        wrapChars(headRightSecond);
     }
 
-    // 3. Master Pinned Timeline
-    // -----------------------------------------------------------------------
-    // This pins the section and scrubs through the animation sequence.
-    // The length (end) determines how long the user scrolls to see the animation.
+    // ── Scrub timeline — trigger on parent, NO pin ────────────────────────
+    const D = 10;
+
     const tl = gsap.timeline({
         scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom bottom", // Match section height
-            scrub: true,
+            trigger: parent || section,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1,
             markers: false
         }
     });
 
-    // 4. Animation Sequence
-    // -----------------------------------------------------------------------
-
-    // A) Reveal the Heading Characters first (or slightly before/during pin)
-    //    Since we are pinning at "top top", let's animate characters fast at the start.
-    if (teamHeading) {
-        const chars = teamHeading.querySelectorAll('[data-anim-char="true"]');
-        tl.to(chars, {
-            opacity: 1,
-            duration: 0.5, // Relative to scroll distance
-            stagger: 0.05,
-            ease: "none"
-        }, 0);
+    // A) team-head-left slides up + fades out
+    if (headLeft) {
+        tl.to(headLeft, { y: -60, opacity: 0, duration: D * 0.15, ease: 'power2.in' }, 0);
+        tl.set(headLeft, { display: 'none' }, D * 0.15);
     }
 
-    // B) Fade Out initial elements (Left Head and the Heading we just typed)
-    //    after they have been visible for a bit.
-    if (teamHeadLeft) {
-        tl.to(teamHeadLeft, {
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, ">+0.5");
-    }
-
-    if (teamHeading) {
-        tl.to(teamHeading, {
-            y: -100,
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    // C) Bring in Right Head and Cards
-    if (teamHeadRight) {
-        tl.to(teamHeadRight, {
-            y: 0, // from 100
-            opacity: 1,
-            duration: 1,
-            ease: "none"
-        }, ">-0.5");
-    }
-
-    if (teamCardsWrapper) {
-        tl.to(teamCardsWrapper, {
-            y: 0, // from 100
-            opacity: 1,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    // E) Reveal Blur FIRST
-    if (teamBlurTop.length) {
-        tl.to(teamBlurTop, {
-            opacity: 1,
-            duration: 0.5,
-            ease: "none"
-        }, ">");
-    }
-
-    // D) Move them up and out to make room for grid
-    if (teamHeadRight) {
-        tl.to(teamHeadRight, {
-            y: -150,
-            opacity: 0,
-            duration: 1,
-            ease: "none"
-        }, ">"); // After blur
-    }
-
-    if (teamCardsWrapper) {
-        tl.to(teamCardsWrapper, {
-            y: -320,
-            duration: 1,
-            ease: "none"
-        }, "<");
-    }
-
-    if (teamGridWrappers.length > 0) {
-        // Use the configured variable here, but invert it because we are moving up (negative Y)
-        // If the variable is "70rem", we want "-70rem".
-        // Note: If the user puts "-70rem", this logic might break, so we assume positive input or handle it.
-        // Safer way: just prepend "-" if it doesn't start with it.
-        let targetY = moveDistance.trim();
-        if (!targetY.startsWith("-")) {
-            targetY = "-" + targetY;
+    // B) headRightSecond becomes visible, chars type in one by one
+    if (headRightSecond) {
+        tl.set(headRightSecond, { opacity: 1 }, D * 0.15);
+        if (chars.length) {
+            const charStagger = (D * 0.38) / chars.length;
+            tl.to(chars, { opacity: 1, duration: 0.001, stagger: charStagger, ease: 'none' }, D * 0.15);
         }
-
-        tl.to(teamGridWrappers, {
-            y: targetY,
-            duration: 12,
-            ease: "none"
-        }, "<");
     }
 
-    // F) Final buffer
-    tl.to({}, { duration: 1 });
-
-    // G) Defer Footer Appearance - Integrated into Main Sequence
-    // -----------------------------------------------------------------------
-    const footer = document.querySelector('.footer');
-    if (footer) {
-        gsap.set(footer, { y: "100vh" });
-
-        // Start earlier but ensuring it's at the end
-        tl.to(footer, {
-            y: 0,
-            ease: "none",
-            duration: 1
-        }, ">-0.2");
+    // C) headRightSecond: quick fade out
+    if (headRightSecond) {
+        tl.to(headRightSecond, { opacity: 0, duration: D * 0.07, ease: 'power2.in' }, D * 0.55);
     }
+
+    // D) team-head-right slides from bottom + opacity
+    if (headRight) {
+        tl.to(headRight, { opacity: 1, y: 0, duration: D * 0.12, ease: 'power2.out' }, D * 0.65);
+    }
+
+    // E) team-cards-wrapper with small delay
+    if (cardsWrapper) {
+        tl.to(cardsWrapper, { opacity: 1, y: 0, duration: D * 0.12, ease: 'power2.out' }, D * 0.72);
+    }
+
+    // F) team-blur-top fades in — small gap after cards wrapper
+    if (blurTop.length) {
+        tl.to(blurTop, { opacity: 1, duration: D * 0.08, ease: 'power2.out' }, D * 0.82);
+    }
+
+    // G) data-team-move grids scroll upward — faster movement, earlier start
+    if (gridWrappers.length) {
+        tl.to(gridWrappers, {
+            y: `-${GRID_MOVE_REM}`,
+            duration: D * 0.15, // Faster check
+            ease: 'none'
+        }, D * 0.85);
+    }
+
+    // H) Hold logic — big gap at the end where nothing happens (animation finished)
+    // The previous total duration was around D (10). Adding D * 1.5 (15) makes total ~25.
+    // So animation takes ~40% of scroll, rest is empty scroll.
+    tl.to({}, { duration: D * 0.15 });
 }
-
-
 
 function initSmoothScrollMobile() {
     const links = document.querySelectorAll('a[href^="#"]');
@@ -1458,4 +1386,91 @@ function initScrollDisableLogic() {
     });
 
     checkScroll();
+}
+
+function initMobileCasesAnimation() {
+    const section = document.querySelector('.cases');
+    if (!section) return;
+
+    const progressLine = section.querySelector('.progress-bar-cases-anim .progress-bar-white-line');
+    const textCase = section.querySelector('.text-case');
+    const card1 = section.querySelector('[data-case-video="1"], [data-case-video="2"]');
+    // On mobile: wrappers by order — grab all three
+    const allCards = [...section.querySelectorAll('.case-vide-wrapper')];
+
+    // ── Progress bar: top bottom → top top (same logic as desktop) ────────
+    if (progressLine) {
+        gsap.set(progressLine, { xPercent: -100 });
+        gsap.to(progressLine, {
+            xPercent: 0,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: section,
+                start: 'top bottom',
+                end: 'top top',
+                scrub: 1,
+                markers: false
+            }
+        });
+    }
+
+    // ── text-case: split into chars, reveal at 20% of progress bar ────────
+    let textChars = [];
+    if (textCase) {
+        const raw = textCase.textContent;
+        textCase.textContent = '';
+        [...raw].forEach(ch => {
+            const s = document.createElement('span');
+            s.textContent = ch;
+            textCase.appendChild(s);
+            textChars.push(s);
+        });
+        gsap.set(textChars, { opacity: 0 });
+    }
+
+    if (textChars.length) {
+        const D = 10;
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: section,
+                start: 'top bottom',
+                end: 'top top',
+                scrub: 1,
+                markers: false
+            }
+        });
+        const charStagger = (D * 0.07) / textChars.length;
+        tl.to(textChars, {
+            opacity: 1,
+            duration: 0.001,
+            stagger: charStagger,
+            ease: 'none'
+        }, D * 0.20);
+    }
+
+    // ── Cards: each slides in from bottom + opacity, one after another ────
+    allCards.forEach((card, i) => {
+        gsap.set(card, { opacity: 0, y: 60 });
+        ScrollTrigger.create({
+            trigger: card,
+            start: 'top 85%',
+            markers: false,
+            onEnter: () => {
+                gsap.to(card, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    ease: 'power2.out'
+                });
+            },
+            onLeaveBack: () => {
+                gsap.to(card, {
+                    opacity: 0,
+                    y: 60,
+                    duration: 0.5,
+                    ease: 'power2.in'
+                });
+            }
+        });
+    });
 }
