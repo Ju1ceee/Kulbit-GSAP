@@ -1161,7 +1161,7 @@ function initMobileTeamAnimation() {
     // The parent provides the extra scroll height; section sticks at top.
     gsap.set(section, { position: 'sticky', top: 0 });
     const parent = section.parentElement;
-    if (parent) gsap.set(parent, { minHeight: '1200vh' });
+    if (parent) gsap.set(parent, { minHeight: '1500vh' });
 
     // ── Initial states ────────────────────────────────────────────────────
     if (headRight) gsap.set(headRight, { opacity: 0, y: 60 });
