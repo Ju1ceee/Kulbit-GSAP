@@ -619,6 +619,7 @@ function initPreloader() {
 
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
 
+    const isMobile = window.innerWidth <= 991;
     const root = document.documentElement;
     const cssVar = (name, fallback) => {
         const v = getComputedStyle(root).getPropertyValue(name).trim();
@@ -635,6 +636,7 @@ function initPreloader() {
         width: "8.0625rem",
         height: "8.0625rem",
         backgroundColor: C_WHITE,
+        scale: isMobile ? 0.75 : 1,
         willChange: "transform,width,height,background-color"
     });
 
@@ -707,11 +709,13 @@ function initPreloader() {
         ease: "power2.inOut"
     }, 1.9);
 
-    tl.to(precentContainer, {
-        width: "108.75rem",
-        duration: 0.25,
-        ease: "power3.inOut"
-    }, 2.05);
+    if (!isMobile) {
+        tl.to(precentContainer, {
+            width: "108.75rem",
+            duration: 0.25,
+            ease: "power3.inOut"
+        }, 2.05);
+    }
 
     if (secondTexts.length) {
         tl.to(secondTexts, {
@@ -729,23 +733,40 @@ function initPreloader() {
             ease: "power3.out"
         }, 2.2);
     }
-    if (button) {
-        tl.to(button, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
 
-        if (soundBtn) {
-            tl.to(soundBtn, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
-        }
-
-        button.addEventListener("click", () => {
-            window.scrollTo(0, 0);
-            gsap.to(wrapper, {
-                autoAlpha: 0,
-                duration: 0.5,
-                onComplete: () => {
-                    gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+    if (isMobile) {
+        tl.to(wrapper, {
+            autoAlpha: 0,
+            duration: 0.5,
+            delay: 0.5,
+            onComplete: () => {
+                gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+                const videoElement = document.getElementById('my-custom-video');
+                if (videoElement) {
+                    videoElement.muted = true;
+                    videoElement.play().catch(console.error);
                 }
+            }
+        }, 2.3);
+    } else {
+        if (button) {
+            tl.to(button, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
+
+            if (soundBtn) {
+                tl.to(soundBtn, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
+            }
+
+            button.addEventListener("click", () => {
+                window.scrollTo(0, 0);
+                gsap.to(wrapper, {
+                    autoAlpha: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+                    }
+                });
             });
-        });
+        }
     }
 
     updateCounter();
@@ -2090,7 +2111,8 @@ function initDynamicAnchors() {
         "Clients": ".our-ambassadors",
         "Cases": ".cases",
         "Team": ".team",
-        "what-we-provide": ".our-services"
+        "what-we-provide": ".our-services",
+        "Footer": ".footer"
     };
 
     function updateAnchors() {
@@ -2154,12 +2176,40 @@ function initScrollDisableLogic() {
     const elements = document.querySelectorAll('[scroll-disable-element]');
     if (!elements.length) return;
 
+    elements.forEach(el => {
+        el.dataset.scrollLocked = 'false';
+        el.dataset.prevOpacity = '0';
+    });
+
     const checkScroll = () => {
         let isAnyVisible = false;
         elements.forEach(el => {
             const style = window.getComputedStyle(el);
+            const opacity = parseFloat(style.opacity || '1');
+            const display = style.display;
+            const visibility = style.visibility;
 
-            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+            let isLocked = el.dataset.scrollLocked === 'true';
+
+            if (display === 'none' || visibility === 'hidden' || opacity === 0) {
+                isLocked = false;
+            } else if (opacity > 0.95) {
+                isLocked = true;
+            } else {
+                const prevOpacity = parseFloat(el.dataset.prevOpacity || '0');
+                if (opacity < prevOpacity) {
+                    // Element is fading out — instantly unlock scroll
+                    isLocked = false;
+                } else if (opacity > prevOpacity) {
+                    // Element is fading in — instantly lock scroll
+                    isLocked = true;
+                }
+            }
+
+            el.dataset.prevOpacity = opacity;
+            el.dataset.scrollLocked = isLocked ? 'true' : 'false';
+
+            if (isLocked) {
                 isAnyVisible = true;
             }
         });
