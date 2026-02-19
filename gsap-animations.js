@@ -18,6 +18,7 @@ function initAnimations() {
         initBenefitsCardsAnimation();
         initStageBenefitsParallax();
         initTeamAnimation();
+        initCasesAnimation();
 
         initSmoothScroll();
 
@@ -2191,4 +2192,128 @@ function initHeroVideoPause() {
         onLeaveBack: () => video.play(),
         markers: false
     });
+}
+
+function initCasesAnimation() {
+    const section = document.querySelector('.cases');
+    if (!section) return;
+
+    const progressLine = section.querySelector('.progress-bar-cases-anim .progress-bar-white-line');
+    const textCase = section.querySelector('.text-case');
+    const textSubtitle = section.querySelector('.text-size-16.text-style-uppercase.is-case');
+    const card1 = section.querySelector('[data-case-video="1"]');
+    const card3 = section.querySelector('[data-case-video="3"]');
+
+    // ── Prepare text-case: split into spans, hide via gsap.set ───────────
+    let textChars = [];
+    if (textCase) {
+        const raw = textCase.textContent;
+        textCase.textContent = '';
+        [...raw].forEach(ch => {
+            const s = document.createElement('span');
+            s.textContent = ch;
+            textCase.appendChild(s);
+            textChars.push(s);
+        });
+        gsap.set(textChars, { opacity: 0 });
+    }
+
+
+    // ── Initial card / bar states ─────────────────────────────────────────
+    if (progressLine) gsap.set(progressLine, { xPercent: -100 });
+    if (card1) gsap.set(card1, { height: '80vh', overflow: 'hidden', opacity: 0, y: 80 });
+    if (card3) gsap.set(card3, { height: 0, overflow: 'hidden', opacity: 0 });
+
+    // ── Progress bar: own trigger — full at top-top ───────────────────────
+    if (progressLine) {
+        gsap.to(progressLine, {
+            xPercent: 0,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: section,
+                start: 'top bottom',
+                end: 'top top',
+                scrub: 1,
+                markers: false
+            }
+        });
+    }
+
+
+    // ── TL1: same range as progress bar (top bottom → top top) ───────────
+    // 1 unit = 10% of that range. Text @ 20%, card1 @ 35%.
+    const D = 10;
+
+    const tl1 = gsap.timeline({
+        scrollTrigger: {
+            trigger: section,
+            start: 'top bottom',
+            end: 'top top',
+            scrub: 1,
+            markers: false
+        }
+    });
+
+    // text-case chars: reveal letter-by-letter from 20% to 27%
+    if (textChars.length) {
+        const charStagger = (D * 0.07) / textChars.length;
+        tl1.to(textChars, {
+            opacity: 1,
+            duration: 0.001,
+            stagger: charStagger,
+            ease: 'none'
+        }, D * 0.20);
+    }
+
+    // card1: slide up + opacity from 35% to 43%
+    if (card1) {
+        tl1.to(card1, { opacity: 1, y: 0, ease: 'power2.out', duration: D * 0.08 }, D * 0.35);
+    }
+
+    // ── TL2: card swap — starts after 10% gap past progress bar 100% ─────
+    // progress bar 100% = 'top top'. 10% gap = 10% of viewport further down.
+    // 'top -10%' = section top is 10% of viewport above viewport top.
+    const tl2 = gsap.timeline({
+        scrollTrigger: {
+            trigger: section,
+            start: 'top -50%',
+            end: 'top -80%',
+            scrub: 1,
+            markers: false,
+            onEnter: () => {
+                if (!card1) return;
+                // Pause the Vimeo iframe inside card1
+                const iframe = card1.querySelector('iframe.vimeo-iframe');
+                if (iframe) {
+                    iframe.contentWindow.postMessage(
+                        JSON.stringify({ method: 'pause' }), '*'
+                    );
+                }
+                // The inline script sets display:none after 200ms — reset that first
+                const poster = card1.querySelector('.video-poster');
+                if (poster) {
+                    poster.style.display = '';
+                    poster.style.opacity = '1';
+                    poster.style.transition = 'none';
+                }
+                const playBtn = card1.querySelector('.vide-case-button');
+                if (playBtn) {
+                    playBtn.style.display = '';
+                    playBtn.style.opacity = '1';
+                    playBtn.style.transition = 'none';
+                }
+            }
+        }
+    });
+
+    if (card1 && card3) {
+        // card1: height-only collapse, opacity stays 1
+        tl2.to(card1, { height: 0, ease: 'power2.inOut', duration: 1 }, 0);
+        // card3: instant opacity then height grows
+        tl2.set(card3, { opacity: 1 }, 0);
+        tl2.to(card3, { height: '80vh', ease: 'power2.inOut', duration: 1 }, 0);
+        // After card3 is full, slide up 3.5rem
+        tl2.to(card3, { y: '-3.5rem', ease: 'power2.out', duration: 0.6 });
+    }
+
 }
