@@ -1301,7 +1301,8 @@ function initDynamicAnchorsMobile() {
         "Clients": ".our-ambassadors",
         "Cases": ".cases",
         "Team": ".team",
-        "what-we-provide": ".our-services"
+        "what-we-provide": ".our-services",
+        "Footer": ".footer"
     };
 
     function updateAnchors() {
@@ -1349,13 +1350,39 @@ function initDynamicAnchorsMobile() {
     }
 }
 
+function initMobileMenuClose() {
+    const menuWrapper = document.querySelector('.menu-wrapper');
+    const burgerBtn = document.querySelector('.burger-button');
+
+    if (!menuWrapper || !burgerBtn) return;
+
+    // 1. Listen for clicks on links or buttons inside the menu
+    const interactables = menuWrapper.querySelectorAll('a, button, [role="button"]');
+    interactables.forEach(el => {
+        el.addEventListener('click', () => {
+            burgerBtn.click();
+        });
+    });
+
+    // 2. Listen for clicks on the background (wrapper itself)
+    menuWrapper.addEventListener('click', (e) => {
+        // If the user clicked directly on the wrapper (the empty background)
+        // and not on a child element, close the menu
+        if (e.target === menuWrapper) {
+            burgerBtn.click();
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     ScrollTrigger.matchMedia({
         "(max-width: 991px)": function () {
+            initPreloader();
             initMobileAnimations();
             initSmoothScrollMobile();
             initDynamicAnchorsMobile();
+            initMobileMenuClose();
         }
     });
 });
@@ -1364,11 +1391,40 @@ function initScrollDisableLogic() {
     const elements = document.querySelectorAll('[scroll-disable-element]');
     if (!elements.length) return;
 
+    elements.forEach(el => {
+        el.dataset.scrollLocked = 'false';
+        el.dataset.prevOpacity = '0';
+    });
+
     const checkScroll = () => {
         let isAnyVisible = false;
         elements.forEach(el => {
             const style = window.getComputedStyle(el);
-            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+            const opacity = parseFloat(style.opacity || '1');
+            const display = style.display;
+            const visibility = style.visibility;
+
+            let isLocked = el.dataset.scrollLocked === 'true';
+
+            if (display === 'none' || visibility === 'hidden' || opacity === 0) {
+                isLocked = false;
+            } else if (opacity > 0.95) {
+                isLocked = true;
+            } else {
+                const prevOpacity = parseFloat(el.dataset.prevOpacity || '0');
+                if (opacity < prevOpacity) {
+                    // Element is fading out — instantly unlock scroll
+                    isLocked = false;
+                } else if (opacity > prevOpacity) {
+                    // Element is fading in — instantly lock scroll
+                    isLocked = true;
+                }
+            }
+
+            el.dataset.prevOpacity = opacity;
+            el.dataset.scrollLocked = isLocked ? 'true' : 'false';
+
+            if (isLocked) {
                 isAnyVisible = true;
             }
         });
@@ -1395,8 +1451,12 @@ function initMobileCasesAnimation() {
     const progressLine = section.querySelector('.progress-bar-cases-anim .progress-bar-white-line');
     const textCase = section.querySelector('.text-case');
     const card1 = section.querySelector('[data-case-video="1"], [data-case-video="2"]');
-    // On mobile: wrappers by order — grab all three
-    const allCards = [...section.querySelectorAll('.case-vide-wrapper')];
+    // On mobile: wrappers by order — explicitly set to 1, 3, 2 as requested
+    const allCards = [
+        section.querySelector('[data-case-video="1"]'),
+        section.querySelector('[data-case-video="3"]'),
+        section.querySelector('[data-case-video="2"]')
+    ].filter(el => el !== null);
 
     // ── Progress bar: top bottom → top top (same logic as desktop) ────────
     if (progressLine) {
@@ -1464,6 +1524,18 @@ function initMobileCasesAnimation() {
                 });
             },
             onLeaveBack: () => {
+                // Pause video and show poster when scrolling back up past the card
+                const iframe = card.querySelector('iframe');
+                const poster = card.querySelector('.video-poster');
+                const button = card.querySelector('.vide-case-button');
+
+                if (poster) gsap.set(poster, { display: '', opacity: 1, pointerEvents: 'auto' });
+                if (button) gsap.set(button, { display: '', opacity: 1, pointerEvents: 'auto' });
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
+                }
+
+                // Hide the card again
                 gsap.to(card, {
                     opacity: 0,
                     y: 60,
@@ -1473,4 +1545,29 @@ function initMobileCasesAnimation() {
             }
         });
     });
+
+    // ── Global trigger: when .our-services reaches top, pause all videos ──
+    const servicesSection = document.querySelector('.our-services');
+    if (servicesSection) {
+        ScrollTrigger.create({
+            trigger: servicesSection,
+            start: 'top top',
+            onEnter: () => {
+                // Pause all videos
+                document.querySelectorAll('iframe').forEach(iframe => {
+                    if (iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
+                    }
+                });
+
+                // Show all posters and play buttons
+                document.querySelectorAll('.video-poster').forEach(poster => {
+                    gsap.set(poster, { display: '', opacity: 1, pointerEvents: 'auto' });
+                });
+                document.querySelectorAll('.vide-case-button').forEach(btn => {
+                    gsap.set(btn, { display: '', opacity: 1, pointerEvents: 'auto' });
+                });
+            }
+        });
+    }
 }
