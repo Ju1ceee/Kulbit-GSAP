@@ -1271,40 +1271,45 @@ function initSmoothScrollMobile() {
 
             if (target) {
                 e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
 
-                const pinSpacer = target.closest(".pin-spacer");
-                const scrollTarget = pinSpacer || target;
+                // Small delay to ensure Webflow doesn't override
+                setTimeout(() => {
+                    const pinSpacer = target.closest(".pin-spacer");
+                    const scrollTarget = pinSpacer || target;
 
-                // Calculate direction based on target's position relative to the viewport.
-                // If top is negative, the target is above us (scrolling up).
-                const targetRectTop = scrollTarget.getBoundingClientRect().top;
-                const isScrollingUp = targetRectTop < 0;
+                    // Calculate direction based on target's position relative to the viewport.
+                    // If top is negative, the target is above us (scrolling up).
+                    const targetRectTop = scrollTarget.getBoundingClientRect().top;
+                    const isScrollingUp = targetRectTop < 0;
 
-                // Get header height for offset, apply only if scrolling up
-                const header = document.querySelector('.header');
-                const offsetAmount = (header && isScrollingUp) ? header.offsetHeight : 0;
+                    // Get header height for offset, apply only if scrolling up
+                    const header = document.querySelector('.header');
+                    const offsetAmount = (header && isScrollingUp) ? header.offsetHeight : 0;
 
-                if (window.lenis) {
-                    // Lenis offset is negative to scroll less
-                    window.lenis.scrollTo(scrollTarget, { offset: -offsetAmount, immediate: false });
-                }
+                    if (window.lenis) {
+                        // Lenis offset is negative to scroll less
+                        window.lenis.scrollTo(scrollTarget, { offset: -offsetAmount, immediate: false });
+                    }
 
-                else if (gsap.plugins.scrollTo) {
-                    gsap.to(window, {
-                        duration: 1,
-                        scrollTo: { y: scrollTarget, offsetY: offsetAmount },
-                        ease: "power2.out"
-                    });
-                }
+                    else if (gsap.plugins.scrollTo) {
+                        gsap.to(window, {
+                            duration: 1,
+                            scrollTo: { y: scrollTarget, offsetY: offsetAmount },
+                            ease: "power2.out"
+                        });
+                    }
 
-                else {
-                    // Native smooth scroll fallback with conditional offset
-                    const targetPosition = targetRectTop + window.scrollY - offsetAmount;
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                }
+                    else {
+                        // Native smooth scroll fallback with conditional offset
+                        const targetPosition = targetRectTop + window.scrollY - offsetAmount;
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
             }
         });
     });
