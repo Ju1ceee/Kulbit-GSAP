@@ -1279,14 +1279,26 @@ function initSmoothScrollMobile() {
                     const pinSpacer = target.closest(".pin-spacer");
                     const scrollTarget = pinSpacer || target;
 
-                    // Calculate direction based on target's position relative to the viewport.
-                    // If top is negative, the target is above us (scrolling up).
-                    const targetRectTop = scrollTarget.getBoundingClientRect().top;
-                    const isScrollingUp = targetRectTop < 0;
+                    // If it's the Home anchor or hero section, scroll to absolute top
+                    if (targetId.toLowerCase() === 'home' || target.classList.contains('hero')) {
+                        if (window.lenis) {
+                            window.lenis.scrollTo(0, { offset: 0, immediate: false });
+                        } else if (gsap.plugins.scrollTo) {
+                            gsap.to(window, { duration: 1, scrollTo: 0, ease: "power2.out" });
+                        } else {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                        return;
+                    }
 
-                    // Get header height for offset, apply only if scrolling up
+                    // Calculate direction based on target's position relative to the viewport.
+                    // If top is positive, the target is below us (scrolling down).
+                    const targetRectTop = scrollTarget.getBoundingClientRect().top;
+                    const isScrollingDown = targetRectTop > 0;
+
+                    // Get header height for offset, apply only if scrolling DOWN
                     const header = document.querySelector('.header');
-                    const offsetAmount = (header && isScrollingUp) ? header.offsetHeight : 0;
+                    const offsetAmount = (header && isScrollingDown) ? header.offsetHeight : 0;
 
                     if (window.lenis) {
                         // Lenis offset is negative to scroll less
