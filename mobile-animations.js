@@ -1275,9 +1275,13 @@ function initSmoothScrollMobile() {
                 const pinSpacer = target.closest(".pin-spacer");
                 const scrollTarget = pinSpacer || target;
 
-                // Get header height for offset
+                // Calculate target position without offset to get base direction
+                const baseTargetPosition = scrollTarget.getBoundingClientRect().top + window.scrollY;
+                const isScrollingUp = baseTargetPosition < window.scrollY;
+
+                // Get header height for offset, apply only if scrolling up
                 const header = document.querySelector('.header');
-                const offsetAmount = header ? header.offsetHeight : 0;
+                const offsetAmount = (header && isScrollingUp) ? header.offsetHeight : 0;
 
                 if (window.lenis) {
                     // Lenis offset is negative to scroll less
@@ -1293,10 +1297,10 @@ function initSmoothScrollMobile() {
                 }
 
                 else {
-                    // Native smooth scroll fallback with offset
-                    const targetPosition = scrollTarget.getBoundingClientRect().top + window.scrollY - offsetAmount;
+                    // Native smooth scroll fallback with conditional offset
+                    const finalTargetPosition = baseTargetPosition - offsetAmount;
                     window.scrollTo({
-                        top: targetPosition,
+                        top: finalTargetPosition,
                         behavior: 'smooth'
                     });
                 }
@@ -1330,11 +1334,9 @@ function initDynamicAnchorsMobile() {
                 const rect = section.getBoundingClientRect();
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-                // Get header height for offset
-                const header = document.querySelector('.header');
-                const offsetAmount = header ? header.offsetHeight : 0;
-
-                const absoluteTop = rect.top + scrollTop - offsetAmount;
+                // Do not apply offset here globally, let smooth scroll handle it 
+                // dynamically based on scroll direction
+                const absoluteTop = rect.top + scrollTop;
 
                 const anchor = document.createElement('div');
                 anchor.id = id;
