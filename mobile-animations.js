@@ -1275,9 +1275,10 @@ function initSmoothScrollMobile() {
                 const pinSpacer = target.closest(".pin-spacer");
                 const scrollTarget = pinSpacer || target;
 
-                // Calculate target position without offset to get base direction
-                const baseTargetPosition = scrollTarget.getBoundingClientRect().top + window.scrollY;
-                const isScrollingUp = baseTargetPosition < window.scrollY;
+                // Calculate direction based on target's position relative to the viewport.
+                // If top is negative, the target is above us (scrolling up).
+                const targetRectTop = scrollTarget.getBoundingClientRect().top;
+                const isScrollingUp = targetRectTop < 0;
 
                 // Get header height for offset, apply only if scrolling up
                 const header = document.querySelector('.header');
@@ -1298,9 +1299,9 @@ function initSmoothScrollMobile() {
 
                 else {
                     // Native smooth scroll fallback with conditional offset
-                    const finalTargetPosition = baseTargetPosition - offsetAmount;
+                    const targetPosition = targetRectTop + window.scrollY - offsetAmount;
                     window.scrollTo({
-                        top: finalTargetPosition,
+                        top: targetPosition,
                         behavior: 'smooth'
                     });
                 }
@@ -1333,9 +1334,6 @@ function initDynamicAnchorsMobile() {
 
                 const rect = section.getBoundingClientRect();
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-                // Do not apply offset here globally, let smooth scroll handle it 
-                // dynamically based on scroll direction
                 const absoluteTop = rect.top + scrollTop;
 
                 const anchor = document.createElement('div');
