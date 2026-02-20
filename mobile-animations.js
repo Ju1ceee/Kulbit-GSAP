@@ -1275,20 +1275,30 @@ function initSmoothScrollMobile() {
                 const pinSpacer = target.closest(".pin-spacer");
                 const scrollTarget = pinSpacer || target;
 
+                // Get header height for offset
+                const header = document.querySelector('.header');
+                const offsetAmount = header ? header.offsetHeight : 0;
+
                 if (window.lenis) {
-                    window.lenis.scrollTo(scrollTarget, { offset: 0, immediate: false });
+                    // Lenis offset is negative to scroll less
+                    window.lenis.scrollTo(scrollTarget, { offset: -offsetAmount, immediate: false });
                 }
 
                 else if (gsap.plugins.scrollTo) {
                     gsap.to(window, {
                         duration: 1,
-                        scrollTo: { y: scrollTarget, offsetY: 0 },
+                        scrollTo: { y: scrollTarget, offsetY: offsetAmount },
                         ease: "power2.out"
                     });
                 }
 
                 else {
-                    scrollTarget.scrollIntoView({ behavior: 'smooth' });
+                    // Native smooth scroll fallback with offset
+                    const targetPosition = scrollTarget.getBoundingClientRect().top + window.scrollY - offsetAmount;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
                 }
             }
         });
@@ -1319,7 +1329,12 @@ function initDynamicAnchorsMobile() {
 
                 const rect = section.getBoundingClientRect();
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                const absoluteTop = rect.top + scrollTop;
+
+                // Get header height for offset
+                const header = document.querySelector('.header');
+                const offsetAmount = header ? header.offsetHeight : 0;
+
+                const absoluteTop = rect.top + scrollTop - offsetAmount;
 
                 const anchor = document.createElement('div');
                 anchor.id = id;
