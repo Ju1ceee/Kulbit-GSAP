@@ -1337,48 +1337,26 @@ function initDynamicAnchorsMobile() {
         "Footer": ".footer"
     };
 
-    function updateAnchors() {
+    // Note: This must run BEFORE GSAP ScrollTriggers are initialized so that the anchor is
+    // placed before any pin-spacers are created. That way it naturally tracks the true top.
+    document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
 
-        document.querySelectorAll('.dynamic-anchor').forEach(el => el.remove());
-
-        for (const [id, selector] of Object.entries(anchorMap)) {
-            const section = document.querySelector(selector);
-            if (section) {
-                const existingId = document.getElementById(id);
-                if (existingId && !existingId.classList.contains('dynamic-anchor')) {
-                    existingId.removeAttribute('id');
-                }
-
-                const rect = section.getBoundingClientRect();
-                const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                const absoluteTop = rect.top + scrollTop;
-
-                const anchor = document.createElement('div');
-                anchor.id = id;
-                anchor.classList.add('dynamic-anchor');
-                anchor.style.position = 'absolute';
-                anchor.style.top = `${absoluteTop}px`;
-                anchor.style.left = '0';
-                anchor.style.width = '1px';
-                anchor.style.height = '1px';
-                anchor.style.visibility = 'hidden';
-                anchor.style.pointerEvents = 'none';
-
-                document.body.appendChild(anchor);
+    for (const [id, selector] of Object.entries(anchorMap)) {
+        const section = document.querySelector(selector);
+        if (section) {
+            const existingId = document.getElementById(id);
+            if (existingId && !existingId.classList.contains('dynamic-anchor')) {
+                existingId.removeAttribute('id');
             }
+
+            const anchor = document.createElement('div');
+            anchor.id = id;
+            anchor.classList.add('dynamic-anchor');
+            // Insert in document flow with 0 height so it naturally tracks page resizes
+            anchor.style.cssText = 'position: relative; top: 0; left: 0; width: 100%; height: 0; visibility: hidden; pointer-events: none; opacity: 0;';
+
+            section.parentNode.insertBefore(anchor, section);
         }
-    }
-
-    window.addEventListener('load', updateAnchors);
-
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(updateAnchors, 200);
-    });
-
-    if (document.readyState === 'complete') {
-        updateAnchors();
     }
 }
 
@@ -1410,10 +1388,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ScrollTrigger.matchMedia({
         "(max-width: 991px)": function () {
-            initPreloader();
+            if (typeof initPreloader === 'function') initPreloader();
+            // Generate anchors BEFORE animations so they are outside GSAP pin-spacers
+            initDynamicAnchorsMobile();
             initMobileAnimations();
             initSmoothScrollMobile();
-            initDynamicAnchorsMobile();
             initMobileMenuClose();
         }
     });
