@@ -30,7 +30,6 @@ function initAnimations() {
 
 function initStageBenefitsParallax() {
     const stageSection = document.querySelector('#stage-top-benefits');
-
     const benefitsSection = stageSection ? stageSection.nextElementSibling : null;
 
     if (!stageSection || !benefitsSection) return;
@@ -42,7 +41,24 @@ function initStageBenefitsParallax() {
         end: "top 50%",
         pin: true,
         pinSpacing: false,
-        markers: false
+        markers: false,
+        onPin: () => {
+            const pinSpacer = stageSection.parentNode;
+            if (pinSpacer && pinSpacer.classList.contains('pin-spacer')) {
+                gsap.set(pinSpacer, { position: "sticky", top: 0 });
+                gsap.set(stageSection, { clearProps: "transform" });
+            }
+        },
+        onRefresh: () => {
+            const pinSpacer = stageSection.parentNode;
+            if (pinSpacer && pinSpacer.classList.contains('pin-spacer')) {
+                gsap.set(pinSpacer, { position: "sticky", top: 0 });
+                gsap.set(stageSection, { clearProps: "transform" });
+            }
+        },
+        onUpdate: () => {
+            gsap.set(stageSection, { clearProps: "transform" });
+        }
     });
 }
 
