@@ -91,15 +91,15 @@ function initBenefitsAnimationSequence() {
 
     const colorLines = document.querySelectorAll('.benefits-color-line');
 
-    if (!dashedLine || !traditionalLine) return;
+    if (!dashedLine) return;
 
     const getCircle = (id) => document.querySelector(`.benefits-circle[data-benefit-circle="${id}"]`);
 
     const hiddenClip = "inset(0% 100% 0% 0%)";
     const visibleClip = "inset(0% 0% 0% 0%)";
 
-    gsap.set(dashedLine, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
-    gsap.set(traditionalLine, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+    gsap.set(dashedLine, { clipPath: visibleClip, webkitClipPath: visibleClip });
+    if (traditionalLine) gsap.set(traditionalLine, { clipPath: visibleClip, webkitClipPath: visibleClip });
 
     if (kulbitText) gsap.set(kulbitText, { opacity: 0, y: 20 });
     if (textNew) gsap.set(textNew, { opacity: 0, y: 20 });
@@ -114,11 +114,92 @@ function initBenefitsAnimationSequence() {
 
     if (colorLines.length) gsap.set(colorLines, { xPercent: -101 });
 
-    if (circles.length) gsap.set(circles, { opacity: 0 });
+    if (circles.length) gsap.set(circles, { opacity: 1 });
 
-    if (textLegacy) gsap.set(textLegacy, { opacity: 0, y: 20 });
+    if (textLegacy) gsap.set(textLegacy, { opacity: 1, y: 0 });
 
-    const tl = gsap.timeline({
+    const tlAuto = gsap.timeline({
+        scrollTrigger: {
+            trigger: section,
+            start: "top 50%",
+        }
+    });
+
+    const F_DUR = 0.4;
+
+    if (textNew) tlAuto.to(textNew, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 0);
+    if (weeksLabel) tlAuto.to(weeksLabel, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 0);
+
+    if (traditionalLine) {
+        const path = traditionalLine.querySelector('path');
+        if (path) {
+            tlAuto.to(path, { fill: "rgba(255, 255, 255, 0.1)", duration: F_DUR, ease: "power2.out" }, 0);
+        }
+    }
+
+    const redColorLine = document.querySelector('.benefits-color-line.is-red');
+    if (redColorLine) tlAuto.to(redColorLine, { xPercent: 0, duration: 0.5, ease: "power2.out" }, 0.2);
+
+    const circle5 = getCircle(5);
+    if (circle5) tlAuto.to(circle5, { borderColor: "#ffffff", duration: F_DUR, ease: "power2.out" }, 0.3);
+
+    const blueColorLine = document.querySelector('.benefits-color-line:not(.is-red)');
+    if (blueColorLine) tlAuto.to(blueColorLine, { xPercent: 0, duration: 0.5, ease: "power2.out" }, 0.5);
+
+    if (circle5) tlAuto.to(circle5, { borderColor: "#363636", duration: F_DUR, ease: "power2.out" }, 0.6);
+
+    if (kulbitText) tlAuto.to(kulbitText, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 0.7);
+    if (weekThreeLabel) tlAuto.to(weekThreeLabel, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 0.7);
+
+    const graphContainers = document.querySelectorAll('.benefits-graph-svg.desktop-only');
+    const graphSvgs = document.querySelectorAll('.benefits-graph-svg.desktop-only .position-absolute-100');
+
+    if (graphContainers.length) {
+        graphContainers.forEach(g => {
+            const mainSvg = g.querySelector('svg:not(.position-absolute-100)');
+            if (mainSvg) gsap.set(mainSvg, { opacity: 0 });
+            tlAuto.set(g, { opacity: 1 }, 0.9);
+        });
+    }
+
+    if (graphSvgs.length) {
+        gsap.set(graphSvgs, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+    }
+
+    if (graphSvgs[0]) tlAuto.to(graphSvgs[0], { clipPath: visibleClip, webkitClipPath: visibleClip, duration: 0.6, ease: "power2.inOut" }, 0.9);
+    if (weekOneLabel) tlAuto.to(weekOneLabel, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 1.1);
+    if (graphSvgs[1]) tlAuto.to(graphSvgs[1], { clipPath: visibleClip, webkitClipPath: visibleClip, duration: 0.6, ease: "power2.inOut" }, 1.3);
+    if (weekTwoLabel) tlAuto.to(weekTwoLabel, { opacity: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 1.5);
+    if (graphSvgs[2]) tlAuto.to(graphSvgs[2], { clipPath: visibleClip, webkitClipPath: visibleClip, duration: 0.6, ease: "power2.inOut" }, 1.7);
+
+    if (cardsWrapper) tlAuto.to(cardsWrapper, { autoAlpha: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 1.8);
+    if (scrollMore) tlAuto.to(scrollMore, { autoAlpha: 1, y: 0, duration: F_DUR, ease: "power2.out" }, 1.8);
+
+    const graph1Container = graphContainers[0];
+    if (graph1Container) {
+        const mainSvg1 = graph1Container.querySelector('svg:not(.position-absolute-100)');
+        if (mainSvg1) {
+            const whitePath1 = mainSvg1.querySelector('path:nth-child(2)');
+            const gradientPath1 = mainSvg1.querySelector('path:nth-child(1)');
+
+            tlAuto.set(mainSvg1, { opacity: 1 }, 1.8);
+            if (gradientPath1) gsap.set(gradientPath1, { opacity: 0 });
+            if (whitePath1) gsap.set(whitePath1, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
+
+            if (whitePath1) {
+                tlAuto.to(whitePath1, { clipPath: visibleClip, webkitClipPath: visibleClip, duration: 0.7, ease: "power2.inOut" }, 1.8);
+            }
+            if (gradientPath1) {
+                tlAuto.to(gradientPath1, { opacity: 1, duration: F_DUR, ease: "power2.out" }, 2.1);
+            }
+        }
+    }
+
+    const circle2 = getCircle(2);
+    if (circle2) tlAuto.to(circle2, { borderColor: "#ffffff", duration: F_DUR, ease: "power2.out" }, 2.3);
+
+    // --- Scrubbing timeline for cards progression ---
+    const tlScrub = gsap.timeline({
         scrollTrigger: {
             trigger: section,
             start: "top top",
@@ -128,284 +209,15 @@ function initBenefitsAnimationSequence() {
         }
     });
 
-    const lineDuration = 1.2;
-
-    tl.to(dashedLine, {
-        clipPath: visibleClip,
-        webkitClipPath: visibleClip,
-        duration: lineDuration,
-        ease: "none"
-    }, "start");
-
-    tl.to(traditionalLine, {
-        clipPath: visibleClip,
-        webkitClipPath: visibleClip,
-        duration: lineDuration,
-        ease: "none"
-    }, "start");
-
-    const fadeDur = 0.3;
-
-    tl.to(getCircle(1), { opacity: 1, duration: fadeDur }, "start");
-
-    tl.to(getCircle(2), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.18}`);
-
-    tl.to(getCircle(3), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.42}`);
-
-    tl.to(getCircle(4), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.68}`);
-
-    tl.to(getCircle(5), { opacity: 1, duration: fadeDur }, `start+=${lineDuration * 0.92}`);
-
-    if (textLegacy) {
-        tl.to(textLegacy, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${lineDuration}`);
-    }
-
-    if (weeksLabel) {
-        tl.to(weeksLabel, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${lineDuration}`);
-    }
-
-    const redColorLine = document.querySelector('.benefits-color-line.is-red');
-    if (redColorLine) {
-        tl.to(redColorLine, {
-            xPercent: 0,
-            duration: 1,
-            ease: "power2.out"
-        }, `start+=${lineDuration + 0.5}`);
-
-        if (traditionalLine) {
-            const path = traditionalLine.querySelector('path');
-            if (path) {
-                tl.to(path, {
-                    fill: "rgba(255, 255, 255, 0.1)",
-                    duration: 1,
-                    ease: "power2.out"
-                }, `start+=${lineDuration + 0.5}`);
-            }
-        }
-
-        const circle5 = getCircle(5);
-        if (circle5) {
-            tl.to(circle5, {
-                borderColor: "#ffffff",
-                duration: 0.5,
-                ease: "power2.out"
-            }, `start+=${lineDuration + 0.5 + 1}`);
-        }
-    }
-
-    const blueLineStart = lineDuration + 0.5 + 1 + 0.5;
-    const blueColorLine = document.querySelector('.benefits-color-line:not(.is-red)');
-    if (blueColorLine) {
-        tl.to(blueColorLine, {
-            xPercent: 0,
-            duration: 1,
-            ease: "power2.out"
-        }, `start+=${blueLineStart}`);
-
-        const circle5 = getCircle(5);
-        if (circle5) {
-            tl.to(circle5, {
-                borderColor: "#363636",
-                duration: 0.5,
-                ease: "power2.out"
-            }, `start+=${blueLineStart}`);
-        }
-    }
-
-    if (kulbitText) {
-        tl.to(kulbitText, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${blueLineStart}`);
-    }
-
-    if (weekThreeLabel) {
-        tl.to(weekThreeLabel, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${blueLineStart}`);
-    }
-
-    const phase2Start = blueLineStart + 1 + 0.5;
-    if (textLegacy) {
-        tl.to(textLegacy, {
-            opacity: 0,
-            y: -20,
-            duration: 0.6,
-            ease: "power2.in"
-        }, `start+=${phase2Start}`);
-    }
-
-    const reverseLineStart = phase2Start + 0.6 + 0.2;
-    if (traditionalLine) {
-        tl.to(traditionalLine, {
-            clipPath: hiddenClip,
-            webkitClipPath: hiddenClip,
-            duration: 1.2,
-            ease: "none"
-        }, `start+=${reverseLineStart}`);
-    }
-
-    const secondTextStart = reverseLineStart + 1.2 + 0.3;
-    if (textNew) {
-        tl.to(textNew, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${secondTextStart}`);
-    }
-
-    const graphContainers = document.querySelectorAll('.benefits-graph-svg.desktop-only');
-    const graphSvgs = document.querySelectorAll('.benefits-graph-svg.desktop-only .position-absolute-100');
-
-    const graphsStart = secondTextStart + 0.8 + 0.3;
-    if (graphContainers.length) {
-        graphContainers.forEach(g => {
-            const mainSvg = g.querySelector('svg:not(.position-absolute-100)');
-            if (mainSvg) gsap.set(mainSvg, { opacity: 0 });
-            tl.set(g, { opacity: 1 }, `start+=${graphsStart}`);
-        });
-    }
-
-    if (graphSvgs.length) {
-        gsap.set(graphSvgs, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
-    }
-
-    const graphDrawDuration = 1.0;
-    const graphGap = 0.3;
-
-    if (graphSvgs[0]) {
-        tl.to(graphSvgs[0], {
-            clipPath: visibleClip,
-            webkitClipPath: visibleClip,
-            duration: graphDrawDuration,
-            ease: "power2.inOut"
-        }, `start+=${graphsStart}`);
-    }
-
-    const week1Start = graphsStart + graphDrawDuration;
-    if (weekOneLabel) {
-        tl.to(weekOneLabel, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out"
-        }, `start+=${week1Start}`);
-    }
-
-    const graph2Start = week1Start + graphGap;
-    if (graphSvgs[1]) {
-        tl.to(graphSvgs[1], {
-            clipPath: visibleClip,
-            webkitClipPath: visibleClip,
-            duration: graphDrawDuration,
-            ease: "power2.inOut"
-        }, `start+=${graph2Start}`);
-    }
-
-    const week2Start = graph2Start + graphDrawDuration;
-    if (weekTwoLabel) {
-        tl.to(weekTwoLabel, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out"
-        }, `start+=${week2Start}`);
-    }
-
-    const graph3Start = week2Start + graphGap;
-    if (graphSvgs[2]) {
-        tl.to(graphSvgs[2], {
-            clipPath: visibleClip,
-            webkitClipPath: visibleClip,
-            duration: graphDrawDuration,
-            ease: "power2.inOut"
-        }, `start+=${graph3Start}`);
-    }
-
-    const finalPhaseStart = graph3Start + graphDrawDuration + 0.3;
-
-    if (cardsWrapper) {
-        tl.to(cardsWrapper, {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${finalPhaseStart}`);
-    }
-
-    if (scrollMore) {
-        tl.to(scrollMore, {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, `start+=${finalPhaseStart}`);
-    }
-
-    const graph1Container = graphContainers[0];
-    if (graph1Container) {
-        const mainSvg1 = graph1Container.querySelector('svg:not(.position-absolute-100)');
-        if (mainSvg1) {
-            const whitePath1 = mainSvg1.querySelector('path:nth-child(2)');
-            const gradientPath1 = mainSvg1.querySelector('path:nth-child(1)');
-
-            tl.set(mainSvg1, { opacity: 1 }, `start+=${finalPhaseStart}`);
-
-            if (gradientPath1) gsap.set(gradientPath1, { opacity: 0 });
-            if (whitePath1) gsap.set(whitePath1, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
-
-            if (whitePath1) {
-                tl.to(whitePath1, {
-                    clipPath: visibleClip,
-                    webkitClipPath: visibleClip,
-                    duration: 1.0,
-                    ease: "power2.inOut"
-                }, `start+=${finalPhaseStart}`);
-            }
-
-            if (gradientPath1) {
-                tl.to(gradientPath1, {
-                    opacity: 1,
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, `start+=${finalPhaseStart + 0.8}`);
-            }
-        }
-    }
-
-    const circle2 = getCircle(2);
-    if (circle2) {
-        tl.to(circle2, {
-            borderColor: "#ffffff",
-            duration: 0.5,
-            ease: "power2.out"
-        }, `start+=${finalPhaseStart + 1.0}`);
-    }
-
-    const cardsStart = finalPhaseStart + 1.5;
+    // Provide a small initial empty space in the scrub timeline (1 second relative to scrub total length)
+    // so that the user scrolls a bit before the cards actually start animating away.
+    const cardsStart = 1.0;
     const cards = document.querySelectorAll('.benefits-card[data-benefit-card]');
 
     if (cards.length >= 3) {
-
         const step1Duration = 3;
 
-        tl.to(cards[0], {
+        tlScrub.to(cards[0], {
             xPercent: -50,
             yPercent: 50,
             rotation: -10,
@@ -421,12 +233,12 @@ function initBenefitsAnimationSequence() {
                 const whitePath2 = mainSvg2.querySelector('path:nth-child(2)');
                 const gradientPath2 = mainSvg2.querySelector('path:nth-child(1)');
 
-                tl.set(mainSvg2, { opacity: 1 }, `start+=${cardsStart}`);
+                tlScrub.set(mainSvg2, { opacity: 1 }, `start+=${cardsStart}`);
                 if (gradientPath2) gsap.set(gradientPath2, { opacity: 0 });
                 if (whitePath2) gsap.set(whitePath2, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
 
                 if (whitePath2) {
-                    tl.to(whitePath2, {
+                    tlScrub.to(whitePath2, {
                         clipPath: visibleClip,
                         webkitClipPath: visibleClip,
                         duration: step1Duration,
@@ -436,7 +248,7 @@ function initBenefitsAnimationSequence() {
 
                 const endOfStep1 = cardsStart + step1Duration;
                 if (gradientPath2) {
-                    tl.to(gradientPath2, {
+                    tlScrub.to(gradientPath2, {
                         opacity: 1,
                         duration: 0.8,
                         ease: "power2.out"
@@ -445,7 +257,7 @@ function initBenefitsAnimationSequence() {
 
                 const circle3 = getCircle(3);
                 if (circle3) {
-                    tl.to(circle3, {
+                    tlScrub.to(circle3, {
                         borderColor: "#ffffff",
                         duration: 0.5,
                         ease: "power2.out"
@@ -454,7 +266,7 @@ function initBenefitsAnimationSequence() {
             }
         }
 
-        tl.to(cards[1], {
+        tlScrub.to(cards[1], {
             xPercent: 0,
             top: "0%",
             yPercent: 0,
@@ -468,7 +280,7 @@ function initBenefitsAnimationSequence() {
                 duration: step1Duration * 0.5
             }, `start+=${cardsStart}`);
 
-        tl.to(cards[2], {
+        tlScrub.to(cards[2], {
             xPercent: 50,
             scale: 0.85,
             zIndex: 2,
@@ -480,7 +292,7 @@ function initBenefitsAnimationSequence() {
         const step2Start = cardsStart + step1Duration + pauseBetweenSteps;
         const step2Duration = 3;
 
-        tl.to(cards[1], {
+        tlScrub.to(cards[1], {
             xPercent: -50,
             yPercent: 50,
             rotation: -10,
@@ -496,12 +308,12 @@ function initBenefitsAnimationSequence() {
                 const whitePath3 = mainSvg3.querySelector('path:nth-child(2)');
                 const gradientPath3 = mainSvg3.querySelector('path:nth-child(1)');
 
-                tl.set(mainSvg3, { opacity: 1 }, `start+=${step2Start}`);
+                tlScrub.set(mainSvg3, { opacity: 1 }, `start+=${step2Start}`);
                 if (gradientPath3) gsap.set(gradientPath3, { opacity: 0 });
                 if (whitePath3) gsap.set(whitePath3, { clipPath: hiddenClip, webkitClipPath: hiddenClip });
 
                 if (whitePath3) {
-                    tl.to(whitePath3, {
+                    tlScrub.to(whitePath3, {
                         clipPath: visibleClip,
                         webkitClipPath: visibleClip,
                         duration: step2Duration,
@@ -511,7 +323,7 @@ function initBenefitsAnimationSequence() {
 
                 const endOfStep2 = step2Start + step2Duration;
                 if (gradientPath3) {
-                    tl.to(gradientPath3, {
+                    tlScrub.to(gradientPath3, {
                         opacity: 1,
                         duration: 0.8,
                         ease: "power2.out"
@@ -520,7 +332,7 @@ function initBenefitsAnimationSequence() {
 
                 const circle4 = getCircle(4);
                 if (circle4) {
-                    tl.to(circle4, {
+                    tlScrub.to(circle4, {
                         borderColor: "#ffffff",
                         duration: 0.5,
                         ease: "power2.out"
@@ -529,7 +341,7 @@ function initBenefitsAnimationSequence() {
             }
         }
 
-        tl.to(cards[2], {
+        tlScrub.to(cards[2], {
             xPercent: 0,
             top: "0%",
             yPercent: 0,
@@ -602,9 +414,6 @@ function initPreloader() {
     const $$ = (v) => document.querySelectorAll(`[data-anim-preloader="${v}"]`);
 
     const wrapper = $("wrapper");
-    const button = $("button");
-    const mainText = $("main-text");
-    const secondTexts = $$("precent-second-text");
     const zero = $("zero-precent");
     const precentContainer = $("precent-container");
     const centerSquare = $("center-square");
@@ -613,13 +422,7 @@ function initPreloader() {
     const sq1 = $("small-square-one");
     const sq2 = $("small-square-two");
 
-    const marquee = $("marquee-text");
-
-    const soundBtn = document.querySelector('.sound-btn');
-
     if (!wrapper || !zero || !precentContainer || !centerSquare) return;
-
-    const isMobile = window.innerWidth <= 991;
     const root = document.documentElement;
     const cssVar = (name, fallback) => {
         const v = getComputedStyle(root).getPropertyValue(name).trim();
@@ -636,7 +439,7 @@ function initPreloader() {
         width: "8.0625rem",
         height: "8.0625rem",
         backgroundColor: C_WHITE,
-        scale: isMobile ? 0.75 : 1,
+        scale: 1,
         willChange: "transform,width,height,background-color"
     });
 
@@ -646,13 +449,7 @@ function initPreloader() {
     }
     if (sq1) gsap.set(sq1, { autoAlpha: 0, backgroundColor: C_PINK, zIndex: 1, willChange: "transform,opacity,background-color" });
     if (sq2) gsap.set(sq2, { autoAlpha: 0, zIndex: 1, willChange: "transform,opacity" });
-    if (marquee) gsap.set(marquee, { x: "0rem", autoAlpha: 0, willChange: "transform" });
-    if (mainText) gsap.set(mainText, { autoAlpha: 0, y: "100%" });
-    if (secondTexts.length) {
-        gsap.set(secondTexts, { autoAlpha: 0, y: "2.5rem" });
-    }
-    if (button) gsap.set(button, { autoAlpha: 0 });
-    if (soundBtn) gsap.set(soundBtn, { autoAlpha: 0 });
+
 
     const counter = { p: 0 };
     const updateCounter = () => {
@@ -709,65 +506,24 @@ function initPreloader() {
         ease: "power2.inOut"
     }, 1.9);
 
-    if (!isMobile) {
-        tl.to(precentContainer, {
-            width: "108.75rem",
-            duration: 0.25,
-            ease: "power3.inOut"
-        }, 2.05);
-    }
+    tl.to(precentContainer, {
+        width: "108.75rem",
+        duration: 0.25,
+        ease: "power3.inOut"
+    }, 2.05);
 
-    if (secondTexts.length) {
-        tl.to(secondTexts, {
-            autoAlpha: 1,
-            y: "0rem",
-            duration: 0.2,
-            ease: "power3.out"
-        }, 2.2);
-    }
-    if (mainText) {
-        tl.to(mainText, {
-            autoAlpha: 1,
-            y: "0%",
-            duration: 0.2,
-            ease: "power3.out"
-        }, 2.2);
-    }
-
-    if (isMobile) {
-        tl.to(wrapper, {
-            autoAlpha: 0,
-            duration: 0.5,
-            delay: 0.5,
-            onComplete: () => {
-                gsap.set(wrapper, { display: "none", pointerEvents: "none" });
-                const videoElement = document.getElementById('my-custom-video');
-                if (videoElement) {
-                    videoElement.muted = true;
-                    videoElement.play().catch(console.error);
-                }
+    tl.to(wrapper, {
+        autoAlpha: 0,
+        duration: 0.5,
+        onComplete: () => {
+            gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+            const videoElement = document.getElementById('my-custom-video');
+            if (videoElement) {
+                videoElement.muted = true;
+                videoElement.play().catch(console.error);
             }
-        }, 2.3);
-    } else {
-        if (button) {
-            tl.to(button, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
-
-            if (soundBtn) {
-                tl.to(soundBtn, { autoAlpha: 1, duration: 0.1, ease: "power2.out" }, 2.3);
-            }
-
-            button.addEventListener("click", () => {
-                window.scrollTo(0, 0);
-                gsap.to(wrapper, {
-                    autoAlpha: 0,
-                    duration: 0.5,
-                    onComplete: () => {
-                        gsap.set(wrapper, { display: "none", pointerEvents: "none" });
-                    }
-                });
-            });
         }
-    }
+    }, 2.3);
 
     updateCounter();
 }
@@ -1648,23 +1404,21 @@ function initAmbassadorsAnimation() {
         tl.to(card1, { y: "-100%", duration: 1 });
         tl.to(card1, { opacity: 0, duration: 0.3 }, "<");
 
-        if (cardText1) {
-
-            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.3 }, "<");
-        }
-
         tl.to(card2, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
-
-        if (cardText2) {
-
-            tl.to(cardText2, { y: "0%", opacity: 1, duration: 1 }, "<+=0.5");
-        }
 
         tl.to({}, { duration: 0.5 });
 
         tl.to(card2, { y: "-100%", opacity: 0, duration: 1 });
 
         tl.to(card3, { y: "0%", opacity: 1, duration: 1 }, "-=0.5");
+
+        if (cardText1) {
+            tl.to(cardText1, { y: "-100%", opacity: 0, duration: 0.5 }, "<");
+        }
+
+        if (cardText2) {
+            tl.to(cardText2, { y: "0%", opacity: 1, duration: 0.5 }, "<+=0.2");
+        }
 
     });
 }
@@ -1673,35 +1427,24 @@ function initServicesAnimation() {
     const section = document.querySelector('.our-services');
     if (!section) return;
 
-    const cardsWrapper = section.querySelector('.our-services-cards-wrapper');
     const mainWrapper = section.querySelector('.our-services-cards-main-wrapper');
-
-    if (!cardsWrapper || !mainWrapper) return;
+    if (!mainWrapper) return;
 
     ScrollTrigger.matchMedia({
-
         "(min-width: 992px)": function () {
 
             const allCards = section.querySelectorAll('.our-services-cards-wrapper');
-            if (allCards.length < 5) {
+            if (allCards.length < 2) return;
 
-                return;
-            }
-
-            const card1 = allCards[0];
-            const card5 = allCards[4];
+            const cardCount = allCards.length;
 
             const getScrollAmount = () => {
-
-                const dist = card5.offsetLeft - card1.offsetLeft;
-                return -dist;
+                const card1 = allCards[0];
+                const cardLast = allCards[cardCount - 1];
+                return -(cardLast.offsetLeft - card1.offsetLeft);
             };
 
-            gsap.set(mainWrapper, {
-                y: "10rem",
-                autoAlpha: 0
-            });
-
+            gsap.set(mainWrapper, { y: "10rem", autoAlpha: 0 });
             gsap.to(mainWrapper, {
                 y: "0rem",
                 autoAlpha: 1,
@@ -1720,10 +1463,15 @@ function initServicesAnimation() {
                     trigger: section,
                     start: "top top",
                     end: "bottom bottom",
-                    pin: false,
                     scrub: 1,
                     invalidateOnRefresh: true,
-                    markers: false
+                    markers: false,
+                    snap: {
+                        snapTo: 1 / (cardCount - 1),
+                        duration: { min: 0.2, max: 0.8 },
+                        delay: 0.1,
+                        ease: "power1.inOut"
+                    }
                 }
             });
 
@@ -1732,8 +1480,6 @@ function initServicesAnimation() {
                 ease: "none",
                 duration: 1
             });
-
-            tl.to({}, { duration: 0.2 });
         }
     });
 }
