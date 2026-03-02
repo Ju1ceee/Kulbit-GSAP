@@ -545,6 +545,14 @@ function initPreloader() {
         duration: 0.5,
         onComplete: () => {
             gsap.set(wrapper, { display: "none", pointerEvents: "none" });
+            // Play video and show the mute button immediately
+            const videoElement = document.getElementById('my-custom-video');
+            if (videoElement) {
+                videoElement.muted = true;
+                videoElement.play().catch(console.error);
+            }
+            const playBtn = document.getElementById('sound-second-btn');
+            if (playBtn) gsap.to(playBtn, { opacity: 1, duration: 0.4, ease: "power2.out" });
             initHeroIntroAnimation();
         }
     }, 2.3);
@@ -768,19 +776,10 @@ function initHeroIntroAnimation() {
         }, ">0.1");
     }
 
-    // 8. Запускаємо відео та розблоковуємо скрол
-    const playBtn = document.getElementById('sound-second-btn');
-    if (playBtn) {
-        tl.to(playBtn, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">0.1");
-    }
+    // 8. Розблоковуємо скрол після завершення анімації
     tl.call(() => {
-        if (videoElement) {
-            videoElement.muted = true;
-            videoElement.play().catch(console.error);
-        }
-        // Re-enable scroll
         unlockScroll();
-    }, null, "<");
+    }, null, ">0.1");
 }
 
 function initScrambleText() {
