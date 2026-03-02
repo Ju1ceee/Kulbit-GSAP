@@ -2014,6 +2014,7 @@ function initCasesAnimation() {
     const textCase = section.querySelector('.text-case');
     const textSubtitle = section.querySelector('.text-size-16.text-style-uppercase.is-case');
     const card1 = section.querySelector('[data-case-video="1"]');
+    const card2 = section.querySelector('[data-case-video="2"]');  // vimeo iframe card
     const card3 = section.querySelector('[data-case-video="3"]');
 
     // ── Prepare text-case: split into spans, hide via gsap.set ───────────
@@ -2034,6 +2035,7 @@ function initCasesAnimation() {
     // ── Initial card / bar states ─────────────────────────────────────────
     if (progressLine) gsap.set(progressLine, { xPercent: -100 });
     if (card1) gsap.set(card1, { height: '80vh', overflow: 'hidden', opacity: 0, y: 80 });
+    if (card2) gsap.set(card2, { height: 0, overflow: 'hidden', opacity: 0 });
     if (card3) gsap.set(card3, { height: 0, overflow: 'hidden', opacity: 0 });
 
     // ── Progress bar: own trigger — full at top-top ───────────────────────
@@ -2082,50 +2084,71 @@ function initCasesAnimation() {
         tl1.to(card1, { opacity: 1, y: 0, ease: 'power2.out', duration: D * 0.08 }, D * 0.35);
     }
 
-    // ── TL2: card swap — starts after 10% gap past progress bar 100% ─────
-    // progress bar 100% = 'top top'. 10% gap = 10% of viewport further down.
-    // 'top -10%' = section top is 10% of viewport above viewport top.
+    // ── TL2: card1 collapses → card2 (vimeo) expands + slides up ─────────
+    // Starts 10% after section reaches top of viewport.
     const tl2 = gsap.timeline({
         scrollTrigger: {
             trigger: section,
-            start: 'top -50%',
-            end: 'top -80%',
+            start: 'top -10%',
+            end: 'top -28%',
             scrub: 1,
             markers: false,
             onEnter: () => {
                 if (!card1) return;
-                // Pause the Vimeo iframe inside card1
-                const iframe = card1.querySelector('iframe.vimeo-iframe');
-                if (iframe) {
-                    iframe.contentWindow.postMessage(
-                        JSON.stringify({ method: 'pause' }), '*'
-                    );
-                }
-                // The inline script sets display:none after 200ms — reset that first
+                // Pause native video
+                const nativeVideo = card1.querySelector('video.vimeo-iframe');
+                if (nativeVideo) { nativeVideo.pause(); nativeVideo.controls = false; }
+                // Restore poster/button
                 const poster = card1.querySelector('.video-poster');
-                if (poster) {
-                    poster.style.display = '';
-                    poster.style.opacity = '1';
-                    poster.style.transition = 'none';
-                }
+                if (poster) { poster.style.display = ''; poster.style.opacity = '1'; poster.style.transition = 'none'; }
                 const playBtn = card1.querySelector('.vide-case-button');
-                if (playBtn) {
-                    playBtn.style.display = '';
-                    playBtn.style.opacity = '1';
-                    playBtn.style.transition = 'none';
-                }
+                if (playBtn) { playBtn.style.display = ''; playBtn.style.opacity = '1'; playBtn.style.transition = 'none'; }
             }
         }
     });
 
-    if (card1 && card3) {
-        // card1: height-only collapse, opacity stays 1
+    if (card1 && card2) {
         tl2.to(card1, { height: 0, ease: 'power2.inOut', duration: 1 }, 0);
-        // card3: instant opacity then height grows
-        tl2.set(card3, { opacity: 1 }, 0);
-        tl2.to(card3, { height: '80vh', ease: 'power2.inOut', duration: 1 }, 0);
-        // After card3 is full, slide up 3.5rem
-        tl2.to(card3, { y: '-3.5rem', ease: 'power2.out', duration: 0.6 });
+        tl2.set(card2, { opacity: 1 }, 0);
+        tl2.to(card2, { height: '80vh', ease: 'power2.inOut', duration: 1 }, 0);
+        // slide up, same as card3 used to do
+        tl2.to(card2, { y: '-3.5rem', ease: 'power2.out', duration: 0.6 });
+    }
+
+    // ── TL3: card2 collapses → card3 expands + slides up ─────────────────
+    const tl3 = gsap.timeline({
+        scrollTrigger: {
+            trigger: section,
+            start: 'top -32%',
+            end: 'top -52%',
+            scrub: 1,
+            markers: false,
+            onEnter: () => {
+                if (!card2) return;
+                // Pause vimeo iframe
+                const iframe = card2.querySelector('iframe.vimeo-iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
+                }
+                // Restore poster/button
+                const poster = card2.querySelector('.video-poster');
+                if (poster) { poster.style.display = ''; poster.style.opacity = '1'; poster.style.transition = 'none'; }
+                const playBtn = card2.querySelector('.vide-case-button');
+                if (playBtn) { playBtn.style.display = ''; playBtn.style.opacity = '1'; playBtn.style.transition = 'none'; }
+            }
+        }
+    });
+
+    if (card2 && card3) {
+        // card3 sits 2 × flex-gap lower than card1's original position.
+        // Compute gap at init time so the y offset accounts for it.
+        const flexGap = card1 ? parseFloat(getComputedStyle(card1.parentElement).rowGap) || 0 : 0;
+        const card3SlideY = -(flexGap * 2 + 56); // 56px ≈ 3.5rem — same aesthetic slide as card2
+
+        tl3.to(card2, { height: 0, ease: 'power2.inOut', duration: 1 }, 0);
+        tl3.set(card3, { opacity: 1 }, 0);
+        tl3.to(card3, { height: '80vh', ease: 'power2.inOut', duration: 1 }, 0);
+        tl3.to(card3, { y: card3SlideY, ease: 'power2.out', duration: 0.6 });
     }
 
 }
