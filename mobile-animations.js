@@ -1461,31 +1461,37 @@ function initMobileCasesAnimation() {
 
     const progressLine = section.querySelector('.progress-bar-cases-anim .progress-bar-white-line');
     const textCase = section.querySelector('.text-case');
-    const card1 = section.querySelector('[data-case-video="1"], [data-case-video="2"]');
-    // On mobile: wrappers by order — explicitly set to 1, 3, 2 as requested
-    const allCards = [
+    const cards = [
         section.querySelector('[data-case-video="1"]'),
-        section.querySelector('[data-case-video="3"]'),
-        section.querySelector('[data-case-video="2"]')
-    ].filter(el => el !== null);
+        section.querySelector('[data-case-video="2"]'),
+        section.querySelector('[data-case-video="3"]')
+    ].filter(Boolean);
 
-    // ── Progress bar: top bottom → top top (same logic as desktop) ────────
+    // ── Helper: pause a card and restore its poster/button ───────────────
+    function pauseCard(card) {
+        if (!card) return;
+        const nativeVideo = card.querySelector('video.vimeo-iframe');
+        if (nativeVideo) { nativeVideo.pause(); nativeVideo.controls = false; }
+        const iframe = card.querySelector('iframe.vimeo-iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
+        }
+        const poster = card.querySelector('.video-poster');
+        if (poster) { poster.style.display = ''; poster.style.opacity = '1'; poster.style.transition = 'none'; }
+        const btn = card.querySelector('.vide-case-button');
+        if (btn) { btn.style.display = ''; btn.style.opacity = '1'; btn.style.transition = 'none'; }
+    }
+
+    // ── Progress bar: top bottom → top top ───────────────────────────────
     if (progressLine) {
         gsap.set(progressLine, { xPercent: -100 });
         gsap.to(progressLine, {
-            xPercent: 0,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: section,
-                start: 'top bottom',
-                end: 'top top',
-                scrub: 1,
-                markers: false
-            }
+            xPercent: 0, ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top bottom', end: 'top top', scrub: 1 }
         });
     }
 
-    // ── text-case: split into chars, reveal at 20% of progress bar ────────
+    // ── text-case: chars reveal on scroll ────────────────────────────────
     let textChars = [];
     if (textCase) {
         const raw = textCase.textContent;
@@ -1498,87 +1504,48 @@ function initMobileCasesAnimation() {
         });
         gsap.set(textChars, { opacity: 0 });
     }
-
     if (textChars.length) {
         const D = 10;
         const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: section,
-                start: 'top bottom',
-                end: 'top top',
-                scrub: 1,
-                markers: false
-            }
+            scrollTrigger: { trigger: section, start: 'top bottom', end: 'top top', scrub: 1 }
         });
         const charStagger = (D * 0.07) / textChars.length;
-        tl.to(textChars, {
-            opacity: 1,
-            duration: 0.001,
-            stagger: charStagger,
-            ease: 'none'
-        }, D * 0.20);
+        tl.to(textChars, { opacity: 1, duration: 0.001, stagger: charStagger, ease: 'none' }, D * 0.20);
     }
 
-    // ── Cards: each slides in from bottom + opacity, one after another ────
-    allCards.forEach((card, i) => {
+
+    // ── Cards: slide in from bottom one by one ────────────────────────────
+    cards.forEach(card => {
         gsap.set(card, { opacity: 0, y: 60 });
+
         ScrollTrigger.create({
             trigger: card,
-            start: 'top 85%',
-            markers: false,
-            onEnter: () => {
-                gsap.to(card, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: 'power2.out'
-                });
-            },
+            start: 'top 90%',
+            onEnter: () => gsap.to(card, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }),
             onLeaveBack: () => {
-                // Pause video and show poster when scrolling back up past the card
-                const iframe = card.querySelector('iframe');
-                const poster = card.querySelector('.video-poster');
-                const button = card.querySelector('.vide-case-button');
-
-                if (poster) gsap.set(poster, { display: '', opacity: 1, pointerEvents: 'auto' });
-                if (button) gsap.set(button, { display: '', opacity: 1, pointerEvents: 'auto' });
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
-                }
-
-                // Hide the card again
-                gsap.to(card, {
-                    opacity: 0,
-                    y: 60,
-                    duration: 0.5,
-                    ease: 'power2.in'
-                });
+                pauseCard(card);
+                gsap.to(card, { opacity: 0, y: 60, duration: 0.5, ease: 'power2.in' });
             }
         });
     });
 
-    // ── Global trigger: when .our-services reaches top, pause all videos ──
+    // ── Pause all when .stages section reaches top of screen ─────────────
+    const stagesSection = document.querySelector('.stages');
+    if (stagesSection) {
+        ScrollTrigger.create({
+            trigger: stagesSection,
+            start: 'top top',
+            onEnter: () => cards.forEach(pauseCard)
+        });
+    }
+
+    // ── Pause all when .our-services section enters ───────────────────────
     const servicesSection = document.querySelector('.our-services');
     if (servicesSection) {
         ScrollTrigger.create({
             trigger: servicesSection,
-            start: 'top top',
-            onEnter: () => {
-                // Pause all videos
-                document.querySelectorAll('iframe').forEach(iframe => {
-                    if (iframe.contentWindow) {
-                        iframe.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
-                    }
-                });
-
-                // Show all posters and play buttons
-                document.querySelectorAll('.video-poster').forEach(poster => {
-                    gsap.set(poster, { display: '', opacity: 1, pointerEvents: 'auto' });
-                });
-                document.querySelectorAll('.vide-case-button').forEach(btn => {
-                    gsap.set(btn, { display: '', opacity: 1, pointerEvents: 'auto' });
-                });
-            }
+            start: 'top bottom',
+            onEnter: () => cards.forEach(pauseCard)
         });
     }
 }
