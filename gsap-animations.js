@@ -449,6 +449,18 @@ function initPreloader() {
     const C_BLUE = cssVar("--blue", "#0066ff");
     const C_PINK = cssVar("--pink", "#ff3ea5");
 
+    // --- Set initial hidden states for hero elements ---
+    const header = document.querySelector('header');
+    const heroBgVideo = document.querySelector('.hero-bg-video');
+    const heroTextSquares = document.querySelectorAll('.hero-text-square');
+    const buttonHero = document.querySelector('[data-anim-preloder="button-hero"]');
+
+    if (header) gsap.set(header, { opacity: 0, y: "-7rem" });
+    if (heroBgVideo) gsap.set(heroBgVideo, { opacity: 0 });
+    if (heroTextSquares.length) gsap.set(heroTextSquares, { opacity: 0, y: "3rem" });
+    if (buttonHero) gsap.set(buttonHero, { x: "-6.25em", y: "6.25em" });
+
+    // --- Preloader timeline ---
     gsap.set(wrapper, { autoAlpha: 1, pointerEvents: "all" });
     gsap.set(precentContainer, { width: "8.3125rem" });
     gsap.set(centerSquare, {
@@ -533,15 +545,242 @@ function initPreloader() {
         duration: 0.5,
         onComplete: () => {
             gsap.set(wrapper, { display: "none", pointerEvents: "none" });
-            const videoElement = document.getElementById('my-custom-video');
-            if (videoElement) {
-                videoElement.muted = true;
-                videoElement.play().catch(console.error);
-            }
+            initHeroIntroAnimation();
         }
     }, 2.3);
 
     updateCounter();
+}
+
+function initHeroIntroAnimation() {
+
+    const header = document.querySelector('header');
+    const heroBgVideo = document.querySelector('.hero-bg-video');
+    const heroTextSquares = document.querySelectorAll('.hero-text-square');
+    const buttonHero = document.querySelector('[data-anim-preloder="button-hero"]');
+    const headingH1 = document.querySelector('.heading-size-h1');
+    const heroButton = document.querySelector('.hero-button');
+    const heroTexts = document.querySelectorAll('.hero-text');
+    const videoElement = document.getElementById('my-custom-video');
+
+    // ---- Helper: split text nodes inside an element into per-character spans,
+    //      preserving element children (spans, etc.) and their styles.
+    const splitIntoCharSpans = (el) => {
+        const processNode = (node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent;
+                if (!text.length) return;
+                const frag = document.createDocumentFragment();
+                for (const ch of text) {
+                    const span = document.createElement('span');
+                    span.textContent = ch;
+                    span.style.opacity = '0';
+                    span.style.display = 'inline';
+                    span.dataset.heroChar = 'true';
+                    frag.appendChild(span);
+                }
+                node.parentNode.replaceChild(frag, node);
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                // Recurse into child elements (preserves span class/style)
+                [...node.childNodes].forEach(processNode);
+            }
+        };
+        if (!el.querySelector('[data-hero-char]')) {
+            [...el.childNodes].forEach(processNode);
+        }
+        return el.querySelectorAll('[data-hero-char]');
+    };
+
+    // ---- Helper: split text nodes for scramble (same structure as existing scramble)
+    const splitTextNodeForScramble = (node) => {
+        const t = node.textContent || "";
+        if (!t.length) return [];
+        const m = t.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        const lead = m ? m[1] : "";
+        const core = m ? m[2] : t;
+        const trail = m ? m[3] : "";
+        if (!core.trim().length) return [];
+        const parent = node.parentNode;
+        if (!parent) return [];
+        const coreNode = document.createTextNode(core);
+        const leadNode = lead ? document.createTextNode(lead) : null;
+        const trailNode = trail ? document.createTextNode(trail) : null;
+        if (leadNode) {
+            node.textContent = lead;
+            parent.insertBefore(coreNode, node.nextSibling);
+            if (trailNode) parent.insertBefore(trailNode, coreNode.nextSibling);
+        } else {
+            parent.insertBefore(coreNode, node);
+            if (trailNode) parent.insertBefore(trailNode, coreNode.nextSibling);
+            parent.removeChild(node);
+        }
+        return [coreNode];
+    };
+
+    const getAllTextNodes = (root) => {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+        const nodes = [];
+        let n;
+        while ((n = walker.nextNode())) nodes.push(n);
+        return nodes;
+    };
+
+    const getScrambleItems = (el) => {
+        const textNodes = getAllTextNodes(el);
+        const animNodes = [];
+        textNodes.forEach((n) => {
+            const t = n.textContent || "";
+            if (!t.trim().length) return;
+            if (/^\s|\s$/.test(t)) {
+                const created = splitTextNodeForScramble(n);
+                created.forEach((cn) => animNodes.push(cn));
+            } else {
+                animNodes.push(n);
+            }
+        });
+        return animNodes
+            .map((node) => ({ node, text: node.textContent || "" }))
+            .filter((it) => it.text.trim().length);
+    };
+
+    // ---- Prepare H1 char spans ----
+    let h1Chars = [];
+    if (headingH1) {
+        h1Chars = [...splitIntoCharSpans(headingH1)];
+    }
+
+    // ---- Prepare hero-button text char spans ----
+    // The text inside .hero-button (the "Start Pilot" div, which is .text-align-stretch.desktop-only)
+    const heroButtonTextEl = heroButton ? heroButton.querySelector('.text-align-stretch') : null;
+    let buttonChars = [];
+    if (heroButtonTextEl) {
+        buttonChars = [...splitIntoCharSpans(heroButtonTextEl)];
+    }
+
+    // ---- Prepare hero-text scramble items ----
+    const heroTextItems = [];
+    if (heroTexts.length) {
+        heroTexts.forEach((el) => {
+            // lock dimensions so scramble doesn't reflow
+            const h = el.getBoundingClientRect().height;
+            const w = el.getBoundingClientRect().width;
+            if (h > 0) { el.style.height = `${h}px`; el.style.width = `${w}px`; el.style.overflow = 'hidden'; }
+            const items = getScrambleItems(el);
+            items.forEach((it) => {
+                it.node.textContent = "";
+                heroTextItems.push(it);
+            });
+        });
+    }
+
+    // ---- Master intro timeline ----
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+    // Block ALL scroll during intro — most reliable method
+    const SCROLL_KEYS = { 32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1, 38: 1, 39: 1, 40: 1 };
+    const preventDefault = (e) => e.preventDefault();
+    const preventKeys = (e) => { if (SCROLL_KEYS[e.keyCode]) e.preventDefault(); };
+    window.addEventListener('wheel', preventDefault, { passive: false });
+    window.addEventListener('touchmove', preventDefault, { passive: false });
+    window.addEventListener('keydown', preventKeys, { passive: false });
+
+    const unlockScroll = () => {
+        window.removeEventListener('wheel', preventDefault);
+        window.removeEventListener('touchmove', preventDefault);
+        window.removeEventListener('keydown', preventKeys);
+        document.body.style.overflow = '';
+        if (window.lenis) window.lenis.start();
+    };
+
+    // 1. hero-bg-video фейдиться
+    if (heroBgVideo) {
+        tl.to(heroBgVideo, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 0);
+    }
+
+    // 2. header виїжджає вниз (до свого місця)
+    if (header) {
+        tl.to(header, { opacity: 1, y: "0rem", duration: 0.4, ease: "power2.out" }, 0.3);
+    }
+
+    // 3. H1 набирається по літері — побудова через gsap.to з opacity 0→1 та stagger
+    const h1Duration = 0.04;
+    const h1Stagger = 0.025;
+    const h1TotalDuration = h1Chars.length > 0 ? h1Chars.length * h1Stagger + h1Duration : 0;
+    const h1Start = 0.6;
+
+    if (h1Chars.length) {
+        // Restore parent opacity to 1 first (CSS hid it), chars are still opacity:0
+        gsap.set(headingH1, { opacity: 1 });
+        tl.to(h1Chars, {
+            opacity: 1,
+            duration: h1Duration,
+            stagger: h1Stagger,
+            ease: "none"
+        }, h1Start);
+    }
+
+    // 4. button-hero виїжджає: спочатку вгору (y→0), потім вправо (x→0)
+    //    Починається коли H1 приблизно на 80%
+    if (buttonHero) {
+        const btnStart = h1Start + h1TotalDuration * 0.8;
+        tl.to(buttonHero, { y: "0em", duration: 0.35, ease: "power3.out" }, btnStart);
+        tl.to(buttonHero, { x: "0em", duration: 0.4, ease: "power3.inOut" }, `>-0.05`);
+    }
+
+    // 5. Текст кнопки набирається по літері після появи стрілки
+    if (buttonChars.length) {
+        // Restore parent opacity to 1 (CSS hid it), chars are still opacity:0
+        if (heroButtonTextEl) gsap.set(heroButtonTextEl, { opacity: 1 });
+        tl.to(buttonChars, {
+            opacity: 1,
+            duration: 0.03,
+            stagger: 0.04,
+            ease: "none"
+        }, ">0.05");
+    }
+
+    // 6. hero-text scramble-анімацією — всі одночасно через фіксований лейбл
+    if (heroTextItems.length) {
+        // Add a label at the current end of the timeline so all scramble tweens
+        // anchor to the exact same point (using ">" string in forEach chains them)
+        tl.addLabel("heroScramble", ">0.05");
+        heroTextItems.forEach((it) => {
+            tl.to(it.node, {
+                duration: 0.5,
+                scrambleText: {
+                    text: it.text,
+                    chars: "01!<>-_\\/[]{}—=+*^?#",
+                    revealDelay: 0,
+                    speed: 1.2,
+                },
+            }, "heroScramble");
+        });
+    }
+
+    // 7. hero-text-square з'являється
+    if (heroTextSquares.length) {
+        tl.to(heroTextSquares, {
+            opacity: 1,
+            y: "0rem",
+            duration: 0.4,
+            stagger: 0.1,
+            ease: "power2.out"
+        }, ">0.1");
+    }
+
+    // 8. Запускаємо відео та розблоковуємо скрол
+    const playBtn = document.getElementById('sound-second-btn');
+    if (playBtn) {
+        tl.to(playBtn, { opacity: 1, duration: 0.4, ease: "power2.out" }, ">0.1");
+    }
+    tl.call(() => {
+        if (videoElement) {
+            videoElement.muted = true;
+            videoElement.play().catch(console.error);
+        }
+        // Re-enable scroll
+        unlockScroll();
+    }, null, "<");
 }
 
 function initScrambleText() {
