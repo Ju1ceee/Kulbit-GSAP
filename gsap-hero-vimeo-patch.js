@@ -3,13 +3,18 @@
  *
  * У базовому gsap-animations.js для .video-wrapper є margin-компенсація через
  * tl.to(bgVideo, { y: "-12rem" }) під margin-top: 12rem. Для Vimeo margin знятий CSS-ом,
- * тому тут y для bgVideo = 0.
+ * замість цього нижче — вертикальний зсув y на самому блоці відео (22vh → 0), щоб прибрати смугу зверху.
  *
  * ВАЖЛИВО (горизонтальний «дрейф»): не анімуйте в одному scrubbed tl.to() разом
  * position/left/x з width/height. Webflow дає .video-wrapper { left: auto } — GSAP
  * інтерполює left/x від стартових значень до 50% / -50%, через це блок їде вліво-вправо.
  * Плюс одночасна зміна width і xPercent у scrub змінює зсув у px. Рішення: gsap.set()
- * для центрування (position + left + x) ДО таймлайну; у tl.to() лише height, width, minWidth, top.
+ * для центрування (position + left + x) ДО таймлайну; у tl.to() лише height, width, minWidth.
+ *
+ * Вертикаль: .video-wrapper у Webflow прив’язаний знизу (bottom: 0), висота 122vh. Якщо в кінці
+ * скролу форсувати top: 0 у scrub-твіні, з bottom конфліктує інтерполяція — зверху з’являється
+ * «чорна смуга». Тримаємо bottom: 0 + top: auto й лише зменшуємо height; додатково зсуваємо
+ * [.hero-bg-video] вгору (y: 22vh → 0), щоб кадр Vimeo «під’їхав» разом із зменшенням блоку.
  */
 (function () {
   var orig = window.initHeroAnimation;
@@ -51,22 +56,36 @@
           position: 'absolute',
           left: '50%',
           xPercent: -50,
+          bottom: '0',
+          top: 'auto',
         });
 
-        tl.to(
+        tl.fromTo(
           videoWrapper,
+          {
+            height: '122vh',
+          },
           {
             height: '100vh',
             width: '100vw',
             minWidth: '100vw',
-            top: '0rem',
             ease: 'none',
             force3D: true,
           },
           0,
         );
 
-        tl.to(bgVideo, { y: '0rem', ease: 'none' }, 0);
+        tl.fromTo(
+          bgVideo,
+          {
+            y: '22vh',
+          },
+          {
+            y: 0,
+            ease: 'none',
+          },
+          0,
+        );
         tl.to(videoMask, { opacity: 0, ease: 'none' }, 0);
       },
       '(max-width: 991px)': function () {},
