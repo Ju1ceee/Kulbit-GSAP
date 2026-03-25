@@ -1,7 +1,15 @@
 /**
- * Kulbit GSAP: для hero з Vimeo (.is-hero-vimeo) margin-top знятий CSS-ом.
- * У gsap-animations.js tl.to(bgVideo, { y: "-12rem" }) компенсував margin-top: 12rem.
- * Без margin зсув -12rem ламає синхрон з розширенням videoWrapper.
+ * Kulbit GSAP — патч для hero з Vimeo (.is-hero-vimeo).
+ *
+ * У базовому gsap-animations.js для .video-wrapper є margin-компенсація через
+ * tl.to(bgVideo, { y: "-12rem" }) під margin-top: 12rem. Для Vimeo margin знятий CSS-ом,
+ * тому тут y для bgVideo = 0.
+ *
+ * ВАЖЛИВО (горизонтальний «дрейф»): не анімуйте в одному scrubbed tl.to() разом
+ * position/left/x з width/height. Webflow дає .video-wrapper { left: auto } — GSAP
+ * інтерполює left/x від стартових значень до 50% / -50%, через це блок їде вліво-вправо.
+ * Плюс одночасна зміна width і xPercent у scrub змінює зсув у px. Рішення: gsap.set()
+ * для центрування (position + left + x) ДО таймлайну; у tl.to() лише height, width, minWidth, top.
  */
 (function () {
   var orig = window.initHeroAnimation;
@@ -40,6 +48,9 @@
           willChange: 'width, height, transform',
           force3D: true,
           backfaceVisibility: 'hidden',
+          position: 'absolute',
+          left: '50%',
+          xPercent: -50,
         });
 
         tl.to(
@@ -48,14 +59,11 @@
             height: '100vh',
             width: '100vw',
             minWidth: '100vw',
-            position: 'absolute',
-            left: '50%',
-            x: '-50%',
             top: '0rem',
             ease: 'none',
             force3D: true,
           },
-          0
+          0,
         );
 
         tl.to(bgVideo, { y: '0rem', ease: 'none' }, 0);
