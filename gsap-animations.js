@@ -684,22 +684,6 @@ function initHeroIntroAnimation() {
     // ---- Master intro timeline ----
     const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
 
-    // Block ALL scroll during intro — most reliable method
-    const SCROLL_KEYS = { 32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1, 38: 1, 39: 1, 40: 1 };
-    const preventDefault = (e) => e.preventDefault();
-    const preventKeys = (e) => { if (SCROLL_KEYS[e.keyCode]) e.preventDefault(); };
-    window.addEventListener('wheel', preventDefault, { passive: false });
-    window.addEventListener('touchmove', preventDefault, { passive: false });
-    window.addEventListener('keydown', preventKeys, { passive: false });
-
-    const unlockScroll = () => {
-        window.removeEventListener('wheel', preventDefault);
-        window.removeEventListener('touchmove', preventDefault);
-        window.removeEventListener('keydown', preventKeys);
-        document.body.style.overflow = '';
-        if (window.lenis) window.lenis.start();
-    };
-
     // 1. hero-bg-video фейдиться
     if (heroBgVideo) {
         tl.to(heroBgVideo, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 0);
@@ -775,11 +759,6 @@ function initHeroIntroAnimation() {
             ease: "power2.out"
         }, ">0.1");
     }
-
-    // 8. Розблоковуємо скрол після завершення анімації
-    tl.call(() => {
-        unlockScroll();
-    }, null, ">0.1");
 }
 
 function initScrambleText() {
@@ -914,24 +893,21 @@ function initHeroAnimation() {
             tl.to(contentWrapper, { y: "150vh", ease: "none" }, 0);
             tl.to(leftGradient, { y: "150vh", ease: "none" }, 0);
 
+            /* Центрування одразу, не в scrub — інакше left/x інтерполюються від auto/0 і блок «їде» вбік */
             gsap.set(videoWrapper, {
                 willChange: "width, height, transform",
                 force3D: true,
-                backfaceVisibility: "hidden"
+                backfaceVisibility: "hidden",
+                position: "absolute",
+                left: "50%",
+                x: "-50%",
             });
 
             tl.to(videoWrapper, {
                 height: "100vh",
                 width: "100vw",
                 minWidth: "100vw",
-
-                position: "absolute",
-
-                left: "50%",
-                x: "-50%",
-
                 top: "0rem",
-
                 ease: "none",
                 force3D: true
             }, 0);
